@@ -1,0 +1,12 @@
+# <board> <devicetree model>: what /proc/device-tree/model reads -> boards/<board>.conf.
+# The first row is also the fallback for an unknown or absent model (image-build chroot).
+rp5              Retroid Pocket 5
+rp5-visionox     Retroid Pocket 5 Visionox
+rpflip2          Retroid Pocket Flip2
+rpflip2-visionox Retroid Pocket Flip2 Visionox
+rpmini           Retroid Pocket Mini
+rpminiv2         Retroid Pocket Mini V2
+thorlite         AYN Thor Lite
+airypro          MANGMI Air Y Pro
+pocketmax        MANGMI Pocket Max
+pocketmicro2     AYANEO Pocket MICRO 2

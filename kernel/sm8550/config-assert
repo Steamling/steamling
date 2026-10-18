@@ -1,4 +1,4 @@
-# Symbols the RP6 display path needs built in: build-kernel.sh fails the build if one did not
+# Symbols the RP6 display path (the reference board) needs built in: build-kernel.sh fails the build if one did not
 # resolve to =y (config-delta trims the display blocks around them).
 DRM_MSM
 DRM_MSM_MDSS

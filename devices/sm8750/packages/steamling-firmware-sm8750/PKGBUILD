@@ -1,0 +1,100 @@
+# Vendor firmware for the SM8750 boards that upstream linux-firmware lacks: the ROCKNIX/extra-firmware
+# SM8750/ tree. Pinned by commit + sha256, nothing
+# in git; installed under /usr/lib/firmware/updates/, which wins the kernel's search.
+pkgname=steamling-firmware-sm8750
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="SM8750 handheld vendor firmware (wifi, bluetooth, ADSP/CDSP, GPU zap, audio, VPU)"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('custom:qcom-firmware')   # Qualcomm vendor blobs
+# firmware blobs must ship byte-identical; some parse as ELF and strip would alter them
+options=('!strip')
+
+_extrafw=8834a0c80f5b24fee5ed9e18c1560dc48a6f1bd9   # ROCKNIX/extra-firmware, SM8750/
+_extrafw_files=(
+  ath12k/WCN7860/hw2.0/amss.bin
+  ath12k/WCN7860/hw2.0/aux_ucode.bin
+  ath12k/WCN7860/hw2.0/bdwlan.elf
+  ath12k/WCN7860/hw2.0/board-2.bin
+  ath12k/WCN7860/hw2.0/m3.bin
+  ath12k/WCN7860/hw2.0/qdss.cfg
+  ath12k/WCN7860/hw2.0/regdb.bin
+  qca/gngbtfw20.mbn
+  qca/gngbtnv20.bin
+  qcom/sm8750/SM8750-AYN-tplg.bin
+  qcom/sm8750/SM8750-KONKR-tplg.bin
+  qcom/sm8750/ayn/odin3/adsp.mbn
+  qcom/sm8750/ayn/odin3/adsp_dtb.mbn
+  qcom/sm8750/ayn/odin3/adspr.jsn
+  qcom/sm8750/ayn/odin3/adsps.jsn
+  qcom/sm8750/ayn/odin3/adspua.jsn
+  qcom/sm8750/ayn/odin3/adspuo.jsn
+  qcom/sm8750/ayn/odin3/aw883xx_acf.bin
+  qcom/sm8750/ayn/odin3/battmgr.jsn
+  qcom/sm8750/ayn/odin3/cdsp.mbn
+  qcom/sm8750/ayn/odin3/cdsp_dtb.mbn
+  qcom/sm8750/ayn/odin3/cdspr.jsn
+  qcom/sm8750/gen80000_zap.mbn
+  qcom/sm8750/konkr/pfe/adsp.mbn
+  qcom/sm8750/konkr/pfe/adsp_dtb.mbn
+  qcom/sm8750/konkr/pfe/adspr.jsn
+  qcom/sm8750/konkr/pfe/adsps.jsn
+  qcom/sm8750/konkr/pfe/adspua.jsn
+  qcom/sm8750/konkr/pfe/adspuo.jsn
+  qcom/sm8750/konkr/pfe/aw88261_acf.bin
+  qcom/sm8750/konkr/pfe/battmgr.jsn
+  qcom/sm8750/konkr/pfe/cdsp.mbn
+  qcom/sm8750/konkr/pfe/cdsp_dtb.mbn
+  qcom/sm8750/konkr/pfe/cdspr.jsn
+  qcom/vpu/vpu35_p4.mbn
+)
+_armada_files=()
+source=()
+for _f in "${_extrafw_files[@]}"; do
+  source+=("${_f//\//_}::https://raw.githubusercontent.com/ROCKNIX/extra-firmware/${_extrafw}/SM8750/${_f}")
+done
+sha256sums=(
+  'bbdfeec01b7de20e89c7e6906d7ea3fd89b896862de29396696a93dbb59fc77a'
+  '2b2eef47107e1c61e1f809371c7413867cf748fb57a2887cc4ff4d386b680fad'
+  '68175a7eeffe9ebe32cfb22676e3ac4c250eb3dcf35d4abe18fee45440e08f76'
+  '9cce38db012867432566dc0deea6d647c2ae2ffa367d3fc90b300e517b748381'
+  '063840b7509e5da791afa6c2905b191297a401c06d39774b82330949c1c8f438'
+  '4683d8683437a11172723dc5820801aaaf5eb082336875a7664142582cc90cbb'
+  'c774af903051e7af845435352fdb2ec6158835c4c95fd9323be22658971ffc6f'
+  '84e210e2ba386a9bad91a2d9dd5d1f4e2559b385f226b463dcfa4d8159f5937f'
+  'a4586f5205dc3752f7d52fd6b7106b02ffe877774e5633018ac48be99d5a079b'
+  'f13452b388908f8062d584b85f4a3806f5dd0b36b5046f972fcd2e2997b1bd10'
+  'd8ef8f93c2dc517c612812b90f4175d4ec4bb6f497951f0306199c2ae1735dc2'
+  'dea0cb8b786c4488d02bcd8df4f4f97e854113e692ce995e4f0bdb82c8d5f6db'
+  '138f43f37a81df5e3d436b86588e031a644f4639178f13c90c980d08d33be37c'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  '92402f429bedf262f1ab4ea5b21a39b2f65ef52f1c46fb0e885a40b5ff442a4d'
+  '252428872f6faf5e555ec3c6a6fae7b609773dcac04a438f135ac9be0aa381f9'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  '13d8e2174803abd8bf74d499fc6b1ffb7276f654a0966e6a32075c34db96e0ce'
+  'd40f817847fa1f58b9ededffb8064d999a365746def359922054feec9800d70c'
+  '6d01cd7dce745204d5de20efe57e2511149ca2a5b48ee562fbedefda573ca465'
+  'e3cba8ddd549083568a4d733752bbe852ac8be25c643c0a48e5fa8a98f1335c3'
+  '03db3d3f68258b23c8026b02c2a77590cb29f4a0152abd95a8f454e3dd0aad3a'
+  '998331e35c35aeff137d7ce71ed247ec175589728b53101aad7b775617a8ccf8'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  '92402f429bedf262f1ab4ea5b21a39b2f65ef52f1c46fb0e885a40b5ff442a4d'
+  'df4a2efd7c92f8816f8b65702f4a86bc696ef098c07537942efdd8ec698cc532'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  'c6c30afc9290e604141e3224c39b69de1337512df4daf660b511d2df8457be82'
+  'bbf7f7f3bdcd006abb83160189638f9714a10dd8138d21b76565d26794bc1c9d'
+  '6d01cd7dce745204d5de20efe57e2511149ca2a5b48ee562fbedefda573ca465'
+  '26c92bd0e62a131e487431cf63a1b50fee83d8f7094f04df4dfbc523881ce0fc'
+)
+
+package() {
+  local _f
+  for _f in "${_extrafw_files[@]}" "${_armada_files[@]}"; do
+    install -Dm644 "${srcdir}/${_f//\//_}" "${pkgdir}/usr/lib/firmware/updates/${_f}"
+  done
+}

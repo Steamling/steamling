@@ -58,7 +58,7 @@ inputs_hash() {
     # kernel.conf also carries the package's release and legacy names, which only repackage the
     # same kernel (build-packages.sh): a bump there must not recompile it.
     cd "${STEAMLING_ROOT}" && grep -vE '^: "\$\{KERNEL_(PKGREL|LEGACY_NAMES):=' "kernel/${SOC}/kernel.conf"
-    find "kernel/${SOC}" kernel/common scripts/build-kernel.sh -type f ! -path "kernel/${SOC}/kernel.conf" -print0 \
+    find "${KERNEL_DIR#"${STEAMLING_ROOT}"/}" kernel/common scripts/build-kernel.sh -type f ! -path "kernel/${SOC}/kernel.conf" -print0 \
       | sort -z | xargs -0 sha256sum
   } | sha256sum | cut -d' ' -f1
 }
@@ -281,11 +281,20 @@ configure() {
   fi
 }
 
+# A tree several SoCs share (KERNEL_TREE) carries every SoC's boards; kernel.conf's
+# KERNEL_DTB_PREFIXES (file-name prefixes, space-separated) keeps this SoC's. Unset: all.
+soc_board() {
+  local name p; name="$(basename "$1")"
+  [ -n "${KERNEL_DTB_PREFIXES:-}" ] || return 0
+  for p in ${KERNEL_DTB_PREFIXES}; do case "${name}" in "${p}"*) return 0 ;; esac; done
+  return 1
+}
+
 build_kernel() {
   # Only the boards kernel/<soc>/dts ships: `make dtbs` would also build ~400 that stage_dtbs drops.
   local dts dtbs=()
   for dts in "${KERNEL_DIR}"/dts/*/*.dts; do
-    [ -f "${dts}" ] || continue
+    [ -f "${dts}" ] && soc_board "${dts}" || continue
     dtbs+=("$(basename "$(dirname "${dts}")")/$(basename "${dts}" .dts).dtb")
   done
   log "building Image + modules + ${#dtbs[@]} dtbs (-j${JOBS}) — this takes a while"
@@ -298,7 +307,7 @@ build_kernel() {
 stage_dtbs() {
   local dts name src n=0
   for dts in "${KERNEL_DIR}"/dts/*/*.dts; do
-    [ -f "${dts}" ] || continue
+    [ -f "${dts}" ] && soc_board "${dts}" || continue
     name="$(basename "${dts}" .dts)"
     src="$(find "${KSRC}/arch/arm64/boot/dts" -name "${name}.dtb" -print -quit)"
     [ -n "${src}" ] || die "dtb not built for shipped board ${name}.dts — is it registered in the qcom Makefile? (install_dts)"

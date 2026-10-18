@@ -1,0 +1,7 @@
+#!/bin/sh
+# steamling-board-env - the board identity as KEY=value lines, for udev rules that apply to one board
+# only: IMPORT{program}="/usr/lib/steamling/steamling-board-env", then ENV{STEAMLING_DEVICE}=="<board>".
+for _dc in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do
+  [ -r "${_dc}" ] && . "${_dc}"
+done
+echo "STEAMLING_DEVICE=${STEAMLING_DEVICE:-rp6}"

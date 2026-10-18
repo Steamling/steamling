@@ -1,0 +1,26 @@
+# kernel/common patches the shared Steamling tree leaves out: it already carries each of them, or its
+# own version of the fix.
+1001-scsi-ufs-qcom-balance-irq-on-host-reset-error.patch   # in armada
+1006-tty-serial-qcom-geni-mask-non-console-irq-on-suspend.patch   # armada's geni suspend set differs
+1011-serial-qcom-geni-add-force-suspend-resume-to-system-sleep-callbacks.patch   # armada 0534
+1016-scsi-ufs-ufs-qcom-enable-only-lane-clocks-in-lane-clock-apis.patch   # armada 0533
+1017-scsi-ufs-core-fast-abort-unsupported-query-idns.patch   # armada 0535
+1018-scsi-ufs-core-dynamically-disable-timestamp-on-unsupported-devices.patch   # armada 0536
+1023-thermal-qcom-tsens-mask-lower-threshold-irqs-across-suspend.patch   # armada 0204
+1024-wifi-ath12k-convert-scan-timeout-to-wiphy-delayed-work.patch   # armada 1021
+1045-PCI-qcom-skip-l23-ready-after-pme-sm8550.patch   # armada 0512
+1046-regulator-qcom-rpmh-add-suspend-state-support.patch   # armada (PR #545)
+1047-regulator-core-apply-mem-state-for-s2idle.patch   # armada (PR #545)
+1048-PCI-qcom-use-suspend-opp-for-non-s2ram.patch   # armada 0513, its own revision
+1052-regulator-core-log-missing-suspend-config-at-debug.patch   # armada (PR #545)
+1053-regulator-apply-state-mem-in-s2idle-only-for-opted-in-drivers.patch   # armada (PR #545)
+1054-PCI-host-common-let-only-endpoints-veto-d3cold.patch   # armada 0522
+1060-PCI-qcom-honor-iommu-map-cell-count.patch   # armada 0514
+1061-of-property-honor-iommu-cells-in-iommu-map-devlinks.patch   # armada 0514a
+1062-arm64-emulate-unaligned-atomics.patch   # armada 0505
+1066-drm-msm-dpu-fix-vblank-timestamps-on-command-mode-panels.patch   # armada 0078
+1067-arm64-unaligned-atomics-cover-the-load128-store-exclusive.patch   # armada 0505a
+1076-drm-msm-a6xx-hfi-irq-clears-only-the-cm3-fault.patch   # armada 0620
+1077-drm-msm-a6xx-bound-the-gmu-wait-for-a-fault-devcoredump.patch   # armada 0621
+1078-drm-msm-a6xx-mask-the-hfi-interrupt-before-booting-the-gmu.patch   # armada 0622
+1082-drm-msm-map-submitqueue-priority-onto-high-low.patch   # armada 0619

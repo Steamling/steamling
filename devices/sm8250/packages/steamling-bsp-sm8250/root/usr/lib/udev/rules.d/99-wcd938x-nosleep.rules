@@ -1,0 +1,5 @@
+# Keep WCD938x SoundWire RX/TX awake for jack detection on SM8250.
+ACTION=="bind", SUBSYSTEM=="soundwire", KERNEL=="sdw:*:0217:010d:*", ATTR{power/control}="on"
+# Headphone pops workaround for the MANGMI Pocket Max.
+ACTION=="bind", SUBSYSTEM=="platform", KERNEL=="audio-codec", IMPORT{program}="/usr/lib/steamling/steamling-board-env"
+ACTION=="bind", SUBSYSTEM=="platform", KERNEL=="audio-codec", ENV{STEAMLING_DEVICE}=="pocketmax", ATTR{power/control}="on"

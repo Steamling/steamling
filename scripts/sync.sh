@@ -18,6 +18,12 @@
 
 source "$(dirname "$0")/lib.sh"
 
+# A SoC on a shared tree (KERNEL_TREE, e.g. kernel/steamling) has no ROCKNIX device dir to sync.
+if [ -n "${KERNEL_TREE:-}" ] && [ "${KERNEL_TREE}" != "${SOC}" ]; then
+  log "${SOC} builds kernel/${KERNEL_TREE}/, which make sync does not manage (see its README.md)"
+  exit 0
+fi
+
 # The ROCKNIX package dirs vendor/ keeps for reference, under projects/ROCKNIX/packages/.
 REFS=(emulators/standalone/steam apps/gamescope compat/fex-emu hardware/quirks linux)
 

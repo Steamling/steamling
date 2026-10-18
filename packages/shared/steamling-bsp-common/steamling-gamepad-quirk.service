@@ -1,0 +1,13 @@
+[Unit]
+Description=Put the controller MCU into the mode Steamling's input stack expects
+# Only boards whose device.conf names a quirk need it; the script exits 0 for the rest.
+After=systemd-udev-trigger.service
+Before=inputplumber.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/steamling/steamling-gamepad-quirk
+
+[Install]
+WantedBy=multi-user.target

@@ -5,8 +5,8 @@ hardcodes a device fact: the **build** reads `devices/<name>/profile.conf` (sour
 `scripts/lib.sh` right after `config/steamling.conf`), and the **running OS** reads
 `/usr/lib/steamling/device.conf`, shipped by the family's BSP package.
 
-`DEVICE` names an **image target**, a SoC family. This tree builds one: `sm8550`, for the
-Retroid Pocket 6 (standard and TOP-DPAD models). The BSP
+`DEVICE` names an **image target**, a SoC family, and each family image serves every board on
+its SoC (`make build DEVICE=sm8550` is the default). The BSP
 (`steamling-bsp-<soc>`) ships per-board facts in `/usr/lib/steamling/boards/<board>.conf`,
 each sourcing the family-wide `boards/family.conf` first, and
 `/usr/lib/steamling/device.conf` is a sourced **dispatcher** that picks one at source time
@@ -15,17 +15,25 @@ BSP's `boards/models` table (`<board> <dt model>` rows). InputPlumber configs ar
 `matches:` on the devicetree model. Since consumers *source* `device.conf`, the dispatcher
 is invisible to them; `/etc/steamling/device.conf` still overrides.
 
-The family:
+The families. The Retroid Pocket 6 is the reference board: it is the only one tested so far.
+Every other board is an **untested port** brought over from
+[armada](https://github.com/armada-os/armada): it builds, and armada boots it, but nobody has run
+Steamling on it yet.
 
-* **sm8550** (qcom-abl): Retroid Pocket 6 (+TOP-DPAD), both on `boards/rp6.conf`. The RP6
-  device tree includes the shared AYN SM8550 dtsi, so its sound card is named `AYN-Odin2`
-  and it loads the AYN Odin 2 DSP and amp firmware: those UCM and firmware files are the
-  RP6's own.
+* **sm8550** (qcom-abl): Retroid Pocket 6 (+TOP-DPAD), Retroid Pocket Nova, AYN Odin 2 / Mini /
+  Portal, AYN Thor, AYANEO Pocket ACE / DMG / DS / EVO / S 1K / S 2K. Kernel: `kernel/sm8550/`
+  (ROCKNIX-synced). The RP6 device tree includes the shared AYN SM8550 dtsi, so its sound card
+  is named `AYN-Odin2` and it loads the AYN Odin 2 DSP and amp firmware.
+* **sm8250** (qcom-abl): Retroid Pocket 5, Retroid Pocket Flip 2, Retroid Pocket Mini / Mini V2,
+  AYN Thor Lite, MANGMI Air Y Pro, MANGMI Pocket Max, AYANEO Pocket MICRO 2; the RP5 and Flip 2
+  also as Visionox-panel revisions (their own dtb and board conf). Kernel: `kernel/steamling/`.
+* **sm8650** (qcom-abl): AYANEO Pocket S2, KONKR Pocket FIT. Kernel: `kernel/steamling/`.
+* **sm8750** (qcom-abl): AYN Odin 3, KONKR Pocket FIT Elite. Kernel: `kernel/steamling/`.
 
-The RP6 is the fallback: it is the first `boards/models` row, which an unknown or absent
-model gets (`make check` pins the two together).
+The first board a bullet names is the family's fallback: it must be the first `boards/models`
+row, which an unknown or absent model gets (`make check` pins the two together).
 
-Adding a **board to the family**: a `boards/<board>.conf` (only what differs from
+Adding a **board to a family**: a `boards/<board>.conf` (only what differs from
 `boards/family.conf`) + its `boards/models` row(s) + (if its controller differs) an
 inputplumber yaml/map with the board's dt-model `matches:` + a `[[device]]` entry in the
 BSP's `root/usr/share/steamos-manager/devices/steamling-family.toml`, ahead of the SoC entry.
@@ -139,6 +147,7 @@ leaves it unset); otherwise it says what a board without the key gets. Keys:
 | `STEAMLING_BOARD_UNKNOWN` | steamling-desktop-rotate | board known (only the fallback branch sets it) | set by the device.conf fallback branch: board not in the list, do not force guessed values |
 | `STEAMLING_PANEL_OUTPUT` | steamling-steam, steamling-desktop-rotate | single panel, first DSI | DRM connector of the main panel (`DSI-2`); gamescope `--prefer-output`, the desktop seed's output |
 | `STEAMLING_PANEL_ROTATE_SHADER` | steamling-steam | rotation autodetected | `1` = gamescope `--force-composition-rotation`: required for a panel past the DPU rotator's 1088-line cap, which otherwise scans out black |
+| `STEAMLING_GAMEPAD_QUIRK` | steamling-gamepad-quirk | none | controller MCU mode switch before InputPlumber starts: `ayaneo-xbox` (AYANEO Pocket MCUs as a fake Xbox 360 pad) or `ayaneo-default` (the MCU's own mode, AYANEO Pocket DS/S2 and KONKR) |
 | `STEAMLING_PANEL_HDR_NITS` | steamling-steam | no HDR | HDR panel's peak in nits: gamescope `--hdr-itm-target-nits` plus GAMESCOPE_EXPOSE_CLIENT_SAMPLEABLE_FORMATS=1 and, for the Steam client, STEAM_GAMESCOPE_HDR_SUPPORTED=1 (its HDR switch). Set only with a gamescope panel profile in the BSP (`/usr/share/gamescope/scripts/10-steamling/displays/`) matching the board's `STEAMLING_DEVICE` with the same peak as its `max_content_light_level`: the profile is what tells gamescope the EDID-less panel can do HDR. Absent or 0 = SDR |
 | `STEAMLING_BIG_CORES` | via cores.sh: steamling-steam-env (-> steamling-game-launch), steamling-rt-ladder, emulator launchers | required | cores games and emulators are pinned to; the cores left out are the small cores irq work goes to (on a SoC with no little cluster, leave two mids out) |
 | `STEAMLING_BOOT_STYLE` | steamling-install-internal, steamling-boot-deploy (the kernel hook, steamling-rollback, steamling-cmdline-sync) | required | qcom-abl (rendered from the profile's `BOOTLOADER`): selects the /flash kernel deploy (`steamling-build-bootimg`) |

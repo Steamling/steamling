@@ -1,0 +1,4 @@
+# gamescope maps every touch device onto its single output, so the second screen's touchscreen
+# (AYN Thor, AYANEO Pocket DS) stays off libinput: until the second screen has its own session,
+# its touches would land on the main panel.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="bottom_touchscreen", ENV{LIBINPUT_IGNORE_DEVICE}="1"

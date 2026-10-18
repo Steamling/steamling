@@ -3,8 +3,8 @@
 # live in devices/<name>/packages/steamling-bsp-<name>, which depends on this package.
 pkgname=steamling-bsp-common
 pkgver=0.1.0
-pkgrel=26.7
-pkgdesc="steamling shared board support: sleep.d dispatcher, suspend hooks, power-key policy, session udev rules, wheel sudo, fan/scheduler daemons, ABL updater, power profiles daemon, realtime priority ladder, zram swap and memory sysctls, deck session limits, kernel /flash deploy, volume rocker daemon, journal cap, iwd Wi-Fi backend, panel refresh calibration"
+pkgrel=26.8
+pkgdesc="steamling shared board support: sleep.d dispatcher, suspend hooks, power-key policy, session udev rules, wheel sudo, fan/scheduler daemons, ABL updater, power profiles daemon, realtime priority ladder, zram swap and memory sysctls, deck session limits, kernel /flash deploy, volume rocker daemon, journal cap, iwd Wi-Fi backend, panel refresh calibration, controller MCU mode quirks"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
@@ -43,8 +43,9 @@ source=('steamling-sleep' 'sdam-debug-pre' 'sdam-debug-post'
         'steamling-boot-deploy' 'steamling-build-bootimg' '90-linux-steamling.hook'
         'steamling-volumed' 'steamling-volumed.service' '10-steamling-journal.conf'
         '20-steamling-wifi-backend.conf'
-        'steamling-panel-calibration' 'steamling-panel-calibration.service')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        'steamling-panel-calibration' 'steamling-panel-calibration.service'
+        'steamling-gamepad-quirk' 'steamling-gamepad-quirk.service' 'steamling-board-env')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   install -Dm755 "${srcdir}/steamling-sleep" \
@@ -171,4 +172,14 @@ package() {
     "${pkgdir}/usr/lib/systemd/system/steamling-panel-calibration.service"
   ln -sf "../steamling-panel-calibration.service" \
     "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-panel-calibration.service"
+
+  # Boards whose controller MCU needs a mode switch (AYANEO, KONKR) name it in device.conf
+  # (STEAMLING_GAMEPAD_QUIRK); everywhere else the unit runs and does nothing.
+  install -Dm755 "${srcdir}/steamling-gamepad-quirk" "${pkgdir}/usr/lib/steamling/steamling-gamepad-quirk"
+  install -Dm644 "${srcdir}/steamling-gamepad-quirk.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-gamepad-quirk.service"
+  ln -sf "../steamling-gamepad-quirk.service" \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-gamepad-quirk.service"
+  # Board-gated udev rules in the family BSPs import the board identity through this.
+  install -Dm755 "${srcdir}/steamling-board-env" "${pkgdir}/usr/lib/steamling/steamling-board-env"
 }

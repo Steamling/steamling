@@ -1,0 +1,72 @@
+# Vendor firmware for the SM8650 boards that upstream linux-firmware lacks: the ROCKNIX/extra-firmware
+# SM8650/ tree. Pinned by commit + sha256, nothing
+# in git; installed under /usr/lib/firmware/updates/, which wins the kernel's search.
+pkgname=steamling-firmware-sm8650
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="SM8650 handheld vendor firmware (wifi, ADSP/CDSP, GPU zap, audio)"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('custom:qcom-firmware')   # Qualcomm vendor blobs
+# firmware blobs must ship byte-identical; some parse as ELF and strip would alter them
+options=('!strip')
+
+_extrafw=8834a0c80f5b24fee5ed9e18c1560dc48a6f1bd9   # ROCKNIX/extra-firmware, SM8650/
+_extrafw_files=(
+  ath12k/WCN7850/hw2.0/Notice.txt
+  ath12k/WCN7850/hw2.0/amss.bin
+  ath12k/WCN7850/hw2.0/board-2.bin
+  ath12k/WCN7850/hw2.0/m3.bin
+  qcom/gen70900_aqe.fw
+  qcom/gen70900_sqe.fw
+  qcom/gmu_gen70900.bin
+  qcom/sm8650/SM8650-APS2-tplg.bin
+  qcom/sm8650/ayaneo/ps2/adsp.mbn
+  qcom/sm8650/ayaneo/ps2/adsp_dtb.mbn
+  qcom/sm8650/ayaneo/ps2/adspr.jsn
+  qcom/sm8650/ayaneo/ps2/adsps.jsn
+  qcom/sm8650/ayaneo/ps2/adspua.jsn
+  qcom/sm8650/ayaneo/ps2/battmgr.jsn
+  qcom/sm8650/ayaneo/ps2/cdsp.mbn
+  qcom/sm8650/ayaneo/ps2/cdsp_dtb.mbn
+  qcom/sm8650/ayaneo/ps2/cdspr.jsn
+  qcom/sm8650/ayaneo/ps2/focalfp.mbn
+  qcom/sm8650/ayaneo/ps2/gen70900_zap.mbn
+  qcom/sm8650/ayaneo/ps2/ipa_fws.mbn
+  renesas_usb_fw.mem
+)
+_armada_files=()
+source=()
+for _f in "${_extrafw_files[@]}"; do
+  source+=("${_f//\//_}::https://raw.githubusercontent.com/ROCKNIX/extra-firmware/${_extrafw}/SM8650/${_f}")
+done
+sha256sums=(
+  '515bf4c9d620a87458e4447fe01a0e9bc384d1c3e0037cc4c3d2037b1ff25525'
+  '5660a1aa3db12716b42c687b0c88ef4f6ac80bd46e42cfe3636ed332d3f6e6ee'
+  '8cc9a64baf68681ece5e26a8445630749eccbfb4517bdbf6802856787afa7c2d'
+  'ff40c57556c2fac552ac192c6e2ad59689fd8f50c9f9bcc997d13623c2bcee86'
+  '25237c161d727b8ea92b4beb837a31651b44ea78bfc34d95672af8f346a45825'
+  'a739a1ef14e4418c5a1f1e1da444deb71aeeb4a31370ab41a4dddf378ab5683d'
+  '9685f62c42543befcaee68d25355e16bf55cdb0d573bddcc9f6633f59eec3f72'
+  '0b38b1fcd70aafef2aa46509e66c676a8f79aa7f9b2fd5c0e08e519d08885772'
+  '3df93c1fdd6321137793713b101f21a4850d9a7bbdcaef277e8d5554d328322b'
+  '321ec38ec5bceb104aea44aeaf8e6dfdd942d3e5020316c1f6bef331e1fbe82f'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  'bf8b9114a02ea7e739a2fc545d45cb7adaa2b863101e62447f6b4d27165497f9'
+  'acbbea941428b0fc2ce1c77a19ff57f63d93ced62e6cf28be57b50cf8a91785b'
+  '6d01cd7dce745204d5de20efe57e2511149ca2a5b48ee562fbedefda573ca465'
+  '4019b8efba19413a9586a618800888c54d0d168577b02f379cd424735f58f83b'
+  '7e5fe9c5e14df32ee536a35160fa512baec1d5b0f7987966807756f7fb530410'
+  '3f9c55dbc06f1ae931a3dca832aa2225d35111bae3692ee7e279f9c5dff0906d'
+  '177560c224c73d040836b17082348036430ecf59e8a32d7736ce2b80b2634f97'
+)
+
+package() {
+  local _f
+  for _f in "${_extrafw_files[@]}" "${_armada_files[@]}"; do
+    install -Dm644 "${srcdir}/${_f//\//_}" "${pkgdir}/usr/lib/firmware/updates/${_f}"
+  done
+}

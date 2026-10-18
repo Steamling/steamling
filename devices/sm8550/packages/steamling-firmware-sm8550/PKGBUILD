@@ -1,21 +1,20 @@
-# Retroid Pocket 6 firmware upstream linux-firmware lacks or gets wrong (ath12k WCN7850,
-# ADSP/CDSP, speaker amps, audio topology, VPU). Pinned by commit + sha256, nothing in git. The
-# RP6 runs its own ADSP build (extracted from a Retroid Android image) from
-# qcom/sm8550/retroidpocket/rp6/, with the amp tuning beside it. The .jsn domain lists are only
-# for a userspace pd-mapper: the kernel's QCOM_PD_MAPPER=y serves its own SM8550 table. The CDSP and the AYN-Odin2 topology (the RP6's sound
-# card is named AYN-Odin2) come from the first pin, the ADSP set from the second. /usr/lib/firmware/updates/ wins the kernel's search and no ALARM package writes
-# there, so linux-firmware updates never revert the ath12k board file that wifi needs.
+# Vendor firmware for the SM8550 boards that upstream linux-firmware lacks or gets wrong (ath12k
+# WCN7850, ADSP/CDSP per board, speaker amp tuning, audio topologies, VPU). Pinned by commit +
+# sha256, nothing in git. The ROCKNIX/extra-firmware SM8550/ tree carries every board's set; the RP6
+# runs its own ADSP build (extracted from a Retroid Android image) from
+# qcom/sm8550/retroidpocket/rp6/. /usr/lib/firmware/updates/ wins the kernel's search and no ALARM
+# package writes there, so linux-firmware updates never revert the ath12k board file wifi needs.
 pkgname=steamling-firmware-sm8550
 pkgver=0.1.0
-pkgrel=3.2
-pkgdesc="Retroid Pocket 6 vendor firmware (wifi, ADSP/CDSP, audio, VPU), immune to linux-firmware updates"
+pkgrel=4
+pkgdesc="SM8550 handheld vendor firmware (wifi, ADSP/CDSP, audio, VPU), immune to linux-firmware updates"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('custom:qcom-firmware')   # Qualcomm vendor blobs
 # firmware blobs must ship byte-identical; some parse as ELF and strip would alter them
 options=('!strip')
 
-_extrafw=30c56e2f34af37fe372166b739d6ab277f5155b5   # ROCKNIX/extra-firmware, SM8550/
+_extrafw=8834a0c80f5b24fee5ed9e18c1560dc48a6f1bd9   # ROCKNIX/extra-firmware, SM8550/
 _extrafw_files=(
   ath12k/WCN7850/hw2.0/amss.bin
   ath12k/WCN7850/hw2.0/board-2.bin
@@ -23,8 +22,120 @@ _extrafw_files=(
   ath12k/WCN7850/hw2.0/regdb.bin
   qcom/sm8550/AYN-Odin2-tplg.bin
   qcom/sm8550/SM8550-APS-tplg.bin
+  qcom/sm8550/ayaneo/adsp.b00
+  qcom/sm8550/ayaneo/adsp.b01
+  qcom/sm8550/ayaneo/adsp.b02
+  qcom/sm8550/ayaneo/adsp.b03
+  qcom/sm8550/ayaneo/adsp.b04
+  qcom/sm8550/ayaneo/adsp.b05
+  qcom/sm8550/ayaneo/adsp.b06
+  qcom/sm8550/ayaneo/adsp.b07
+  qcom/sm8550/ayaneo/adsp.b08
+  qcom/sm8550/ayaneo/adsp.b09
+  qcom/sm8550/ayaneo/adsp.b10
+  qcom/sm8550/ayaneo/adsp.b11
+  qcom/sm8550/ayaneo/adsp.b12
+  qcom/sm8550/ayaneo/adsp.b13
+  qcom/sm8550/ayaneo/adsp.b14
+  qcom/sm8550/ayaneo/adsp.b15
+  qcom/sm8550/ayaneo/adsp.b16
+  qcom/sm8550/ayaneo/adsp.b17
+  qcom/sm8550/ayaneo/adsp.b18
+  qcom/sm8550/ayaneo/adsp.b19
+  qcom/sm8550/ayaneo/adsp.b20
+  qcom/sm8550/ayaneo/adsp.b21
+  qcom/sm8550/ayaneo/adsp.b22
+  qcom/sm8550/ayaneo/adsp.b23
+  qcom/sm8550/ayaneo/adsp.b24
+  qcom/sm8550/ayaneo/adsp.b25
+  qcom/sm8550/ayaneo/adsp.b26
+  qcom/sm8550/ayaneo/adsp.b27
+  qcom/sm8550/ayaneo/adsp.b28
+  qcom/sm8550/ayaneo/adsp.b29
+  qcom/sm8550/ayaneo/adsp.b30
+  qcom/sm8550/ayaneo/adsp.b31
+  qcom/sm8550/ayaneo/adsp.b33
+  qcom/sm8550/ayaneo/adsp.b34
+  qcom/sm8550/ayaneo/adsp.b35
+  qcom/sm8550/ayaneo/adsp.b36
+  qcom/sm8550/ayaneo/adsp.b38
+  qcom/sm8550/ayaneo/adsp.b39
+  qcom/sm8550/ayaneo/adsp.b40
+  qcom/sm8550/ayaneo/adsp.b41
+  qcom/sm8550/ayaneo/adsp.b42
+  qcom/sm8550/ayaneo/adsp.b43
+  qcom/sm8550/ayaneo/adsp.b44
+  qcom/sm8550/ayaneo/adsp.b45
+  qcom/sm8550/ayaneo/adsp.b46
+  qcom/sm8550/ayaneo/adsp.b47
+  qcom/sm8550/ayaneo/adsp.b48
+  qcom/sm8550/ayaneo/adsp.b49
+  qcom/sm8550/ayaneo/adsp.b50
+  qcom/sm8550/ayaneo/adsp.b51
+  qcom/sm8550/ayaneo/adsp.b52
+  qcom/sm8550/ayaneo/adsp.b53
+  qcom/sm8550/ayaneo/adsp.b54
+  qcom/sm8550/ayaneo/adsp.b56
+  qcom/sm8550/ayaneo/adsp.mdt
+  qcom/sm8550/ayaneo/adsp_dtb.b00
+  qcom/sm8550/ayaneo/adsp_dtb.b01
+  qcom/sm8550/ayaneo/adsp_dtb.b02
+  qcom/sm8550/ayaneo/adsp_dtb.mdt
+  qcom/sm8550/ayaneo/adspr.jsn
+  qcom/sm8550/ayaneo/adsps.jsn
+  qcom/sm8550/ayaneo/adspua.jsn
+  qcom/sm8550/ayaneo/cdsp.b00
+  qcom/sm8550/ayaneo/cdsp.b01
+  qcom/sm8550/ayaneo/cdsp.b02
+  qcom/sm8550/ayaneo/cdsp.b03
+  qcom/sm8550/ayaneo/cdsp.b04
+  qcom/sm8550/ayaneo/cdsp.b05
+  qcom/sm8550/ayaneo/cdsp.b06
+  qcom/sm8550/ayaneo/cdsp.b07
+  qcom/sm8550/ayaneo/cdsp.b08
+  qcom/sm8550/ayaneo/cdsp.b09
+  qcom/sm8550/ayaneo/cdsp.b10
+  qcom/sm8550/ayaneo/cdsp.b11
+  qcom/sm8550/ayaneo/cdsp.b12
+  qcom/sm8550/ayaneo/cdsp.b13
+  qcom/sm8550/ayaneo/cdsp.b15
+  qcom/sm8550/ayaneo/cdsp.mdt
+  qcom/sm8550/ayaneo/cdsp_dtb.b00
+  qcom/sm8550/ayaneo/cdsp_dtb.b01
+  qcom/sm8550/ayaneo/cdsp_dtb.b02
+  qcom/sm8550/ayaneo/cdsp_dtb.mdt
+  qcom/sm8550/ayaneo/cdspr.jsn
+  qcom/sm8550/ayaneo/vpu30_4v.mbn
   qcom/sm8550/ayn/cdsp.mbn
   qcom/sm8550/ayn/cdsp_dtb.mbn
+  qcom/sm8550/ayn/odin2/adsp.mbn
+  qcom/sm8550/ayn/odin2/adsp_dtb.mbn
+  qcom/sm8550/ayn/odin2/adspr.jsn
+  qcom/sm8550/ayn/odin2/adsps.jsn
+  qcom/sm8550/ayn/odin2/adspua.jsn
+  qcom/sm8550/ayn/odin2/aw883xx_acf.bin
+  qcom/sm8550/ayn/odin2/battmgr.jsn
+  qcom/sm8550/ayn/odin2mini/adsp.mbn
+  qcom/sm8550/ayn/odin2mini/adsp_dtb.mbn
+  qcom/sm8550/ayn/odin2mini/adspr.jsn
+  qcom/sm8550/ayn/odin2mini/adsps.jsn
+  qcom/sm8550/ayn/odin2mini/adspua.jsn
+  qcom/sm8550/ayn/odin2mini/aw883xx_acf.bin
+  qcom/sm8550/ayn/odin2mini/battmgr.jsn
+  qcom/sm8550/ayn/odin2portal/adsp.mbn
+  qcom/sm8550/ayn/odin2portal/adsp_dtb.mbn
+  qcom/sm8550/ayn/odin2portal/adspr.jsn
+  qcom/sm8550/ayn/odin2portal/adsps.jsn
+  qcom/sm8550/ayn/odin2portal/adspua.jsn
+  qcom/sm8550/ayn/odin2portal/aw883xx_acf.bin
+  qcom/sm8550/ayn/odin2portal/battmgr.jsn
+  qcom/sm8550/ayn/thor/adsp.mbn
+  qcom/sm8550/ayn/thor/adsp_dtb.mbn
+  qcom/sm8550/ayn/thor/adspr.jsn
+  qcom/sm8550/ayn/thor/adsps.jsn
+  qcom/sm8550/ayn/thor/adspua.jsn
+  qcom/sm8550/ayn/thor/aw883xx_acf.bin
+  qcom/sm8550/ayn/thor/battmgr.jsn
   qcom/vpu/vpu30_p4.mbn
   renesas_usb_fw.mem
 )
@@ -52,8 +163,120 @@ sha256sums=(
   'fe1327d789e4c93a9f6686afea5e17cd048b925693c6b9a7ac2c36026335d311'
   '0e530c1fea0767c21b39bb1149fab01c17a7c736e78d84a63803f8f467784241'
   'feef17790cf76d16fc9bce6a9b1bb44f669cfd5ce2b4d723d83943e3eca263ee'
+  'c66e1729ff3e45bd10dc49b07458a0e70b73bc3d603cc62bdecd6740df85bcbb'
+  '475bd54976171eaa5ffc013f32d058e7424822b149fb8599801aa5d16cbe0c0c'
+  '37285077989d7fab83498836f6bb0444098e6e6c161d169d7b64d5c05d01f8be'
+  '9c5f5c77b65a8cfa051778972a20179fadf54e2e3cc0928291049e4718e73ee5'
+  '2ffcdf8d2e5d6e36220cbce13cfafcc2316b2ed4a57163c0183ca0b0a49d25a5'
+  '2e690569ef64890b63eb59b86dd7d61b81259dc8d5f6025e75c7832e0814ddca'
+  'f67565de53ff55650e31be91198eec92e08087fb5cae58f27adc68d2263be01b'
+  '586e3fed6daefe6ab920de9ec9d48e82075710b795c2de3e1f081d26d9060b49'
+  '868084e56eb82b7a6f71c54508cf4d6e141e955d836be7b430d00d1eb7509f68'
+  'bbdc4d4f3e75a5b6ba29ed3143cfd319ffd411283921fbf940fd741cb9a5e137'
+  '6e57eac5f4803010ca5aae96231aa31842fc9ca757b3f129986bae6347f5511f'
+  'fb69e6bd1cd219046ad71b5b03f7c3b352c2304d06088e570ac517f0e600f483'
+  '063f23c12a053df039332977cbf9833eccf71c1eb04dc81ba47f1e81b9b651d8'
+  'e77d11ec52e5d586c915b5d92abc37e3abfe718b8cfc34ccf77344be0cd4331d'
+  '49521528d885949410c8f67ca08bb550ea42d9cbe0c8017898875df526957b1e'
+  '0d6902b85c7c288ae578e7ce9b9c7e8b2b180dff153154fc048779a06739398e'
+  'b85d81e8fc6f2dbba3015855cbb0f124349c4207d0e7fc85e111ea207edac4b6'
+  'ff89f9811a8bc5ee8bf4b4fc18fd6f6c4eb9153cc937c39ab34b37dc4a831759'
+  'f900a9fb709655cab0f9c7937b06660252e2d670a10c8703e312ece944fa7313'
+  'dd9863b18a8b4bb5362b7a63972941348387e38cf44dde75315d33b9d2c389d1'
+  'b7d75b92b8d657da82a2166d7c30aa226fe1adff51887224f3c777760d3e5851'
+  'e3f74379b2a37310cab3b18663218ceba2fd1f757213da9cb1e49b2c9ae42e0b'
+  '1dd96fbc90ebb3ea9c2474b7fbe946fb30b31e0e50724bc8771d312ed16eb963'
+  '0d0f686262e1a5b1ecc94f6d510a27eaf730a4de497b1f4fba12b9ffc35a3dc2'
+  '9153438d2684d56e392352bc969211d33d98e01d9e719127ebdc56092cfb2d6e'
+  '2dcd4f93bb7af47f957ca41749235a5574553cd0f7554021ff42907c9f40855d'
+  '3e595769844b597e8ba373cbf0da83577f8c1ff61e40c74fb75469c3d5fea8af'
+  'b71d9b347c06eca1ad72ef41205204ca44b770cd31e9ba1ae1cb6d286a3da949'
+  'f182a5c2a53482d7d7d13ae6a51b78aacdb79e19d17b3001c9cea5bc43f02956'
+  '37eb41c8f8102025d47fd4da76057b4ab7c371fd65393575c1a7c401b3f23504'
+  '1ee1d84531cd5bc47c2f4a75056179982b2ed57fec04192ae8e838a6ca475902'
+  'aa41a057e30d602ccb4b95b2afa583257048154b605506b9be7cb9acadaf9f6b'
+  '2e25d0452197fa3c10b87f3c888eac2f3e7bcd8b18ba8ad247e091948b7d358a'
+  '4856eb8a7d34e9ba3b5672c0641a1cca7133143c314aa079abfdc65d3acf26fc'
+  'd60c75cb7b756bd033ba2a56a18bb40f5bb035105224fe042912fb502fd9bf9e'
+  '6f0fd25feb98c0c2c6ca2ab00679d814ae54560c746eda791223ea6208188c92'
+  '115e935d85b1f0c0200976f91a59df97746581b7028f2eb6e4b17343a47cd2a7'
+  'cda9d97033a9569dab00c89dcfcb45caae44ddfad3e7fe18b778b882bf5e771c'
+  '04efc7e12953621c309b654294ea9db36b87feacd562f8af00986d2ee448ec41'
+  '5ed9c438ecb535539a8024fd0f30656f31ff59fa592e600d31cd57905e4f2c2f'
+  '9bfa0b0cb24d2ab186f313e5a027a76a37ca52623784863f09bbf3182b55b76a'
+  '6695d6ec6f7bcb92bc38bdb54a2c562673cf444c4a930a2a87bb7a271baf36ee'
+  'f6a356a10a8cfe212415440528c6db9a696e6127e4022af9319a7c5e81196de1'
+  '271c5783def587733c57edd67523fd9890a97b12fd2ee0ad4237226454bb6b85'
+  'af2ef096dc6a6d3df580dc1b1743b2ef72220ca4e1a26a2c5931493bcb176aec'
+  '4f9d24bdb150581e08188dedcddfa68a26bbbd3a3d98654c38596c9124de9829'
+  '6f70e9461bfadc063cfebc948e39ef55501d549dc53eb96c76945ac4e4d38d6c'
+  'b2295adb91644e03e67ec7e51fd2133b77eccbbe796a769b0d210ea445107f9a'
+  '6f2cae4761b96944b67a3f7281c2ef4657677e6592ad0f6bb225ee7d8e485af2'
+  '3bcf1bf685558fc0f7aacaabdbbc23241ceb98a77fe39f125bb4591a97e57c6a'
+  '570c5604a7b6915541a438ac175b5b7f630074d8588ec4f9909d907a9861191b'
+  'bb11ef0e8f7456637cdf45adc9bf9ed5b38a92b2f546f1b7c2a4a321c44180dc'
+  '1d3515748ebaf74172151af9dd5a26c4d6fb0f2a4884bed317ab3f3d86c6a3ce'
+  '79113f333086a346b6e719ab24208186741fa5222bc383f4b8b46d785d26c1cc'
+  'a8368d80752a090887fdac8fe5d466b53b733f664a413aaef2399c529d18cd41'
+  '6bf39fd29034606433776d7320ad7a12d7372319d8ec364bbeb671e82d99155c'
+  '006d0a6abb068e10fa6f69d53174343c7b5744e8c0be8493c70ac8d44b7cbb05'
+  '43264e9b221ce2f18e439def407dddb0b1575c1016e3ff39f6818b9e23408235'
+  'd01c79d48eca6369b058e04aae6e2b301b7be813d115e51fc0d295f8e3697f99'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  'cfe03a3f5c6a962627ae0533796e46f4196c565f589909c1c0d19bfa06bfb3b0'
+  '8e212db6c2e658b0c1068e28eb890647d8d74e59baa0c3f55007a466d64cd889'
+  '9a5807357d1bdb1b920aecb1f903e52f777919515873e3db8398b6ac5e049f03'
+  'ccb8cd3debe08fa86bb0240f9d367e6eeedf613b785c5474460715271ce4eb49'
+  '57ac977e680ec98fceca4a3229f5bd01abe3861ca39bcbd0c62dff1f8a1683f6'
+  '722b0dce97ac1badec6fe711177508a7e032d5ec35ba5365e5983bb059af617b'
+  '6483e847eb38d6e00263decc9ae62a538052db598cc468a133ef7595e8a7cfe4'
+  '5331e23634d41c54c759c961701124cc648887c712d97984fdc5d58d6fbbf0ee'
+  '84df8a245a9b98d9c82d6041969c4ebba5cd64084c4c46536e7ea343b1442d90'
+  '68a91698dc54643a5204070bb8b28ad8713b9ccb846b86fe89c7392d692147d8'
+  '712d8ba2dbf95c53850fa3855ae5541255919140b0ab4cd2162fff8350606748'
+  '6af28f01ca9215088ca3cd3b8f55f3e8836d1a8dd72483f31201f4e95c0ef783'
+  '7b94feb49307d0f370633f15fd0dcd7dfd980a2252a20ecbc63af308cb806553'
+  '2d1d077efd39692c51bce849bf78c3a8f4da8f2c8149fdf08b533b70b93c7bbf'
+  '40c4870a42eee5d9e4e1562b02243add9802686376c32c01f6578748bc944314'
+  '818af4192eb13a92066151d85f3ff028c6ac7940eeabd02c3d68acd768a8e8e7'
+  '464d0c0cb8e1a3eca42b750e9dae56ad5ee19a8516a5cafe6689a4e46ea61541'
+  '5bf7466772c1c32efacef7ec3a6a9eead44f3efdbd7f270c675dcb5cdabcf9a2'
+  '5fa88ac222326629e190f273e406c3083822bdf6c94d2286f4583202ae864e91'
+  'b10401adc8d758241b56ce14431fadfe735684382a27eb94df580b8d2d39f729'
+  '6d01cd7dce745204d5de20efe57e2511149ca2a5b48ee562fbedefda573ca465'
+  '1e9f9dafee7af0a9bb1dbc9ed45d6a69b19afa3c892ef1c844caa0ea1ac6d470'
   'c8166bf798f3bab68defc2437a225a8e5fc7979faf1f5f3b3fc8b187b7f4cccf'
   'aae496bed4987eebf69538ca21ec309c60c00ffa0e98ce743aee1531de6387d3'
+  '750d98172d9e780640fd02431dea2cb6827f11e34e8d2e71109be727bfc1d42d'
+  'dde0327058b0b2b6cdbf8259937c76a6adf097664d0428e4c1b3f3f7e9398d08'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  'a73ecfe2239a56eb7ad1573fa35977fd57557cfa7c220ba5437f88d256c907ad'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  'f13cfcab0b910dbdc87be911004a76aa220feda7449cda7b88bf7c4d60cea685'
+  '0f6e9534a0d56d1ad6bf7426923fed00aa128f491685dd5f6a2221185487296b'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  '310e37f985032cd85d49ca579509adfabe7f8b95fa177eb34614c53876ca8e39'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  '2259a124683f60af8ed5472c1606391603164aecab379b22fce51e3fe4342661'
+  '71865c9be058c4fe8903933df0fb3ce9a2abd155524c30a16917374054808ea3'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  'a73ecfe2239a56eb7ad1573fa35977fd57557cfa7c220ba5437f88d256c907ad'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
+  'e771ab967310bc210147d5d0f9e455802c35564584d1ed26e64a2eb4e9c2470c'
+  '660fd8f2051bd2dd8694d1b36b70bc339faf6d86b0f80462395e8d229f376477'
+  '66ce8531efb7979d234e0f0eabbe18d038ac97da771a8a194f613df8f0724e81'
+  '12ac2f3ae8ced12aa4b06b3ab3a01bc4d8efe1c92ebea503c002f209a6ec176f'
+  '982a99853495e34726b8e44697fdfad303334de0a67cbf6cde306c8f1731000b'
+  'ecb5419011078e9178d25963ed788003c11c2c5b12cbcfaa8a98ce7eff3028af'
+  'be8c6fba330908e4683fb6282761cb08485a302d6a66e09721e102e342f27236'
   'f59fec39dc69b34130fbf0b5cd72db266e585071324a1a3e384146bb19f53e66'
   '177560c224c73d040836b17082348036430ecf59e8a32d7736ce2b80b2634f97'
   'c7c53436f34748908f9d89103a38364604960f179d813a716fde57457aa44de3'

@@ -1,0 +1,36 @@
+# Vendor firmware for the SM8250 boards that upstream linux-firmware lacks: the ROCKNIX/extra-firmware
+# SM8250/ tree. Pinned by commit + sha256, nothing
+# in git; installed under /usr/lib/firmware/updates/, which wins the kernel's search.
+pkgname=steamling-firmware-sm8250
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="SM8250 handheld vendor firmware (AYN Thor Lite ADSP and amp tuning, MANGMI Pocket Max MCU)"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('custom:qcom-firmware')   # Qualcomm vendor blobs
+# firmware blobs must ship byte-identical; some parse as ELF and strip would alter them
+options=('!strip')
+
+_extrafw=8834a0c80f5b24fee5ed9e18c1560dc48a6f1bd9   # ROCKNIX/extra-firmware, SM8250/
+_extrafw_files=(
+  qcom/sm8250/ayn/thor/adsp.mbn
+  qcom/sm8250/ayn/thor/aw883xx_acf.bin
+  qcom/sm8250/mangmi/pocketmax/mcu_v1_3_20251110.bin
+)
+_armada_files=()
+source=()
+for _f in "${_extrafw_files[@]}"; do
+  source+=("${_f//\//_}::https://raw.githubusercontent.com/ROCKNIX/extra-firmware/${_extrafw}/SM8250/${_f}")
+done
+sha256sums=(
+  'ccd2aae6c4ab78a3ff45b715985f32a6a87859e52596be6c3959376626e2f127'
+  'ecb5419011078e9178d25963ed788003c11c2c5b12cbcfaa8a98ce7eff3028af'
+  '371a55fd8a7e7771bb00a973909929ecb4bb1f23244581fcd77ceb703e2680c6'
+)
+
+package() {
+  local _f
+  for _f in "${_extrafw_files[@]}" "${_armada_files[@]}"; do
+    install -Dm644 "${srcdir}/${_f//\//_}" "${pkgdir}/usr/lib/firmware/updates/${_f}"
+  done
+}

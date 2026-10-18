@@ -29,7 +29,7 @@ disabled and the 6bpc and default paths are unchanged.
 +/*
 + * The DPU disables output dithering at 8bpc, but a panel fed from the 10-bit
 + * pipeline can visibly band without it. Boards opt in per panel with the
-+ * armada,dpu-8bpc-dither devicetree property on the panel node.
++ * steamling,dpu-8bpc-dither devicetree property on the panel node.
 + */
 +static bool dpu_encoder_panel_dithers_8bpc(struct drm_encoder *drm_enc)
 +{
@@ -40,7 +40,7 @@ disabled and the 6bpc and default paths are unchanged.
 +		return false;
 +
 +	dithers = last->of_node &&
-+		of_property_read_bool(last->of_node, "armada,dpu-8bpc-dither");
++		of_property_read_bool(last->of_node, "steamling,dpu-8bpc-dither");
 +	drm_bridge_put(last);
 +
 +	return dithers;

@@ -1,0 +1,23 @@
+# steamling-device-sm8250 - metapackage: the per-SoC members of an SM8250 system (BSP, kernel,
+# bootloader, the proton choice). Shared members live on steamling-core / the steamling-*-full layers.
+pkgname=steamling-device-sm8250
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="steamling device metapackage: SM8250 family"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('steamling-bsp-sm8250'
+         'linux-steamling-sm8250'
+         'steamling-bootloader-sm8250'
+         # a6xx (Adreno 650) lacks the 8-bit storage DXVK 3 needs: D3D10/11 games in these
+         # stock Protons will not start until DXVK 2 Protons are packaged (docs/known-issues.md)
+         'proton-cachyos'
+         'proton-ge')
+# Exactly one device metapackage per install (wrong-device guard).
+provides=('steamling-device')
+conflicts=('steamling-device')
+
+package() {
+  :   # pure metapackage
+}

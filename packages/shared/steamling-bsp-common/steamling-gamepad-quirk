@@ -1,0 +1,32 @@
+#!/bin/bash
+# steamling-gamepad-quirk - put a handheld's controller MCU into the mode its input stack expects,
+# once per boot before InputPlumber starts. Boards pick it with STEAMLING_GAMEPAD_QUIRK in device.conf:
+#   ayaneo-xbox     AYANEO Pocket MCUs answer as a fake Xbox 360 pad (045e:028e) only after this
+#                   serial frame; without it the kernel cannot drive the controller.
+#   ayaneo-default  the MCU's own mode (AYANEO Pocket DS/S2, KONKR), via the driver's gamepad_mode
+#                   attribute when it has one, else the same serial protocol.
+set -u
+for _dc in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do
+  [ -r "${_dc}" ] && . "${_dc}"
+done
+SERIAL=/dev/ttyHS0
+
+send() {
+  [ -e "${SERIAL}" ] || { echo "steamling-gamepad-quirk: ${SERIAL} not present, skipping"; return 0; }
+  stty -F "${SERIAL}" 115200 -clocal -opost -isig -icanon -echo
+  printf '%b' "$1" > "${SERIAL}"; sleep 0.1
+  printf '%b' "$2" > "${SERIAL}"; sleep 0.1
+}
+
+case "${STEAMLING_GAMEPAD_QUIRK:-}" in
+  ayaneo-xbox)
+    send '\xe7\x55\x05\x01\x00\x00\x00\x00\x00\x5b\xed' '\x35\x35\x30\x35\x30\x31\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30'
+    echo "steamling-gamepad-quirk: AYANEO MCU in Xbox 360 mode" ;;
+  ayaneo-default)
+    for _a in /sys/bus/serial/devices/*/gamepad_mode; do
+      [ -e "${_a}" ] && echo default > "${_a}" && { echo "steamling-gamepad-quirk: AYANEO MCU in its default mode"; exit 0; }
+    done
+    send '\xe7\x55\x05\x00\x00\x00\x00\x00\x00\x5a\xed' '\x35\x35\x30\x35\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30'
+    echo "steamling-gamepad-quirk: AYANEO MCU in its default mode" ;;
+esac
+exit 0

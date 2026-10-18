@@ -40,8 +40,8 @@ source "${STEAMLING_ROOT}/devices/${DEVICE}/tuning.conf"
 
 # Paths derived from the profile (must come after it):
 : "${DEVICE_DIR:=${STEAMLING_ROOT}/devices/${DEVICE}}"
-: "${KERNEL_DIR:=${STEAMLING_ROOT}/kernel/${SOC}}"
-: "${ROCKNIX_DEVICE_DIR:=${ROCKNIX_PROJECT_DIR}/devices/${ROCKNIX_SOC}}"
+: "${KERNEL_DIR:=${STEAMLING_ROOT}/kernel/${KERNEL_TREE:-${SOC}}}"   # KERNEL_TREE: a tree several SoCs share
+: "${ROCKNIX_DEVICE_DIR:=${ROCKNIX_PROJECT_DIR}/devices/${ROCKNIX_SOC:-}}"
 # Per-SoC pacman repo: tuned packages (mesa etc.) share pkgnames across SoCs
 # with different binaries, so each SoC gets its own localrepo/published tree.
 # packages/shared/* are byte-identical across SoCs: built once into the shared

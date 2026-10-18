@@ -1,4 +1,4 @@
-# steamling-device-sm8550 — metapackage: the per-SoC members of a Retroid Pocket 6 system
+# steamling-device-sm8550 — metapackage: the per-SoC members of an SM8550 system
 # (BSP, kernel, bootloader, the proton choice). Shared members live on
 # steamling-core / the steamling-*-full layers: a dep edge from here would block
 # `pacman -Rs` of an optional layer.
@@ -6,8 +6,8 @@
 # installed devices (e.g. an internal-installed RP6) on their next pacman -Syu.
 pkgname=steamling-device-sm8550
 pkgver=0.2.0
-pkgrel=11.1
-pkgdesc="steamling device metapackage: Retroid Pocket 6 (SM8550)"
+pkgrel=12
+pkgdesc="steamling device metapackage: SM8550 family (Retroid Pocket 6 and others)"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')

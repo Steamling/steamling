@@ -14,3 +14,5 @@ packages/soc/cemu/PKGBUILD :: version :: >=3\.3
 packages/shared/steamling-decky/steamling-control/py_modules/steamling_control/calibration.py :: provenance/status :: GPcal
 packages/shared/steamling-bsp-common/steamling-panel-calibration :: provenance/status :: ROCKNIX
 config/steamling.conf :: provenance/status :: borrowed from
+devices/sm8250/packages/steamling-bsp-sm8250/root/usr/share/alsa/ucm2/Qualcomm/sm8250/AYN-Thor-Lite.conf :: provenance/status :: copied from
+devices/sm8250/packages/steamling-bsp-sm8250/root/usr/share/alsa/ucm2/conf.d/sm8250/* :: provenance/status :: copied from

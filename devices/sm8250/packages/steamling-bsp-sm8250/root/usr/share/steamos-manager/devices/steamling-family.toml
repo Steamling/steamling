@@ -1,0 +1,61 @@
+# steamos-manager's device match for this family, by devicetree compatible (these boards have
+# no DMI). Entries match in order, so the SoC entry stays last to catch boards without their
+# own line: an unmatched board would get a local CpuScaling1.
+
+[[device]]
+dt.compatible = "retroidpocket,rp5"
+device        = "retroid_pocket_5"
+variant       = "RP5"
+friendly_name = "Retroid Pocket 5"
+
+[[device]]
+dt.compatible = "retroidpocket,rpflip2"
+device        = "retroid_pocket_flip2"
+variant       = "RPFlip2"
+friendly_name = "Retroid Pocket Flip 2"
+
+[[device]]
+dt.compatible = "retroidpocket,rpmini"
+device        = "retroid_pocket_mini"
+variant       = "RPMini"
+friendly_name = "Retroid Pocket Mini"
+
+[[device]]
+dt.compatible = "retroidpocket,rpminiv2"
+device        = "retroid_pocket_mini_v2"
+variant       = "RPMiniV2"
+friendly_name = "Retroid Pocket Mini V2"
+
+[[device]]
+dt.compatible = "ayn,thor-lite"
+device        = "ayn_thor_lite"
+variant       = "ThorLite"
+friendly_name = "AYN Thor Lite"
+
+[[device]]
+dt.compatible = "mangmi,air-y-pro"
+device        = "mangmi_air_y_pro"
+variant       = "AirYPro"
+friendly_name = "MANGMI Air Y Pro"
+
+[[device]]
+dt.compatible = "mangmi,pocket-max"
+device        = "mangmi_pocket_max"
+variant       = "PocketMax"
+friendly_name = "MANGMI Pocket Max"
+
+[[device]]
+dt.compatible = "ayaneo,pocket-micro2"
+device        = "ayaneo_pocket_micro2"
+variant       = "PocketMICRO2"
+friendly_name = "AYANEO Pocket MICRO 2"
+
+[[device]]
+dt.compatible = "qcom,sm8250"
+device        = "steamling_sm8250"
+variant       = "SM8250"
+friendly_name = "Snapdragon 865 handheld"
+
+# Leaves the slot for steamling-perfd, which only allows schedutil.
+[cpu_scaling]
+driver = "none"

@@ -1,20 +1,20 @@
-# Board support for the Retroid Pocket 6: device.conf picks a boards/ file by devicetree model
-# (the standard and TOP-DPAD models share rp6.conf) and the input maps are model-gated.
+# Board support for the SM8550 family: device.conf picks a boards/ file by devicetree model (the
+# RP6 standard and TOP-DPAD models share rp6.conf) and the input maps are model-gated.
 pkgname=steamling-bsp-sm8550
 pkgver=0.2.0
-pkgrel=17.5
-pkgdesc="steamling board support: Retroid Pocket 6 (SM8550) — board dispatch, input maps, suspend config, audio UCM"
+pkgrel=18
+pkgdesc="steamling board support: SM8550 family (Retroid Pocket 6, Nova; AYN Odin 2 / Mini / Portal, Thor; AYANEO Pocket ACE / DMG / DS / EVO / S) - board dispatch, input maps, suspend config, audio UCM"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
 # The firmware reaches the fleet through this edge: -Syu never installs a new name alone.
-depends=('steamling-bsp-common' 'steamling-firmware-sm8550>=0.1.0-3.2')  # 3.2: the RP6 dtb loads its ADSP from retroidpocket/rp6/
+depends=('steamling-bsp-common' 'steamling-firmware-sm8550>=0.1.0-4')  # 4: every board's firmware set
 # One BSP per device (wrong-device guard); replaces= migrates the retired per-device BSPs.
 provides=('steamling-bsp')
 conflicts=('steamling-bsp')
 replaces=('steamling-bsp' 'steamling-bsp-rp6')
-optdepends=('inputplumber: gamepad -> Steam Input mapping (01-rsinput-controller.yaml)'
-            'alsa-ucm-conf: base UCM (codec include sequences for the AYN-Odin2 UCM the RP6 card uses)')
+optdepends=('inputplumber: gamepad -> Steam Input mapping'
+            'alsa-ucm-conf: base UCM (codec include sequences)')
 
 package() {
   # scripts/render-bsp.sh renders device.conf and family.conf into ./staged (build-packages.sh).

@@ -308,7 +308,8 @@ probe_model() {  # $1 = scratch dir, $2 = model, $3 = expected
 # Prints one problem per line for a BSP's boards/; nothing means it is fine. $2 lets the
 # self-test below point it at a doctored copy.
 check_boards() {  # $1 = SoC, $2 = boards dir
-  local soc="$1" boards="$2" t f n b m r rows="" first="" firstm="" got want
+  local soc="$1" boards="$2" t f n b m r rows="" first="" firstm="" got want ktree
+  ktree="$(kernel_get "${soc}" KERNEL_TREE)"; ktree="${ktree:-${soc}}"
   for f in family.conf models; do
     [ -f "${boards}/${f}" ] || { echo "missing boards/${f}"; return; }
   done
@@ -322,8 +323,8 @@ check_boards() {  # $1 = SoC, $2 = boards dir
     case "${m}" in *[\"\\\$\`]*) echo "models: '${m}' would need shell quoting" ;; esac
     [ -f "${boards}/${b}.conf" ] || echo "models: '${m}' names a missing boards/${b}.conf"
     # The dispatcher matches /proc/device-tree/model verbatim, so a typo never selects its board.
-    git -C "${STEAMLING_ROOT}" grep -qF -- "model = \"${m}\";" -- "kernel/${soc}/dts" ||
-      echo "models: '${m}' is the model of no dts under kernel/${soc}/dts"
+    git -C "${STEAMLING_ROOT}" grep -qF -- "model = \"${m}\";" -- "kernel/${ktree}/dts" ||
+      echo "models: '${m}' is the model of no dts under kernel/${ktree}/dts"
     [ -n "${first}" ] || { first="${b}"; firstm="${m}"; }
     rows="${rows}${b}|${m}"$'\n'
   done < "${boards}/models"
@@ -381,6 +382,15 @@ check_family() {  # $1 = SoC
       # a positive integer, or one with a minor release (a fork's 3.1 over upstream's 3)
       ''|*[!0-9.]*|0*|.*|*.|*.*.*) echo "kernel/${soc}/kernel.conf KERNEL_PKGREL='${rel}' is not a positive integer or N.M" ;;
     esac
+  fi
+  # A SoC on a shared tree builds kernel/<tree>/, which carries everything but kernel.conf.
+  if [ -f "${STEAMLING_ROOT}/kernel/${soc}/kernel.conf" ]; then
+    local tree; tree="$(kernel_get "${soc}" KERNEL_TREE)"
+    if [ -n "${tree}" ]; then
+      for f in patches dts config/linux.aarch64.conf; do
+        [ -e "${STEAMLING_ROOT}/kernel/${tree}/${f}" ] || echo "KERNEL_TREE=${tree}: kernel/${tree}/${f} missing"
+      done
+    fi
   fi
   [ -f "${dev}/profile.conf" ] || return
   grep -q "^| kernel (${soc}" "${STEAMLING_ROOT}/PATCHES.md" || echo "no PATCHES.md kernel row"

@@ -1,0 +1,25 @@
+# steamos-manager's device match for this family, by devicetree compatible (these boards have
+# no DMI). Entries match in order, so the SoC entry stays last to catch boards without their
+# own line: an unmatched board would get a local CpuScaling1.
+
+[[device]]
+dt.compatible = "ayaneo,pocket-s2"
+device        = "ayaneo_pocket_s2"
+variant       = "PocketS2"
+friendly_name = "AYANEO Pocket S2"
+
+[[device]]
+dt.compatible = "konkr,pocket-fit"
+device        = "konkr_pocket_fit"
+variant       = "PocketFIT"
+friendly_name = "KONKR Pocket FIT"
+
+[[device]]
+dt.compatible = "qcom,sm8650"
+device        = "steamling_sm8650"
+variant       = "SM8650"
+friendly_name = "Snapdragon 8 Gen 3 handheld"
+
+# Leaves the slot for steamling-perfd, which only allows schedutil.
+[cpu_scaling]
+driver = "none"

@@ -1,0 +1,4 @@
+# Keep the Pocket FIT Elite WCD939x SoundWire path awake for jack detection.
+ACTION=="bind", SUBSYSTEM=="platform|soundwire", KERNEL=="6ad0000.soundwire|7630000.soundwire|sdw:*", IMPORT{program}="/usr/lib/steamling/steamling-board-env"
+ACTION=="bind", SUBSYSTEM=="platform", KERNEL=="6ad0000.soundwire|7630000.soundwire", ENV{STEAMLING_DEVICE}=="pocketfitelite", ATTR{power/control}="on"
+ACTION=="bind", SUBSYSTEM=="soundwire", KERNEL=="sdw:*", ENV{STEAMLING_DEVICE}=="pocketfitelite", ATTR{power/control}="on"

@@ -1,0 +1,9 @@
+# Symbols every board on this tree needs built in: there is no initramfs, so the display and
+# storage paths cannot wait for modules. build-kernel.sh fails the build if one is not =y.
+DRM_MSM
+DRM_MSM_MDSS
+DRM_MSM_DPU
+DRM_MSM_DSI
+SCSI_UFS_QCOM
+PHY_QCOM_QMP_UFS
+MMC_SDHCI_MSM
