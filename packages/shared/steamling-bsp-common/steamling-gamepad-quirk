@@ -12,6 +12,9 @@ done
 SERIAL=/dev/ttyHS0
 
 send() {
+  # The MCU's UART can register after this unit starts; give it a few seconds.
+  local _i
+  for _i in $(seq 40); do [ -e "${SERIAL}" ] && break; sleep 0.25; done
   [ -e "${SERIAL}" ] || { echo "steamling-gamepad-quirk: ${SERIAL} not present, skipping"; return 0; }
   stty -F "${SERIAL}" 115200 -clocal -opost -isig -icanon -echo
   printf '%b' "$1" > "${SERIAL}"; sleep 0.1
@@ -23,6 +26,7 @@ case "${STEAMLING_GAMEPAD_QUIRK:-}" in
     send '\xe7\x55\x05\x01\x00\x00\x00\x00\x00\x5b\xed' '\x35\x35\x30\x35\x30\x31\x30\x30\x30\x30\x30\x30\x30\x30\x30\x30'
     echo "steamling-gamepad-quirk: AYANEO MCU in Xbox 360 mode" ;;
   ayaneo-default)
+    for _i in $(seq 40); do [ -e "${SERIAL}" ] && break; sleep 0.25; done
     for _a in /sys/bus/serial/devices/*/gamepad_mode; do
       [ -e "${_a}" ] && echo default > "${_a}" && { echo "steamling-gamepad-quirk: AYANEO MCU in its default mode"; exit 0; }
     done

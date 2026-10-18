@@ -293,4 +293,7 @@ package() {
   for _f in "${_extrafw_files[@]}" "${_armada_files[@]}"; do
     install -Dm644 "${srcdir}/${_f//\//_}" "${pkgdir}/usr/lib/firmware/updates/${_f}"
   done
+  # A symlink in extra-firmware (raw downloads would fetch the link text): the Thor's card loads
+  # the Odin 2 topology under its own name.
+  ln -s AYN-Odin2-tplg.bin "${pkgdir}/usr/lib/firmware/updates/qcom/sm8550/AYN-Thor-tplg.bin"
 }
