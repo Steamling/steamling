@@ -1,0 +1,12 @@
+# 99- so it sorts after the 90/95 boot-deploy hooks: /flash KERNEL is already refreshed.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = steamling: finalizing snapshot metadata...
+When = PostTransaction
+Exec = /usr/bin/steamling-snapshot-post

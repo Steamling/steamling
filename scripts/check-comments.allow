@@ -1,0 +1,16 @@
+# Exceptions for scripts/check-comments.py: "<path glob> :: <regex>" or "<path glob> :: <kind> ::
+# <regex>" (kind = dead path | provenance/status | version), matched against the comment line.
+# Add one only when the number or path IS the mechanism (a threshold the code tests, a dependency
+# floor, a foreign tree path) or the wording is a licence attribution, never for a ledger fact.
+kernel/*/kernel.conf :: ROCKNIX's
+scripts/build-kernel.sh :: common-skip
+scripts/build-kernel.sh :: __assign_str
+packages/shared/steamling-branding/steamling-branding.install :: version :: 0\.1\.0-1
+packages/shared/steamling-steam/steamling-game-launch :: c000007b
+packages/shared/steamling-tools/steamling-internal-boot-rename :: from ROCKNIX to STEAMLING
+packages/shared/steamling-sdcard-automount/format-device.sh :: SteamOS's deck
+packages/shared/wxwidgets-steamling/PKGBUILD :: version :: >=3\.3
+packages/soc/cemu/PKGBUILD :: version :: >=3\.3
+packages/shared/steamling-decky/steamling-control/py_modules/steamling_control/calibration.py :: provenance/status :: GPcal
+packages/shared/steamling-bsp-common/steamling-panel-calibration :: provenance/status :: ROCKNIX
+config/steamling.conf :: provenance/status :: borrowed from

@@ -1,0 +1,8 @@
+# Code lines outside the chip-named trees that name a chip (sm####), for scripts/check.sh:
+# "<path glob> :: <regex> :: <reason>", reason = "by design: ..." or an issue number. Shared code
+# that names today's chips silently mishandles the next one, so this list only shrinks: fixing
+# a leak deletes its row (a row nothing matches fails), and a new chip id without a row fails.
+# Comments, devices/, kernel/, family docs and packages/soc/<name>-<soc>/ are not scanned.
+config/steamling.conf :: DEVICE:=sm8550 :: by design: the default image target
+scripts/check-comments.py :: SM8550 quirk :: by design: self-test fixture
+packages/shared/steamling-bsp-common/PKGBUILD :: linux-steamling-sm[0-9]{4}<7 :: #126: the kernels that shipped the /flash deploy before it moved here

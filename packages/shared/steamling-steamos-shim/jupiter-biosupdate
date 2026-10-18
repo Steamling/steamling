@@ -1,0 +1,5 @@
+#!/bin/bash
+# steamling jupiter-biosupdate shim. Settings > System > Check for Updates treats a missing helper
+# (127) as a check failure and shows "Update Error". exit 0 = "no BIOS update"; do NOT reuse
+# steamos-update here, whose 7 the BIOS check reads as "update available" and prompts on.
+exit 0

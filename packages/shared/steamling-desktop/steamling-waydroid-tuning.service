@@ -1,0 +1,10 @@
+[Unit]
+Description=steamling Waydroid tuning (nav/density/font/immersive/multi_windows), re-asserted after the Android container boots
+After=waydroid-container.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/steamling/steamling-waydroid-tuning
+
+[Install]
+WantedBy=waydroid-container.service

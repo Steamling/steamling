@@ -1,0 +1,59 @@
+# azahar — Nintendo 3DS emulator (the maintained Citra successor), built from source because
+# upstream's Linux release assets are x86_64-only. Desktop aarch64 Linux is the least-CI'd
+# upstream combination, so a version bump can need compile fixes.
+pkgname=azahar
+pkgver=2126.2
+pkgrel=1.1
+pkgdesc="Azahar — 3DS emulator (Citra successor), native aarch64 build"
+arch=('aarch64')
+url="https://github.com/azahar-emu/azahar"
+license=('GPL-2.0-or-later')
+depends=('boost-libs' 'crypto++' 'enet' 'fmt' 'glslang' 'hicolor-icon-theme' 'libinih' 'libusb'
+         'openal' 'openssl' 'qt6-base' 'qt6-multimedia' 'sdl2' 'soundtouch')
+makedepends=('boost' 'catch2' 'cmake' 'doxygen' 'ffmpeg4.4' 'ninja' 'nlohmann-json' 'qt6-tools'
+             'rapidjson' 'spirv-headers' 'vulkan-headers')
+source=("https://github.com/azahar-emu/azahar/releases/download/${pkgver}/azahar-unified-source-${pkgver}.tar.xz")
+sha256sums=('85c8b56fac703df04720125044b8ff887997911858a6cde545dfb1107ba4cd26')
+
+prepare() {
+  cd "azahar-unified-source-${pkgver}"
+  # The cubeb backends miss a <cstring> include.
+  sed -i '4i #include <cstring>' src/audio_core/{cubeb_input,cubeb_sink}.cpp
+}
+
+build() {
+  # Tuned to the SoC like packages/soc/mesa (sm8550 fallback for a standalone makepkg): the
+  # recompiler emits its own code at runtime, this covers everything that is not recompiled.
+  local _rocknix_tune="${STEAMLING_TUNE_CFLAGS:--march=armv9-a+fp16+crypto+i8mm+bf16+memtag+sm4+sha3+nosve+nosve2 -mtune=cortex-x3 -mno-outline-atomics}"
+  export CFLAGS+=" ${_rocknix_tune}" CXXFLAGS+=" ${_rocknix_tune}"
+  # The video-dump backend is compiled unconditionally against FFmpeg-4/5 APIs that FFmpeg 8
+  # removed, so CMAKE_INCLUDE_PATH steers headers to the ffmpeg4.4 compat package. Headers
+  # only: the libs are dlopen'd, so no ffmpeg4.4 at runtime just disables video dumping.
+  cmake -B build -S "azahar-unified-source-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INCLUDE_PATH=/usr/include/ffmpeg4.4 \
+    -DUSE_DISCORD_PRESENCE=OFF \
+    -DENABLE_TESTS=OFF \
+    -DUSE_SYSTEM_BOOST=ON \
+    -DUSE_SYSTEM_CATCH2=ON \
+    -DUSE_SYSTEM_CRYPTOPP=ON \
+    -DUSE_SYSTEM_ENET=ON \
+    -DUSE_SYSTEM_FFMPEG_HEADERS=ON \
+    -DUSE_SYSTEM_FMT=ON \
+    -DUSE_SYSTEM_GLSLANG=ON \
+    -DUSE_SYSTEM_INIH=ON \
+    -DUSE_SYSTEM_JSON=ON \
+    -DUSE_SYSTEM_LIBUSB=ON \
+    -DUSE_SYSTEM_OPENAL=ON \
+    -DUSE_SYSTEM_OPENSSL=ON \
+    -DUSE_SYSTEM_QT=ON \
+    -DUSE_SYSTEM_SDL2=ON \
+    -DUSE_SYSTEM_SOUNDTOUCH=ON \
+    -DUSE_SYSTEM_VULKAN_HEADERS=ON
+  ninja -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" ninja -C build install
+}

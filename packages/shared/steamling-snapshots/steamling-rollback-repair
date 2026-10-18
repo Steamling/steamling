@@ -1,0 +1,20 @@
+#!/bin/bash
+# steamling-rollback-repair — activate boot files left staged as /flash/*.new by a
+# rollback that died between its set-default commit and the rename (see
+# steamling-rollback). Marker-gated oneshot; always exits 0.
+set -uo pipefail
+
+FLASH=/flash
+mountpoint -q "${FLASH}" || exit 0
+
+staged=()
+shopt -s nullglob
+for f in "${FLASH}/KERNEL.new" "${FLASH}/KERNEL.md5.new"; do
+  [ -f "${f}" ] && staged+=("${f}")
+done
+[ "${#staged[@]}" -gt 0 ] || exit 0
+
+mount -o remount,rw "${FLASH}" 2>/dev/null || true
+for f in "${staged[@]}"; do mv -f "${f}" "${f%.new}"; done
+sync
+echo "steamling-rollback-repair: activated ${#staged[@]} staged boot file(s) left by an interrupted rollback"

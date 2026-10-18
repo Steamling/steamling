@@ -1,0 +1,8 @@
+// Installed OVER the tarball's own: commandline must run the steamling-proton shim beside proton.
+"manifest"
+{
+  "version" "2"
+  "commandline" "/steamling-proton %verb%"
+  "use_sessions" "1"
+  "compatmanager_layer_name" "proton"
+}

@@ -1,0 +1,38 @@
+#!/bin/bash
+# steamling-update — terminal system updater behind the "Steamling Updater" Plasma entry.
+# Starts as the session user and re-execs itself through pkexec (passwordless for wheel via
+# 51-steamling-update.rules). Always -Syu, never -Sy: a refreshed index on an un-upgraded
+# system is the partial-upgrade trap.
+set -euo pipefail
+
+SELF=/usr/bin/steamling-update
+
+if [ "$(id -u)" = 0 ]; then
+  if ! grep -q '^\[pocknix-base\]' /etc/pacman.conf && [ -e /etc/steamling/rolling-mode ]; then
+    echo "bleeding-edge rolling mode: this is a live ALARM upgrade. steamling-rollback"
+    echo "undoes it; 'sudo steamling-base locked' returns to the supported base."
+    echo
+  fi
+  exec pacman -Syu
+fi
+
+echo "Steamling Updater"
+echo "This refreshes the package database and installs all available updates."
+echo
+read -rp "Check for updates now? [y/N]: " a
+case "$a" in
+  y|Y) ;;
+  *) echo "Cancelled."; exit 0 ;;
+esac
+echo
+
+rc=0
+pkexec "$SELF" || rc=$?
+echo
+if [ "$rc" = 0 ]; then
+  echo "Update complete."
+else
+  echo "Update did not finish (failed or cancelled)."
+fi
+read -rp "Press Enter to close... " _ || true
+exit "$rc"

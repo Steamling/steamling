@@ -1,0 +1,21 @@
+# retroarch-autoconfig-steamling — the official libretro joypad autoconfig profiles, vendored
+# because ALARM's retroarch ships none and RetroArch with no profile for the pad in play has
+# entirely dead controls. The WHOLE set is vendored so Bluetooth pads work untouched too.
+pkgname=retroarch-autoconfig-steamling
+pkgver=0.1.0
+pkgrel=3
+pkgdesc="libretro joypad autoconfig profiles (udev) — controller bindings for RetroArch"
+arch=('any')
+url="https://github.com/libretro/retroarch-joypad-autoconfig"
+license=('MIT')
+depends=()
+_commit=86207989e43a636ee3746d190e73f25c23dc7b81
+source=("autoconfig-${_commit}.tar.gz::https://github.com/libretro/retroarch-joypad-autoconfig/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  install -dm755 "${pkgdir}/usr/share/libretro/autoconfig/udev"
+  cp "${srcdir}/retroarch-joypad-autoconfig-${_commit}/udev/"*.cfg \
+     "${pkgdir}/usr/share/libretro/autoconfig/udev/"
+  chmod 644 "${pkgdir}/usr/share/libretro/autoconfig/udev/"*.cfg
+}

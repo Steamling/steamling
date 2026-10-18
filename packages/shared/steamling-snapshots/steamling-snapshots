@@ -1,0 +1,88 @@
+#!/bin/bash
+# steamling-snapshots — inspect and prune the pre-update btrfs snapshots. Retention is
+# ${STEAMLING_SNAPSHOT_KEEP} snapshots plus one abandoned root subvol; prune runs from
+# the post-update hook and from steamling-rollback.
+set -euo pipefail
+
+. /usr/lib/steamling/snapshot-lib.sh
+
+die() { echo "steamling-snapshots: $*" >&2; exit 1; }
+
+snap_fmt_date() {  # stored ISO-8601 UTC -> local DD-MM-YYYY HH:MM
+  date -d "$1" +"%d-%m-%Y %H:%M" 2>/dev/null || echo "$1"
+}
+
+cmd_list() {
+  steamling_snap_supported || die "snapshots unsupported here (root is not btrfs — pre-snapshot install; reflash to migrate)"
+  printf '%-6s %-17s %-4s %-8s %s\n' "ID" "CREATED" "OK" "KERNEL" "TARGETS"
+  local info id created ok kern targets
+  for info in "${SNAP_DIR}"/[0-9][0-9][0-9][0-9]/info.json; do
+    [ -f "${info}" ] || continue
+    while IFS=$'\t' read -r id created ok kern targets; do
+      printf '%-6s %-17s %-4s %-8s %s\n' "${id}" "$(snap_fmt_date "${created}")" "${ok}" "${kern}" "${targets}"
+    done < <(jq -r '[.id, .created, (if .transaction_ok then "yes" else "no" end),
+            (if .kernel_in_transaction then "yes" else "-" end),
+            ((.targets_head | join(" ")) + (if .targets_count > 8 then " (+\(.targets_count - 8) more)" else "" end))]
+           | @tsv' "${info}")
+  done
+}
+
+cmd_status() {
+  local fstype; fstype="$(findmnt -no FSTYPE /)"
+  echo "root filesystem : ${fstype}"
+  if ! steamling_snap_supported; then
+    echo "snapshots       : unsupported (pre-snapshot install; reflash to migrate)"
+    return 0
+  fi
+  local mounted default
+  mounted="$(snap_mounted_subvol)"; default="$(snap_default_subvol)"
+  echo "running root    : ${mounted:-?}"
+  echo "boots next      : ${default:-?} $([ "${mounted}" = "${default}" ] && echo '(same)' || echo '(REBOOT PENDING: differs from running root)')"
+  if [ -f /var/lib/steamling/rollback-info.json ]; then
+    echo "rolled back     : yes (from snapshot $(jq -r '.from_snapshot' /var/lib/steamling/rollback-info.json), $(snap_fmt_date "$(jq -r '.ts' /var/lib/steamling/rollback-info.json)"))"
+  fi
+  [ -f /run/steamling/reboot-required ] && echo "reboot required : yes (kernel updated)"
+  echo "free space      : $(df -h --output=avail / | tail -1 | tr -d ' ') ($(snap_free_mib) MiB; snapshot floor ${STEAMLING_SNAPSHOT_MIN_FREE_MIB} MiB, UI warning ${STEAMLING_SNAPSHOT_WARN_FREE_MIB} MiB)"
+  echo "snapshots       : $(ls "${SNAP_DIR}" 2>/dev/null | grep -Ec '^[0-9]{4}$' || true) kept (retention ${STEAMLING_SNAPSHOT_KEEP})"
+}
+
+cmd_prune() {
+  local quiet="${1:-}"
+  say() { [ "${quiet}" = "--quiet" ] || echo "steamling-snapshots: $*"; }
+  steamling_snap_supported || exit 0
+  [ "$(id -u)" = 0 ] || die "prune needs root"
+
+  local ids extra id
+  ids="$(ls "${SNAP_DIR}" 2>/dev/null | grep -E '^[0-9]{4}$' | sort -n || true)"
+  extra=$(( $(wc -l <<<"${ids}") - STEAMLING_SNAPSHOT_KEEP ))
+  if [ -n "${ids}" ] && [ "${extra}" -gt 0 ]; then
+    for id in $(head -n "${extra}" <<<"${ids}"); do
+      btrfs subvolume delete "${SNAP_DIR}/${id}/snapshot" >/dev/null 2>&1 || true
+      rm -rf "${SNAP_DIR:?}/${id}"
+      say "pruned snapshot ${id}"
+    done
+  fi
+
+  # One abandoned root subvol (@ / @rb-*) is kept for post-mortem after a rollback;
+  # the default and the running root are never candidates.
+  local top=/run/steamling/prune-top mounted default roots keepable r
+  mounted="$(snap_mounted_subvol)"; default="$(snap_default_subvol)"
+  mkdir -p "${top}"
+  if mount -o subvolid=5 "$(snap_root_dev)" "${top}" 2>/dev/null; then
+    roots="$(cd "${top}" && ls -d @ @rb-* 2>/dev/null | grep -vx "${mounted}" | grep -vx "${default}" | sort || true)"
+    keepable="$(tail -n 1 <<<"${roots}")"   # lexically newest ("@" sorts before "@rb-<ts>")
+    for r in ${roots}; do
+      [ "${r}" = "${keepable}" ] && continue
+      btrfs subvolume delete "${top}/${r}" >/dev/null 2>&1 && say "pruned abandoned root ${r}" || true
+    done
+    umount "${top}" 2>/dev/null || true
+  fi
+  rmdir "${top}" 2>/dev/null || true
+}
+
+case "${1:-list}" in
+  list)   cmd_list ;;
+  status) cmd_status ;;
+  prune)  cmd_prune "${2:-}" ;;
+  *) echo "usage: steamling-snapshots [list|status|prune [--quiet]]" >&2; exit 1 ;;
+esac

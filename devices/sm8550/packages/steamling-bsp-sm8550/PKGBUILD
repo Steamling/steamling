@@ -1,0 +1,33 @@
+# Board support for the Retroid Pocket 6: device.conf picks a boards/ file by devicetree model
+# (the standard and TOP-DPAD models share rp6.conf) and the input maps are model-gated.
+pkgname=steamling-bsp-sm8550
+pkgver=0.2.0
+pkgrel=17.5
+pkgdesc="steamling board support: Retroid Pocket 6 (SM8550) — board dispatch, input maps, suspend config, audio UCM"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# The firmware reaches the fleet through this edge: -Syu never installs a new name alone.
+depends=('steamling-bsp-common' 'steamling-firmware-sm8550>=0.1.0-3.2')  # 3.2: the RP6 dtb loads its ADSP from retroidpocket/rp6/
+# One BSP per device (wrong-device guard); replaces= migrates the retired per-device BSPs.
+provides=('steamling-bsp')
+conflicts=('steamling-bsp')
+replaces=('steamling-bsp' 'steamling-bsp-rp6')
+optdepends=('inputplumber: gamepad -> Steam Input mapping (01-rsinput-controller.yaml)'
+            'alsa-ucm-conf: base UCM (codec include sequences for the AYN-Odin2 UCM the RP6 card uses)')
+
+package() {
+  # scripts/render-bsp.sh renders device.conf and family.conf into ./staged (build-packages.sh).
+  install -Dm644 "${startdir}/staged/device.conf" "${pkgdir}/usr/lib/steamling/device.conf"
+  # root/ is the install tree. makepkg's umask 022 turns git's exec bit into 755/644, and
+  # files created under fakeroot are root-owned; -d keeps the UCM symlinks as links.
+  cp -dr "${startdir}/root/." "${pkgdir}/"
+  # The on-device boot image rebuild bakes this in; build-packages.sh stages it from the profile.
+  install -Dm644 "${startdir}/staged/kernel-cmdline" "${pkgdir}/usr/lib/steamling/kernel-cmdline"
+  # boards/ also comes from startdir (build-packages.sh copies the whole package dir);
+  # models is not installed, and the rendered family.conf replaces the committed one.
+  local b
+  for b in "${startdir}/boards/"*.conf "${startdir}/staged/family.conf"; do
+    install -Dm644 "${b}" "${pkgdir}/usr/lib/steamling/boards/$(basename "${b}")"
+  done
+}

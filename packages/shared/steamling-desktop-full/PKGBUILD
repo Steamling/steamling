@@ -1,0 +1,33 @@
+# steamling-desktop-full — the Plasma Mobile desktop-session layer. Hard depends= so that
+# `pacman -Rs steamling-desktop-full` removes exactly this layer and nothing else.
+# Build with ./nodeps: makepkg -s would drag the whole KDE/Qt stack in to lay out nothing.
+pkgname=steamling-desktop-full
+pkgver=0.1.0
+pkgrel=3
+pkgdesc="steamling optional layer: Plasma Mobile desktop session, KDE apps, Waydroid, Flatpak"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('steamling-desktop'
+         'steamling-desktop-plasma-mobile'   # the default flavour, named so no provider prompt
+         'xdg-user-dirs'
+         'konsole'
+         'kate'
+         'dolphin'
+         'kcalc'
+         'ark'
+         'unrar'
+         'gwenview'
+         'okular'
+         'koko'
+         'kclock'
+         'kweather'
+         'waydroid'          # needs the kernel's binder/binderfs (build-kernel.sh)
+         'flatpak'
+         'discover'
+         'kdialog'           # the internal installer's GUI dialogs
+         'qt6-tools')        # qdbus6 drives the kdialog progress dialog
+
+package() {
+  :
+}

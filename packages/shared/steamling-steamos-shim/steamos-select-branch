@@ -1,0 +1,11 @@
+#!/bin/bash
+# steamling steamos-select-branch shim — Steam's "OS Update Channel" hook; its absence logs
+# "failed to query current OS branch" during the OOBE. Valve's flags:
+#   -l  list channel tokens   -c  current channel token   <branch>  set channel
+set -u
+case "${1:-}" in
+  -l) printf '%s\n' stable ;;
+  -c) printf '%s\n' stable ;;
+  *)  : ;;   # set branch: accept, no-op
+esac
+exit 0

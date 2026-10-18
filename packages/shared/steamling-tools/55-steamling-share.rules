@@ -1,0 +1,8 @@
+// Promptless pkexec of steamling-share for wheel, same trust as 53-steamling-ssh.rules.
+polkit.addRule(function(action, subject) {
+    if (!subject.isInGroup("wheel")) { return; }
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/bin/steamling-share") {
+        return polkit.Result.YES;
+    }
+});

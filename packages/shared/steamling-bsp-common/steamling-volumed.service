@@ -1,0 +1,14 @@
+[Unit]
+Description=steamling volume rocker -> PipeWire volume
+# Not After=multi-user.target: that starts the daemon dead last, and until then the rocker only
+# shows Steam's OSD. The daemon tolerates the input device and deck's PipeWire not being up yet.
+After=basic.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/steamling/steamling-volumed
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

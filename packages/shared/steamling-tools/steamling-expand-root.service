@@ -1,0 +1,16 @@
+[Unit]
+Description=Expand root partition + filesystem to fill the disk (first boot)
+DefaultDependencies=no
+After=systemd-remount-fs.service local-fs.target
+# Steam's first-run download needs the full card, not the image's slack.
+Before=steamling-session.service getty.target shutdown.target
+Conflicts=shutdown.target
+ConditionPathExists=!/var/lib/steamling/expand-root.done
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/steamling/steamling-expand-root
+
+[Install]
+WantedBy=multi-user.target

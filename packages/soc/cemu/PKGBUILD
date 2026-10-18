@@ -1,0 +1,60 @@
+# cemu — Wii U emulator, built from upstream main at a pinned commit: the releases are x86-only,
+# the AArch64 recompiler backend only exists on main. Bump = move _commit to a newer main commit
+# and set pkgver to <last release>.<commit date>.<short sha>, which vercmp orders by date.
+pkgname=cemu
+pkgver=2.6.20261009.aa20e2f
+pkgrel=1.1
+_commit=aa20e2f86e93c9f625f048dbd2b6b993f1973180
+pkgdesc="Cemu — Wii U emulator (native aarch64 build with the ARM64 recompiler)"
+arch=('aarch64')
+url="https://cemu.info"
+license=('MPL2')
+options=('!strip')
+# The wxwidgets-gtk3>=3.3 constraint is what steers resolution to wxwidgets-steamling: ALARM's
+# 3.2 cannot satisfy it. sdl3 (not sdl2): the pinned commit post-dates the SDL3 migration.
+depends=('boost-libs' 'fmt' 'libzip' 'libpng' 'pugixml' 'sdl3' 'wxwidgets-gtk3>=3.3'
+         'wayland' 'bluez-libs' 'libsodium' 'hidapi')
+makedepends=('git' 'cmake' 'clang' 'llvm' 'ninja' 'boost' 'glslang' 'glm' 'rapidjson'
+             'vulkan-headers' 'glu' 'libpulse' 'wayland-protocols')
+source=("cemu::git+https://github.com/cemu-project/Cemu.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+prepare() {
+  cd cemu
+  git submodule update --init --recursive
+  # System fmt is linked (not header-only), there is no system cubeb, and glm's imported
+  # target is unnamespaced here.
+  sed -i '/FMT_HEADER_ONLY/d' src/Common/precompiled.h
+  sed -i '/find_package(cubeb)/d' CMakeLists.txt
+  sed -i 's/glm::glm/glm/' src/Common/CMakeLists.txt src/input/CMakeLists.txt
+}
+
+build() {
+  # Tuned to the SoC like packages/soc/mesa (sm8550 fallback for a standalone makepkg): the
+  # recompiler emits its own code at runtime, this covers everything that is not recompiled.
+  local _rocknix_tune="${STEAMLING_TUNE_CFLAGS:--march=armv9-a+fp16+crypto+i8mm+bf16+memtag+sm4+sha3+nosve+nosve2 -mtune=cortex-x3 -mno-outline-atomics}"
+  export CFLAGS+=" ${_rocknix_tune}" CXXFLAGS+=" ${_rocknix_tune}"
+  cd cemu
+  cmake -B build -G Ninja -Wno-dev \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.21.1 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_CXX_FLAGS="${CXXFLAGS} -w" \
+    -DENABLE_VCPKG=OFF \
+    -DEMULATOR_VERSION_MAJOR=2 \
+    -DEMULATOR_VERSION_MINOR=6 \
+    -DEMULATOR_VERSION_PATCH=99
+  cmake --build build
+}
+
+package() {
+  cd cemu
+  install -Dm755 bin/Cemu_release "${pkgdir}/usr/bin/Cemu"
+  ln -s Cemu "${pkgdir}/usr/bin/cemu"
+  # Upstream keeps gameProfiles/resources beside the binary; Cemu finds them under share.
+  install -dm755 "${pkgdir}/usr/share/Cemu"
+  find bin -mindepth 1 -maxdepth 1 ! -name 'Cemu_release' -exec cp -r {} "${pkgdir}/usr/share/Cemu/" \;
+  install -Dm644 src/resource/logo_icon.png "${pkgdir}/usr/share/icons/hicolor/128x128/apps/info.cemu.Cemu.png"
+  install -Dm644 dist/linux/info.cemu.Cemu.desktop "${pkgdir}/usr/share/applications/Cemu.desktop"
+}

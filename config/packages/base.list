@@ -1,0 +1,76 @@
+# One package per line; '#' comments and blank lines ignored.
+
+# --- core system ---
+base
+systemd
+systemd-sysvcompat
+dbus-broker
+mkinitcpio
+
+# --- boot splash ---
+plymouth
+
+# --- package management ---
+pacman-contrib       # paccache: stock pacman grows its cache without bound on the one rw fs
+
+# --- networking ---
+networkmanager
+iwd
+wireless-regdb
+openssh
+
+# --- filesystem / storage ---
+e2fsprogs
+dosfstools
+btrfs-progs
+util-linux
+parted
+rsync
+cloud-guest-utils
+
+# --- graphics stack ---
+# Bootstrap only: install_local_packages replaces both with our [steamling] builds.
+mesa
+vulkan-freedreno
+vulkan-icd-loader
+libdrm
+mesa-utils
+vulkan-tools
+
+# --- GPU firmware (Adreno) ---
+# The Adreno sqe/zap blobs ship .zst here: the kernel needs FW_LOADER_COMPRESS_ZSTD.
+linux-firmware-qcom
+
+# --- audio ---
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+rtkit               # deck has no blanket rtprio, so PipeWire's realtime goes through rtkit
+alsa-utils
+alsa-ucm-conf
+
+# --- utilities ---
+sudo
+nano
+less
+htop
+jq
+zstd
+python-evdev
+bluez
+bluez-utils
+sbc                  # without a codec lib, BT headphones pair but give no audio sink
+libfreeaptx
+
+# --- power / battery ---
+upower               # Steam reads battery only via UPower, once at startup: keep it enabled
+
+# --- storage ---
+udisks2              # Steam lists formattable drives only via UDisks2, once at startup: keep it enabled
+
+# --- memory / swap ---
+zram-generator
+
+# --- CPU scheduler (gaming) ---
+scx-scheds           # needs the SCHED_CLASS_EXT + DEBUG_INFO_BTF kernel (build-kernel.sh)

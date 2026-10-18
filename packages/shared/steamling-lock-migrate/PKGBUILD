@@ -1,0 +1,34 @@
+# steamling-lock-migrate — rolling device -> locked base. The base repo URL is stamped in
+# at build time (STEAMLING_BASE_URL from build-packages.sh) and is stable across snapshots,
+# so a bumped base never has to repoint devices.
+pkgname=steamling-lock-migrate
+pkgver=0.1.0
+pkgrel=4
+pkgdesc="One-shot migration of a rolling steamling device onto the locked base snapshot"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('pacman' 'networkmanager' 'steamling-base')
+install=steamling-lock-migrate.install
+source=('steamling-lock-migrate'
+        'steamling-lock-converge.service'
+        'steamling-lock-converge-dispatcher')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  [ -n "${STEAMLING_BASE_URL:-}" ] \
+    || { echo "STEAMLING_BASE_URL is unset — the migrator needs the base repo URL" >&2; exit 1; }
+  sed "s|@STEAMLING_BASE_URL@|${STEAMLING_BASE_URL}|" "${srcdir}/steamling-lock-migrate" \
+    > "${srcdir}/steamling-lock-migrate.stamped"
+  grep -q '@STEAMLING_BASE_URL@' "${srcdir}/steamling-lock-migrate.stamped" \
+    && { echo "placeholder stamping failed" >&2; exit 1; } || true
+}
+
+package() {
+  install -Dm755 "${srcdir}/steamling-lock-migrate.stamped" \
+    "${pkgdir}/usr/lib/steamling/steamling-lock-migrate"
+  install -Dm644 "${srcdir}/steamling-lock-converge.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-lock-converge.service"
+  install -Dm755 "${srcdir}/steamling-lock-converge-dispatcher" \
+    "${pkgdir}/etc/NetworkManager/dispatcher.d/52-steamling-lock-converge"
+}

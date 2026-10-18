@@ -1,0 +1,39 @@
+[Unit]
+Description=steamling session on tty1
+# Not getty: its Type=idle wait costs 5s of black every boot.
+After=systemd-user-sessions.service plymouth-start.service
+# Plymouth is handed off by ExecStartPre/Post (see steamling-plymouth-handoff), never quit early.
+Conflicts=plymouth-quit.service
+After=plymouth-quit.service
+Wants=systemd-logind.service dbus.socket
+After=systemd-logind.service dbus.socket
+# Older images' first-boot oneshots only order themselves Before=getty@tty1.
+After=steamling-expand-root.service steamling-oobe-marker.service
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+OnFailure=getty@tty1.service plymouth-quit.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=deck
+PAMName=steamling-session
+TTYPath=/dev/tty1
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+UtmpIdentifier=tty1
+UtmpMode=user
+# A non-graphical type can demote the class to user-light: no user manager, so no PipeWire.
+Environment=XDG_SESSION_TYPE=wayland XDG_SESSION_CLASS=user
+ExecStartPre=+-/usr/bin/plymouth deactivate
+ExecStart=/usr/lib/steamling/steamling-session
+ExecStartPost=+-/usr/lib/steamling/steamling-plymouth-handoff
+Restart=on-failure
+# 3 = the supervisor stopped on purpose: no restart, OnFailure puts a login prompt on tty1.
+RestartPreventExitStatus=3
+
+[Install]
+Alias=display-manager.service
+WantedBy=graphical.target

@@ -1,0 +1,106 @@
+# gamescope (steamling) - Valve tag plus a small series for msm handhelds.
+# steamling-steam passes logical LANDSCAPE -W/-H and relies on upstream composite rotation;
+# a build without it requests a plane rotation the msm DPU rejects.
+# epoch=1 outranks ALARM's gamescope. The pkgver segment after "rocknix." must vercmp higher
+# on every bump, hence commit date then sha — a bare sha is non-monotonic.
+pkgname=gamescope
+epoch=1
+pkgver=3.16.31.rocknix.20261017.610568b
+pkgrel=1.1
+_commit=610568b61c0476f0fa1314c4b9d430d3e3fd832e
+install=gamescope.install
+pkgdesc="SteamOS session compositing WM — patched (for msm handhelds)"
+arch=('aarch64')
+url="https://github.com/ValveSoftware/gamescope"
+license=('BSD-2-Clause')
+provides=('gamescope')
+conflicts=('gamescope')
+depends=('wayland' 'libdrm' 'libinput' 'libxkbcommon' 'pixman' 'systemd-libs' 'libcap'
+         'luajit' 'libdecor' 'libx11' 'libxext' 'libxfixes' 'libxdamage' 'libxcomposite'
+         'libxrender' 'libxxf86vm' 'libxtst' 'libxi' 'libxcursor' 'libxmu' 'libxres'
+         'libxcb' 'xcb-util-wm' 'seatd' 'hwdata' 'sdl2' 'pipewire' 'vulkan-icd-loader'
+         'glslang' 'xorg-xwayland' 'libdisplay-info')
+makedepends=('git' 'meson' 'ninja' 'cmake' 'pkgconf' 'glslang' 'vulkan-headers'
+             'wayland-protocols' 'python' 'libxkbcommon' 'wayland'
+             # wlroots subproject build-deps (else meson tries to build them itself):
+             'xorg-xwayland' 'libdisplay-info' 'xcb-util-errors' 'xcb-util-renderutil'
+             'xcb-util-image' 'xcb-util-keysyms')
+source=("gamescope::git+https://github.com/ValveSoftware/gamescope.git#commit=${_commit}"
+        '0004-DRMBackend-Add-GAMESCOPE_FAKE_OUTPUT_MM-env-to-set-c.patch'
+        '0006-steamcompmgr-fix-gamepad-cursor-sprite-frozen-via-XTest.patch'
+        '0009-steamcompmgr-run-SGSR-when-FSR-is-requested-on-SDR-content.patch'
+        '0011-steamcompmgr-skip-identity-colour-LUTs-in-the-composite.patch'
+        # HDR on the EDID-less OLEDs (armada-os/armada; 0023 ours), see PATCHES.md
+        '0012-drm-synthesize-edid-for-edidless-internal-panels.patch'
+        '0013-drm-support-known-display-profiles-for-edidless-panels.patch'
+        '0014-drm-compose-gamma22-hdr-without-hardware-color-management.patch'
+        '0015-wsi-filter-hdr-formats-by-underlying-support.patch'
+        '0016-color-scale-sdr-white-on-gamma22-hdr-output.patch'
+        '0017-expose-client-sampleable-formats.patch'
+        '0018-color-fall-back-to-app-hdr-metadata-for-tonemapping.patch'
+        '0019-color-p3-red-is-wide-gamut.patch'
+        '0020-drm-sdr-color-management-through-dpu-output-luts.patch'
+        '0021-libliftoff-fix-multiple-primary-plane-stacking.patch'
+        '0022-drm-per-plane-color-management-through-msm-plane-color-pipelines.patch'
+        '0023-drm-count-the-msm-DPU-output-LUTs-as-plane-colour-management.patch'
+        # overlays above the game on msm's multiple primary planes (ROCKNIX 0020 + 0022)
+        '0024-libliftoff-treat-enodev-as-no-fit.patch'
+        '0025-libliftoff-give-planes-the-layer-zpos.patch'
+        # Steam's colour-temperature slider on the ARM64 client (armada 0018)
+        '0027-steamcompmgr-arm64-virtual-white.patch')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  cd gamescope
+  git submodule update --init --recursive
+  # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
+  patch -p1 < "${srcdir}/0004-DRMBackend-Add-GAMESCOPE_FAKE_OUTPUT_MM-env-to-set-c.patch"
+  patch -p1 < "${srcdir}/0006-steamcompmgr-fix-gamepad-cursor-sprite-frozen-via-XTest.patch"
+  patch -p1 < "${srcdir}/0009-steamcompmgr-run-SGSR-when-FSR-is-requested-on-SDR-content.patch"
+  patch -p1 < "${srcdir}/0011-steamcompmgr-skip-identity-colour-LUTs-in-the-composite.patch"
+  patch -p1 < "${srcdir}/0012-drm-synthesize-edid-for-edidless-internal-panels.patch"
+  patch -p1 < "${srcdir}/0013-drm-support-known-display-profiles-for-edidless-panels.patch"
+  patch -p1 < "${srcdir}/0014-drm-compose-gamma22-hdr-without-hardware-color-management.patch"
+  patch -p1 < "${srcdir}/0015-wsi-filter-hdr-formats-by-underlying-support.patch"
+  patch -p1 < "${srcdir}/0016-color-scale-sdr-white-on-gamma22-hdr-output.patch"
+  patch -p1 < "${srcdir}/0017-expose-client-sampleable-formats.patch"
+  patch -p1 < "${srcdir}/0018-color-fall-back-to-app-hdr-metadata-for-tonemapping.patch"
+  patch -p1 < "${srcdir}/0019-color-p3-red-is-wide-gamut.patch"
+  patch -p1 < "${srcdir}/0020-drm-sdr-color-management-through-dpu-output-luts.patch"
+  patch -p1 < "${srcdir}/0021-libliftoff-fix-multiple-primary-plane-stacking.patch"
+  patch -p1 < "${srcdir}/0022-drm-per-plane-color-management-through-msm-plane-color-pipelines.patch"
+  patch -p1 < "${srcdir}/0023-drm-count-the-msm-DPU-output-LUTs-as-plane-colour-management.patch"
+  patch -p1 < "${srcdir}/0024-libliftoff-treat-enodev-as-no-fit.patch"
+  patch -p1 < "${srcdir}/0025-libliftoff-give-planes-the-layer-zpos.patch"
+  patch -p1 < "${srcdir}/0027-steamcompmgr-arm64-virtual-white.patch"
+}
+
+build() {
+  cd gamescope
+  # gamescope and wlroots build with -Werror against older libs than ALARM ships (newer
+  # libinput enums alone break -Werror=switch); appended last, these override it, and they
+  # propagate into the subprojects.
+  export CFLAGS+=" -Wno-error" CXXFLAGS+=" -Wno-error"
+  # Appended last so -march/-mtune override ALARM's defaults, subprojects included.
+  # Fallback = sm8550, as in packages/soc/mesa.
+  local _rocknix_tune="${STEAMLING_TUNE_CFLAGS:--march=armv9-a+fp16+crypto+i8mm+bf16+memtag+sm4+sha3+nosve+nosve2 -mtune=cortex-x3 -mno-outline-atomics}"
+  export CFLAGS+=" ${_rocknix_tune}" CXXFLAGS+=" ${_rocknix_tune}"
+  meson setup build \
+    --prefix=/usr --buildtype=release -Db_lto=false \
+    -Ddrm_backend=enabled \
+    -Dpipewire=enabled \
+    -Denable_openvr_support=false \
+    -Davif_screenshots=disabled \
+    -Dbenchmark=disabled \
+    -Dinput_emulation=disabled \
+    -Drt_cap=enabled \
+    -Denable_tests=false \
+    -Dsdl2_backend=enabled
+  meson compile -C build
+}
+
+package() {
+  cd gamescope
+  meson install -C build --destdir "${pkgdir}"
+}

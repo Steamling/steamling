@@ -1,0 +1,11 @@
+[Unit]
+Description=steamling: converge a freshly locked device onto the base snapshot
+# Dispatcher-started (52-steamling-lock-converge) because network-online fires before
+# wlan0 has DNS. The marker exists only between lock migration and a successful converge.
+ConditionPathExists=/var/lib/steamling/lock-migrate-pending
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/steamling/steamling-lock-migrate converge
+
+# No [Install]: the dispatcher is the only thing that may start this.

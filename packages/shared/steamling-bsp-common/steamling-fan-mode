@@ -1,0 +1,30 @@
+#!/bin/sh
+# steamling-fan-mode — get/set the steamling-fancontrol curve (companion to steamling-lavd-mode).
+#
+# Persisted in /var/lib/steamling/fan-mode, which steamling-fancontrol re-reads every tick, so a set
+# is just the file write. Unknown/absent values fall back to quiet (the default).
+#
+#   steamling-fan-mode                # print the current mode
+#   steamling-fan-mode moderate       # set a mode (quiet|moderate|performance)
+MODE_FILE=/var/lib/steamling/fan-mode
+DEFAULT=quiet
+
+case "${1:-}" in
+  "")
+    m="$(cat "${MODE_FILE}" 2>/dev/null)"
+    case "${m}" in quiet|moderate|performance) ;; *) m="${DEFAULT}" ;; esac
+    printf '%s\n' "${m}"
+    ;;
+  quiet|moderate|performance)
+    mkdir -p "$(dirname "${MODE_FILE}")" 2>/dev/null
+    if ! printf '%s\n' "${1}" > "${MODE_FILE}" 2>/dev/null; then
+      echo "steamling-fan-mode: cannot write ${MODE_FILE} (run as root)" >&2
+      exit 1
+    fi
+    echo "fan mode: ${1}"
+    ;;
+  *)
+    echo "usage: steamling-fan-mode [quiet|moderate|performance]" >&2
+    exit 2
+    ;;
+esac

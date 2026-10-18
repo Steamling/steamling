@@ -1,0 +1,11 @@
+# Must sort after 90-linux-steamling.hook, so a kernel upgrade already carries the new cmdline.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = usr/lib/steamling/kernel-cmdline
+
+[Action]
+Description = steamling: syncing the boot image cmdline...
+When = PostTransaction
+Exec = /usr/lib/steamling/steamling-cmdline-sync

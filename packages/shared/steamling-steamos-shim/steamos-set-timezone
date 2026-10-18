@@ -1,0 +1,9 @@
+#!/bin/bash
+# steamling steamos-set-timezone shim — the Deck UI's timezone picker calls this helper rather than
+# timedatectl, so without it the selection silently no-ops (127). Runs as 'deck', so it needs
+# 50-steamling-deck.rules granting org.freedesktop.timedate1.* to wheel with no password prompt.
+set -u
+tz="${1:-}"
+[ -n "${tz}" ]                       || { echo "usage: steamos-set-timezone <Area/City>" >&2; exit 1; }
+[ -e "/usr/share/zoneinfo/${tz}" ]   || { echo "steamos-set-timezone: unknown timezone: ${tz}" >&2; exit 1; }
+exec timedatectl set-timezone "${tz}"

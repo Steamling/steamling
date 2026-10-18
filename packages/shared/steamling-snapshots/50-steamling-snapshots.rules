@@ -1,0 +1,10 @@
+// Passwordless pkexec of steamling-rollback for wheel, same trust model as the overlay's
+// 50-steamling-deck.rules. Covers the desktop/ssh path only: the QAM backend is root
+// already and uses systemd-run.
+polkit.addRule(function(action, subject) {
+    if (!subject.isInGroup("wheel")) { return; }
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/bin/steamling-rollback") {
+        return polkit.Result.YES;
+    }
+});

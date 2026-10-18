@@ -1,0 +1,13 @@
+[Unit]
+Description=Restore the saved steamling panel refresh calibration
+# Only a device whose panel was calibrated (Steamling Control > Controller > Display) has the conf.
+ConditionPathExists=/etc/steamling/panel-calibration.conf
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/steamling/steamling-panel-calibration restore
+
+[Install]
+WantedBy=multi-user.target

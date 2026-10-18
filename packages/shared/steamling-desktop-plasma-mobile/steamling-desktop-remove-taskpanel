@@ -1,0 +1,36 @@
+#!/bin/bash
+# steamling-desktop-remove-taskpanel — delete Plasma Mobile's bottom taskpanel containment.
+# No config value can hide it: disabling the panels only asks for thickness 0, and PanelView
+# clamps to a ~12 logical px minimum that then floats over app content in overlay mode.
+# Runs per session, not baked into appletsrc, because plasma-mobile's panelsfix.js re-adds it.
+set -u
+# /etc/xdg/autostart is read by every KDE session, desktop Plasma included.
+[ "${DESKTOP_SESSION:-}" = plasma-mobile ] || exit 0
+
+have() { command -v "$1" >/dev/null 2>&1; }
+have qdbus6 || { echo "steamling-desktop-remove-taskpanel: qdbus6 not found" >&2; exit 1; }
+
+log() { echo "steamling-desktop-remove-taskpanel: $*" >&2; }
+
+# Snapshot panels() once: remove() shrinks the live list, so a fresh panels() call per index
+# walks off the end mid-loop.
+script='var ps = panels();
+var out = "";
+for (var i = 0; i < ps.length; i++) {
+    if (ps[i].type == "org.kde.plasma.mobile.taskpanel") {
+        ps[i].remove();
+        out += "removed taskpanel ";
+    }
+}
+print(out || "no taskpanel present");'
+
+# plasmashell can take a moment after login to register on D-Bus.
+for _ in $(seq 1 30); do
+  if out="$(qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "${script}" 2>/dev/null)"; then
+    log "${out:-done}"
+    exit 0
+  fi
+  sleep 0.5
+done
+log "plasmashell not reachable on D-Bus after ~15s, taskpanel left in place"
+exit 1

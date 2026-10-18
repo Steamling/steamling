@@ -1,0 +1,4 @@
+#!/bin/bash
+# steamling steamos-format-sdcard shim — the legacy alias older Steam clients call without --device,
+# so the SD slot has to be named here. See steamos-format-device for the pkexec/polkit path.
+exec pkexec /usr/lib/hwsupport/format-device.sh --device /dev/mmcblk0 "$@"

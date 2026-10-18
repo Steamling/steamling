@@ -1,0 +1,55 @@
+# DE-neutral half of the desktop layer; the DE itself comes from a steamling-desktop-flavour
+# provider. Build with ./nodeps: the flavour dep would drag a whole DE into the chroot.
+pkgname=steamling-desktop
+pkgver=0.1.0
+pkgrel=31.3
+pkgdesc="steamling desktop session launcher, Flathub seeding, flatpak fixes and Waydroid helpers"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# steamling-desktop-full: the same pre-meta catch-up cycle as steamling-steam -> steamling-steam-full.
+# >= -2: steamos-session-select moved there from -26, so the file never goes missing mid-upgrade.
+depends=('bash' 'steamling-session>=0.1.0-2' 'steamling-desktop-flavour'
+         'steamling-bsp-common>=0.1.0-22'  # owns the SDL d-pad fix the launcher used to export
+         'steamling-desktop-full'
+         'steamos-vapor-theme')          # SteamOS's Return to Gaming Mode icon
+optdepends=('steamling-desktop-plasma-mobile: Plasma Mobile flavour (default)'
+            'steamling-desktop-plasma: desktop Plasma flavour')
+install='steamling-desktop.install'
+source=('steamling-desktop' 'steamling-desktop-select' 'return-to-gamemode.desktop'
+        'steamling-flathub-setup' 'steamling-flathub.service' 'steamling-flathub-dispatcher'
+        'steamling-x11.conf'
+        'steamling-fontcache-prune' '99-steamling-fontcache.hook'
+        'steamling-waydroid-tuning' 'steamling-waydroid-tuning.service'
+        'steamling-waydroid-apk-install' 'waydroid-apk-install.desktop')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-desktop"          "${pkgdir}/usr/bin/steamling-desktop"
+  install -Dm755 "${srcdir}/steamling-desktop-select"   "${pkgdir}/usr/bin/steamling-desktop-select"
+  install -Dm644 "${srcdir}/return-to-gamemode.desktop" \
+    "${pkgdir}/usr/share/applications/return-to-gamemode.desktop"
+  # Not enabled: the NM dispatcher starts it once a link is up.
+  install -Dm755 "${srcdir}/steamling-flathub-setup"    "${pkgdir}/usr/bin/steamling-flathub-setup"
+  install -Dm644 "${srcdir}/steamling-flathub.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-flathub.service"
+  # Dispatcher scripts must be root-owned and not group/world writable or NM refuses to run them.
+  install -Dm755 "${srcdir}/steamling-flathub-dispatcher" \
+    "${pkgdir}/etc/NetworkManager/dispatcher.d/50-steamling-flathub"
+  # No xorg-server in the base to create /tmp/.X11-unix for XWayland.
+  install -Dm644 "${srcdir}/steamling-x11.conf"         "${pkgdir}/usr/lib/tmpfiles.d/steamling-x11.conf"
+  install -Dm755 "${srcdir}/steamling-fontcache-prune" "${pkgdir}/usr/bin/steamling-fontcache-prune"
+  install -Dm644 "${srcdir}/99-steamling-fontcache.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/99-steamling-fontcache.hook"
+  # Waydroid (steamling-desktop-full): Android-side tuning re-asserted on every container start,
+  # and the Open With handler for .apk files.
+  install -Dm755 "${srcdir}/steamling-waydroid-tuning" "${pkgdir}/usr/lib/steamling/steamling-waydroid-tuning"
+  install -Dm644 "${srcdir}/steamling-waydroid-tuning.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-waydroid-tuning.service"
+  install -d "${pkgdir}/usr/lib/systemd/system/waydroid-container.service.wants"
+  ln -sf "../steamling-waydroid-tuning.service" \
+    "${pkgdir}/usr/lib/systemd/system/waydroid-container.service.wants/steamling-waydroid-tuning.service"
+  install -Dm755 "${srcdir}/steamling-waydroid-apk-install" "${pkgdir}/usr/bin/steamling-waydroid-apk-install"
+  install -Dm644 "${srcdir}/waydroid-apk-install.desktop" \
+    "${pkgdir}/usr/share/applications/waydroid-apk-install.desktop"
+}

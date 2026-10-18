@@ -1,0 +1,170 @@
+#!/bin/bash
+# steamling-rollback — roll the OS back to a pre-update snapshot. The sm8550 ABL has no boot
+# menu, so the switch is a btrfs set-default on a writable copy of the chosen snapshot: one
+# atomic commit, and cmdline/fstab must keep naming no subvol for / for it to take effect.
+# /home, /var/log, /.snapshots and the pacman cache are separate subvols, so they survive.
+set -euo pipefail
+
+. /usr/lib/steamling/snapshot-lib.sh
+
+FLASH=/flash
+RUN=/run/steamling
+TOP="${RUN}/rollback-top"
+INT_FLASH="${RUN}/rollback-flash"
+
+die() { echo "steamling-rollback: $*" >&2; exit 1; }
+
+target="" assume_yes="" internal="" action=rollback
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --to)       target="${2:?--to needs a snapshot id}"; shift 2 ;;
+    --yes)      assume_yes=1; shift ;;
+    --internal) internal=1; shift ;;
+    --list)     action=list; shift ;;
+    --status)   action=status; shift ;;
+    *) die "unknown argument '$1' (usage: steamling-rollback [--internal] [--to <id>] [--yes] [--list] [--status])" ;;
+  esac
+done
+
+# --list/--status need no root, so the running system delegates them.
+if [ -z "${internal}" ]; then
+  case "${action}" in
+    list)   exec steamling-snapshots list ;;
+    status) exec steamling-snapshots status ;;
+  esac
+fi
+
+[ "$(id -u)" = 0 ] || die "needs root (or pkexec steamling-rollback)"
+
+mkdir -p "${RUN}"
+mkdir "${RUN}/rollback.lock" 2>/dev/null || die "another rollback is already running"
+cleanup() {
+  umount "${INT_FLASH}" 2>/dev/null || true
+  umount "${TOP}" 2>/dev/null || true
+  rmdir "${INT_FLASH}" "${TOP}" 2>/dev/null || true
+  rmdir "${RUN}/rollback.lock" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+if [ -n "${internal}" ]; then
+  [ -r /usr/lib/steamling/device.conf ] && . /usr/lib/steamling/device.conf
+  [ -r /etc/steamling/device.conf ] && . /etc/steamling/device.conf
+  disk="${STEAMLING_INTERNAL_DISK:-/dev/sda}"
+  rootlbl="${STEAMLING_ROOT_LABEL:-STEAMLING_ROOT}"
+  bootlbl="${STEAMLING_BOOT_GPT_NAME:-STEAMLING}"
+  int_root="$(lsblk -rpno NAME,PARTLABEL "${disk}" 2>/dev/null | awk -v l="${rootlbl}" '$2==l{print $1}' | head -1)"
+  int_boot="$(lsblk -rpno NAME,PARTLABEL "${disk}" 2>/dev/null | awk -v l="${bootlbl}" '$2==l{print $1}' | head -1)"
+  # pre-rename installs (steamling-internal-boot-rename) still name the boot FAT ROCKNIX
+  [ -n "${int_boot}" ] || int_boot="$(lsblk -rpno NAME,PARTLABEL "${disk}" 2>/dev/null | awk '$2=="ROCKNIX"{print $1}' | head -1)"
+  [ -n "${int_root}" ] || die "no internal steamling root (PARTLABEL=${rootlbl}) on ${disk}"
+  [ -n "${int_boot}" ] || die "no internal boot partition (PARTLABEL=${bootlbl}) on ${disk}"
+  [ "$(snap_root_dev)" != "${int_root}" ] || die "this IS the internal install — run without --internal"
+
+  mkdir -p "${TOP}" "${INT_FLASH}"
+  mount -o subvolid=5 "${int_root}" "${TOP}" || die "cannot mount internal root ${int_root}"
+  SNAPS="${TOP}/@snapshots"
+  [ -d "${SNAPS}" ] || die "internal install has no snapshots (pre-btrfs install?)"
+  mount "${int_boot}" "${INT_FLASH}" || die "cannot mount internal boot ${int_boot}"
+  FLASH="${INT_FLASH}"
+  # kernel-diff reference: what the internal install would boot today.
+  cur_default="$(btrfs subvolume get-default "${TOP}" | sed -n 's/.* path //p')"
+  KERNEL_REF="${TOP}/${cur_default}/boot/Image"
+else
+  steamling_snap_supported || die "root is not btrfs — snapshots unsupported on this install (reflash to migrate)"
+  mountpoint -q "${FLASH}" || die "${FLASH} not mounted — cannot guarantee kernel/rootfs coherence"
+  mkdir -p "${TOP}"
+  mount -o subvolid=5 "$(snap_root_dev)" "${TOP}"
+  SNAPS="${SNAP_DIR}"
+  KERNEL_REF=/boot/Image
+fi
+
+list_snaps() {
+  printf '%-6s %-17s %-4s %-8s %s\n' "ID" "CREATED" "OK" "KERNEL" "TARGETS"
+  local info
+  for info in "${SNAPS}"/[0-9][0-9][0-9][0-9]/info.json; do
+    [ -f "${info}" ] || continue
+    while IFS=$'\t' read -r id created ok kern targets; do
+      printf '%-6s %-17s %-4s %-8s %s\n' "${id}" "$(date -d "${created}" +"%d-%m-%Y %H:%M" 2>/dev/null || echo "${created}")" "${ok}" "${kern}" "${targets}"
+    done < <(jq -r '[.id, .created, (if .transaction_ok then "yes" else "no" end),
+            (if .kernel_in_transaction then "yes" else "-" end),
+            ((.targets_head | join(" ")) + (if .targets_count > 8 then " (+\(.targets_count - 8) more)" else "" end))]
+           | @tsv' "${info}")
+  done
+}
+
+case "${action}" in
+  list)   list_snaps; exit 0 ;;
+  status) echo "internal default: $(btrfs subvolume get-default "${TOP}" | sed -n 's/.* path //p')"; list_snaps; exit 0 ;;
+esac
+
+if [ -z "${target}" ]; then
+  target="$(ls "${SNAPS}" | grep -E '^[0-9]{4}$' | sort -n | tail -1 || true)"
+  [ -n "${target}" ] || die "no snapshots exist yet (they are created before each update)"
+fi
+src="${SNAPS}/${target}/snapshot"
+[ -d "${src}" ] || die "snapshot '${target}' not found (steamling-rollback ${internal:+--internal }--list)"
+[ "$(btrfs property get -ts "${src}" ro 2>/dev/null)" = "ro=true" ] || die "snapshot '${target}' is not read-only — refusing"
+
+if [ -f "${SNAPS}/${target}/info.json" ] && [ -z "${assume_yes}" ]; then
+  created="$(jq -r '.created' "${SNAPS}/${target}/info.json")"
+  created="$(date -d "${created}" +"%d-%m-%Y %H:%M" 2>/dev/null || echo "${created}")"
+  echo "Rolling back${internal:+ the INTERNAL install} to snapshot ${target}:"
+  jq -r --arg created "${created}" \
+    '"  created : \($created)\n  undoes  : \(.targets_head | join(" "))\(if .targets_count > 8 then " (+\(.targets_count - 8) more)" else "" end)\n  kernel  : \(if .kernel_in_transaction then "was updated in that transaction (boot files will be restored)" else "unchanged" end)"' \
+    "${SNAPS}/${target}/info.json"
+  echo "  kept    : /home (games/saves), /var/log, snapshots"
+  read -rp "Proceed? [y/N]: " a
+  case "${a}" in y|Y) ;; *) echo "Cancelled."; exit 0 ;; esac
+fi
+
+ts="$(date -u +%Y%m%d-%H%M%S)"
+new="@rb-${ts}"
+btrfs subvolume snapshot "${src}" "${TOP}/${new}" >/dev/null
+
+# Taken inside a pacman transaction, so the snapshot carries pacman's own db.lck;
+# restored as-is it blocks every future update.
+rm -f "${TOP}/${new}/var/lib/pacman/db.lck"
+
+# Also the ConditionPathExists gate for steamling-rollback-repair.service.
+mkdir -p "${TOP}/${new}/var/lib/steamling"
+jq -n --arg from "${target}" --arg prev "$(btrfs subvolume get-default "${TOP}" | sed -n 's/.* path //p')" --arg ts "$(date -u +%FT%TZ)" \
+  '{schema:1, from_snapshot:$from, previous_default:$prev, ts:$ts}' \
+  > "${TOP}/${new}/var/lib/steamling/rollback-info.json"
+
+# The kernel lives on the FAT boot partition, outside btrfs, so it cannot ride the
+# subvolume switch: stage *.new first, where a failure still aborts before the commit.
+# cmp, not the transaction flag: a rollback can span several kernel bumps.
+staged=""
+if ! cmp -s "${KERNEL_REF}" "${TOP}/${new}/boot/Image"; then
+  regen=/usr/lib/steamling/steamling-boot-deploy
+  [ -x "${regen}" ] || die "kernel differs but ${regen} is missing (steamling-bsp-common not installed?)"
+  echo "steamling-rollback: target kernel differs — staging boot files from the snapshot ($("${regen}" --style))"
+  FLASH="${FLASH}" SRCROOT="${TOP}/${new}" OUT_SUFFIX=".new" "${regen}" \
+    || die "boot-file staging failed — NOTHING was committed, system unchanged"
+  [ -f "${FLASH}/KERNEL.new" ] || die "staging produced no ${FLASH}/KERNEL.new — aborting before commit"
+  staged=1
+fi
+
+# The commit. Crash before it and nothing changed (a stray @rb-* is pruned later);
+# crash after and the new root boots.
+btrfs subvolume set-default "$(btrfs inspect-internal rootid "${TOP}/${new}")" "${TOP}"
+
+# A crash in this window leaves *.new for steamling-rollback-repair.service to finish.
+if [ -n "${staged}" ]; then
+  mount -o remount,rw "${FLASH}" 2>/dev/null || true
+  shopt -s nullglob
+  for f in "${FLASH}/KERNEL.new" "${FLASH}/KERNEL.md5.new"; do
+    [ -f "${f}" ] && mv -f "${f}" "${f%.new}"
+  done
+  sync
+fi
+
+if [ -n "${internal}" ]; then
+  sync
+  echo "steamling-rollback: internal install's default root is now ${new} (from snapshot ${target})"
+  echo "steamling-rollback: takes effect the next time the device boots from internal storage"
+else
+  steamling-snapshots prune --quiet || true
+  sync
+  echo "steamling-rollback: default root is now ${new} (from snapshot ${target}) — REBOOT to complete"
+fi

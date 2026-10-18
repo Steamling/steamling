@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!--
+  steamling ES-DE emulator find-rules, seeded to ~/ES-DE/custom_systems/ by steamling-roms-init.
+  This does NOT redefine systems. es_systems.xml owns the launch commands (absolute es-* wrapper
+  paths); these rules cover what it does not override. Within a staticpath, first match wins.
+-->
+<ruleList>
+
+  <!-- The bundled rule is systempath-only, and that PATH lookup comes up empty under the
+       Steam-launched ES-DE environment: every RetroArch system then fails to find an
+       emulator. The absolute path is what makes it resolve. -->
+  <emulator name="RETROARCH">
+    <rule type="systempath">
+      <entry>retroarch</entry>
+    </rule>
+    <rule type="staticpath">
+      <entry>/usr/bin/retroarch</entry>
+    </rule>
+  </emulator>
+
+  <!-- GameCube / Wii -->
+  <emulator name="DOLPHIN">
+    <rule type="staticpath">
+      <entry>/opt/steamling/emulators/dolphin/dolphin-emu.AppImage</entry>
+      <entry>/usr/bin/dolphin-emu</entry>
+    </rule>
+  </emulator>
+
+  <!-- PS2 -> ARMSX2, via the stock PCSX2 name. First entry is the big-core pin wrapper. -->
+  <emulator name="PCSX2">
+    <rule type="staticpath">
+      <entry>/usr/lib/steamling/es-armsx2</entry>
+      <entry>/opt/steamling/emulators/armsx2/ARMSX2.AppImage</entry>
+      <entry>/usr/bin/armsx2</entry>
+    </rule>
+  </emulator>
+
+  <!-- PS3 -->
+  <emulator name="RPCS3">
+    <rule type="staticpath">
+      <entry>/opt/steamling/emulators/rpcs3/rpcs3.AppImage</entry>
+      <entry>/usr/bin/rpcs3</entry>
+    </rule>
+  </emulator>
+
+  <!-- PSP -->
+  <emulator name="PPSSPP">
+    <rule type="staticpath">
+      <entry>/usr/bin/ppsspp</entry>
+      <entry>/usr/bin/PPSSPPSDL</entry>
+    </rule>
+  </emulator>
+
+  <!-- PS Vita -->
+  <emulator name="VITA3K">
+    <rule type="staticpath">
+      <entry>/opt/steamling/emulators/vita3k/Vita3K.AppImage</entry>
+      <entry>/usr/bin/Vita3K</entry>
+    </rule>
+  </emulator>
+
+  <!-- Wii U -->
+  <emulator name="CEMU">
+    <rule type="staticpath">
+      <entry>/usr/bin/Cemu</entry>
+    </rule>
+  </emulator>
+
+  <!-- 3DS -->
+  <emulator name="AZAHAR">
+    <rule type="staticpath">
+      <entry>/usr/bin/azahar</entry>
+    </rule>
+  </emulator>
+
+  <!-- Original Xbox -->
+  <emulator name="XEMU">
+    <rule type="staticpath">
+      <entry>/opt/steamling/emulators/xemu/xemu.AppImage</entry>
+      <entry>/usr/bin/xemu</entry>
+    </rule>
+  </emulator>
+
+  <!-- Switch: not shipped; the wrappers resolve the user's drop-in build (emu-resolve.sh) -->
+  <emulator name="EDEN">
+    <rule type="staticpath">
+      <entry>/usr/lib/steamling/es-eden</entry>
+    </rule>
+  </emulator>
+  <emulator name="RYUJINX">
+    <rule type="staticpath">
+      <entry>/usr/lib/steamling/es-ryujinx</entry>
+    </rule>
+  </emulator>
+
+</ruleList>

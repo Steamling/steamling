@@ -1,0 +1,161 @@
+#!/bin/bash
+# steamling-steam — launch the native ARM64 Steam client in Big Picture under gamescope.
+set -e
+
+export HOME="${HOME:-/root}"
+STEAM="${HOME}/.local/share/Steam"
+CLIENT_DIR="${STEAM}/steamrtarm64"
+CLIENT="${CLIENT_DIR}/steam"
+
+# Elapsed marks for the phases the user sees as a black screen; the splash shares the clock.
+export STEAMLING_STEAM_T0="$(date +%s)"
+mark() {
+  local m="+$(( $(date +%s) - STEAMLING_STEAM_T0 ))s: $*"
+  echo "[steamling-steam] ${m}"
+  logger -t steamling-steam -- "${m}" 2>/dev/null || true
+}
+
+# Order matters: the client's own dir FIRST (its bundled libvpx.so.6 shadows the system one),
+# then the aarch64 shim dir.
+LDLP="${CLIENT_DIR}:${STEAM}/lib/aarch64-linux-gnu"
+
+# Seeded at BUILD time, so an absent tree is unrecoverable here, not something to fall back from.
+if [ ! -x "${CLIENT}" ]; then
+  echo "[steamling-steam] native Steam client missing at ${CLIENT} — the build-time bake didn't seed it." >&2
+  exit 1
+fi
+
+# Steam resolves its legacy module paths (bin/vgui2_s.dll ...) RELATIVE TO getcwd, and gamescope
+# passes our cwd to the client: launching from $HOME gives "Could not load module 'bin/vgui2_s.dll'".
+cd "${CLIENT_DIR}" 2>/dev/null || { echo "missing ${CLIENT_DIR}" >&2; exit 1; }
+
+# Marker Decky's CEF remote-debugging connection looks for.
+touch "${STEAM}/.cef-enable-remote-debugging" 2>/dev/null || true
+
+# Re-pin EVERY launch: the ARM64 Big-Picture client only works on steamdeck_publicbeta, and
+# anything that flips the channel leaves Steam reading "installed version 0", stuck on
+# "Installing update" with steamwebhelper crash-looping until this reasserts it.
+mkdir -p "${STEAM}/package"
+echo steamdeck_publicbeta > "${STEAM}/package/beta"
+
+# Must precede Steam, which enumerates controllers once at startup; desktop mode leaves the pad
+# on xb360, and only a Deck target gives Steam Input the Steam-native pad (Guide, QAM, L4/L5).
+# deck-uhid, not USB/IP `deck`: vhci vetoes suspend (see bsp-common inputplumber-sleep-pre).
+if command -v steamling-gamepad-target >/dev/null 2>&1; then
+  steamling-gamepad-target deck-uhid || true
+fi
+
+# Must run BEFORE gamescope: Steam reads compatibilitytools.d only at startup.
+/usr/bin/steamling-proton-prep
+mark "proton prep done"
+
+# A session switch SIGTERMs gamescope but the Steam client re-parents and survives holding its
+# single-instance lock, so the next launch exits "Steam is already running" and gamescope
+# hot-loops. Safe only because this runs at session START, when no legitimate Steam is alive.
+uid="$(id -u)"
+if pgrep -u "${uid}" -x steam >/dev/null 2>&1 || pgrep -u "${uid}" -f steamwebhelper >/dev/null 2>&1; then
+  echo "[steamling-steam] clearing a stale Steam from a previous session..."
+  env LD_LIBRARY_PATH="${LDLP}" "${CLIENT}" -shutdown >/dev/null 2>&1 || true
+  for _ in $(seq 1 8); do pgrep -u "${uid}" -x steam >/dev/null 2>&1 || break; sleep 1; done
+  pkill -u "${uid}" -KILL -x steam        2>/dev/null || true
+  pkill -u "${uid}" -KILL -f steamwebhelper 2>/dev/null || true
+fi
+
+# Do NOT seed a global default compat tool here: a CompatToolMapping "0" entry makes Steam refuse
+# to install Valve compat tools with "Invalid platform" (steam-for-linux issue 6874).
+
+# Must stay HERE, before Steam starts: Steam rewrites shortcuts.vdf on exit, so a sync against a
+# live client is clobbered.
+/usr/bin/steamling-steam-sync || echo "[steamling-steam] Steam-library sync failed (non-fatal)"
+mark "library sync done"
+
+for _dc in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do
+  [ -r "${_dc}" ] && . "${_dc}"
+done
+W="${STEAMLING_PANEL_W:-1080}"; H="${STEAMLING_PANEL_H:-1920}"
+REFRESH="${STEAMLING_PANEL_REFRESH:-120}"; ORIENT="${STEAMLING_PANEL_ORIENT:-left}"
+PANEL_MM="${STEAMLING_PANEL_MM:-177x100}"
+# device.conf carries the panel's NATIVE portrait geometry; gamescope wants -W/-H in
+# LOGICAL landscape, so transpose for 90/270.
+case "${ORIENT}" in
+  left|right) GS_W="${H}"; GS_H="${W}" ;;
+  *)          GS_W="${W}"; GS_H="${H}" ;;
+esac
+
+# --prefer-output pins the panel when a board names its output.
+GS_OUTPUT=()
+if [ -n "${STEAMLING_PANEL_OUTPUT:-}" ]; then
+  GS_OUTPUT=(--prefer-output "${STEAMLING_PANEL_OUTPUT}")
+fi
+
+# Rotation autodetects (scanout when the plane can, else composited).
+# Panels past the DPU rotator's 1088-line cap must opt in here or scan out black.
+GS_ROTATE=()
+if [ "${STEAMLING_PANEL_ROTATE_SHADER:-0}" = "1" ]; then
+  GS_ROTATE=(--force-composition-rotation)
+fi
+
+# HDR: these OLEDs expose no EDID, so gamescope synthesizes an SDR one unless a panel profile
+# matches the board (the BSP's /usr/share/gamescope/scripts/10-steamling/displays, keyed on
+# GAMESCOPE_INTERNAL_DEVICE_ID = STEAMLING_DEVICE). A board with a profile also sets
+# STEAMLING_PANEL_HDR_NITS, the panel's peak: inverse tone mapping of SDR content targets it,
+# clients are offered the formats gamescope can sample as well as those a plane scans out,
+# which HDR swapchains rely on, and the Steam client (which inherits gamescope's environment)
+# is told the session supports HDR, so its display settings offer the HDR switch. DXVK_HDR=1 lets
+# DXVK and vkd3d-proton offer HDR swapchains, so a Proton game's own HDR option appears: the
+# upstream session exports it only with ENABLE_GAMESCOPE_HDR, which also forces HDR output on at
+# startup, and gamescope's DRM backend never sets it. The gamescope WSI layer still forces it
+# off for clients it flags, and Steam's switch decides whether the panel runs HDR.
+GS_ENV=(GAMESCOPE_INTERNAL_DEVICE_ID="${STEAMLING_DEVICE:-rp6}")
+GS_HDR=()
+case "${STEAMLING_PANEL_HDR_NITS:-0}" in
+  ''|0|*[!0-9]*) ;;
+  *) GS_HDR=(--hdr-itm-target-nits "${STEAMLING_PANEL_HDR_NITS}")
+     GS_ENV+=(GAMESCOPE_EXPOSE_CLIENT_SAMPLEABLE_FORMATS=1 STEAM_GAMESCOPE_HDR_SUPPORTED=1 DXVK_HDR=1) ;;
+esac
+
+# Session flags a Steam Deck sets in game mode, limited to what holds on every board: two
+# Xwaylands (Steam on its own, games on the other), mangoapp as the performance overlay with its
+# presets and horizontal layout, gamescope colour management and its scaling filters offered in
+# the quick-access menu, the on-screen keyboard as input method for Qt and GTK apps, links opened
+# in the Steam browser, Steam not taking over audio routing (WirePlumber and the BSP own it),
+# and removable drives offered for unmount. VRR, tearing, the dynamic frame limiter and the
+# volume handler stay off until a board proves them.
+GS_ENV+=(STEAM_MULTIPLE_XWAYLANDS=1
+         STEAM_USE_MANGOAPP=1 STEAM_MANGOAPP_PRESETS_SUPPORTED=1
+         STEAM_DISABLE_MANGOAPP_ATOM_WORKAROUND=1 STEAM_MANGOAPP_HORIZONTAL_SUPPORTED=1
+         STEAM_GAMESCOPE_COLOR_MANAGED=1 STEAM_GAMESCOPE_VIRTUAL_WHITE=1
+         STEAM_GAMESCOPE_NIS_SUPPORTED=1 STEAM_GAMESCOPE_FANCY_SCALING_SUPPORT=1
+         QT_IM_MODULE=steam GTK_IM_MODULE=Steam
+         SRT_URLOPEN_PREFER_STEAM=1 STEAM_DISABLE_AUDIO_DEVICE_SWITCHING=1 STEAM_ALLOW_DRIVE_UNMOUNT=1)
+
+# Do NOT pin the client itself: scx_lavd places the bursty threads itself and needs the littles free
+# for batch work. Game launches get the big cores through steam-launch-wrapper instead.
+. /usr/lib/steamling/steamling-steam-env
+
+# The power button belongs to Steam while game mode runs: the inhibitor stops logind acting on
+# it, and dies with the helper, so a helper that finds no key (or this launcher exiting) hands
+# the key straight back. Desktop mode never starts it.
+systemd-inhibit --what=handle-power-key --mode=block --who=steamling-powerbuttond \
+  --why="Steam handles the power button in game mode" \
+  /usr/lib/steamling/steamling-powerbuttond >>"${HOME}/steamling-powerbuttond.log" 2>&1 &
+PBD=$!
+# systemd-inhibit does not pass a TERM on to its child, so stop the helper itself first.
+trap 'pkill -TERM -P "${PBD}" 2>/dev/null; kill "${PBD}" 2>/dev/null' EXIT
+
+# Log to a file, never the tty: tty1 is what shows between compositors on a session switch and
+# must stay blank. Do NOT exec gamescope either, since the session switch pkills it by name.
+GS_LOG="${HOME}/steamling-steam.log"
+# gamescope paints black until a client presents; the splash covers that, then execs Steam.
+mark "starting gamescope"
+# gamepadui sizes its UI from the output's physical mm; the ~96 DPI default reads as a desktop
+# monitor and renders the UI tiny. -noshaders keeps fossilize from stealing CPU during play.
+# --rt: gamescope's own threads at SCHED_RR 1 (cap_sys_nice), below audio and GPU/display kthreads;
+# it resets children before exec, so Steam and games stay SCHED_OTHER.
+env -u WAYLAND_DISPLAY \
+  GAMESCOPE_FAKE_OUTPUT_MM="${PANEL_MM}" "${GS_ENV[@]}" \
+  gamescope "${GS_OUTPUT[@]}" -W "${GS_W}" -H "${GS_H}" -r "${REFRESH}" --rt --xwayland-count 2 --mangoapp --backend drm \
+    --force-orientation "${ORIENT}" "${GS_ROTATE[@]}" "${GS_HDR[@]}" -e -- \
+    /usr/lib/steamling/steamling-steam-splash "${GS_W}x${GS_H}" -- \
+    env LD_LIBRARY_PATH="${LDLP}" "${CLIENT}" -gamepadui -steamos3 -steampal -steamdeck -noverifyfiles -noshaders \
+  >"${GS_LOG}" 2>&1

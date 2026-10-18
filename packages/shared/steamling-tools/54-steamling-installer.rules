@@ -1,0 +1,9 @@
+// Promptless for wheel by the same trust as 50-steamling-deck.rules.
+polkit.addRule(function(action, subject) {
+    if (!subject.isInGroup("wheel")) { return; }
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        (action.lookup("program") == "/usr/bin/steamling-install-internal" ||
+         action.lookup("program") == "/usr/bin/steamling-uninstall-internal")) {
+        return polkit.Result.YES;
+    }
+});

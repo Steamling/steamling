@@ -1,0 +1,35 @@
+# steamling-emulation-full — the emulation layer metapackage. depends= is hard so that
+# `pacman -Rs steamling-emulation-full` removes exactly this layer; the source-built emulators
+# are optdepends instead, so a failed optional build cannot block the layer.
+pkgname=steamling-emulation-full
+pkgver=0.1.0
+pkgrel=3.1
+pkgdesc="steamling optional layer: ES-DE frontend, RetroArch cores, standalone emulators (Switch: bring your own)"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('steamling-emulation'
+         'es-de'
+         'libretro-cores-steamling'
+         # Source-built, Vulkan-capable cores for N64, Dreamcast and PlayStation: hard deps,
+         # unlike the standalone emulators, because the vendored set no longer carries them.
+         'libretro-mupen64plus-next'
+         'libretro-flycast'
+         'libretro-swanstation'
+         'retroarch'
+         'libretro-core-info'
+         'retroarch-autoconfig-steamling'
+         'retroarch-shaders-steamling'
+         'ppsspp'
+         'fuse2'
+         'armsx2-bin'
+         'rpcs3-bin'
+         'xemu-bin'
+         'vita3k-bin')
+optdepends=('dolphin-emu: GameCube/Wii'
+            'azahar: 3DS'
+            'cemu: Wii U')
+
+package() {
+  :   # pure metapackage
+}

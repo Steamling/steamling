@@ -1,0 +1,13 @@
+[Unit]
+Description=steamling: keep the ARM Proton compat tools registered (no reboot after Steam downloads/updates them)
+# Must stay a USER service: it reads/writes ~/.local/share/Steam. It covers mid-session downloads
+# and desktop mode only; steamling-steam runs prep synchronously before the game session's Steam.
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/steamling-proton-prep --watch
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

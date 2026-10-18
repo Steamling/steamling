@@ -1,0 +1,17 @@
+#!/bin/bash
+# The /flash deploy for STEAMLING_BOOT_STYLE; qcom-abl, the RP6's, is the only one.
+# FLASH / SRCROOT / OUT_SUFFIX pass through; --style only prints.
+# No pipefail: device.conf's model probe is a pipeline that fails without a devicetree.
+set -eu
+
+[ -r /usr/lib/steamling/device.conf ] && . /usr/lib/steamling/device.conf
+[ -r /etc/steamling/device.conf ] && . /etc/steamling/device.conf
+# A BSP published before family.conf carried the key is qcom-abl.
+style="${STEAMLING_BOOT_STYLE:-qcom-abl}"
+
+[ "${1:-}" = --style ] && { echo "${style}"; exit 0; }
+[ $# -eq 0 ] || { echo "steamling-boot-deploy: unknown argument '$1'" >&2; exit 1; }
+case "${style}" in
+  qcom-abl) exec /usr/bin/steamling-build-bootimg ;;
+  *) echo "steamling-boot-deploy: unknown boot style '${style}'" >&2; exit 1 ;;
+esac

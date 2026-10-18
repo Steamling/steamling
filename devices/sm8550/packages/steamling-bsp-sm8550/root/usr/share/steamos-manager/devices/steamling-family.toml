@@ -1,0 +1,19 @@
+# steamos-manager's device match by devicetree compatible (the RP6 has no DMI). Entries match in
+# order, so the SoC entry stays last to catch a variant without its own line: an unmatched board
+# would get a local CpuScaling1.
+
+[[device]]
+dt.compatible = "retroidpocket,rp6"
+device        = "retroid_pocket_6"
+variant       = "RP6"
+friendly_name = "Retroid Pocket 6"
+
+[[device]]
+dt.compatible = "qcom,sm8550"
+device        = "steamling_sm8550"
+variant       = "SM8550"
+friendly_name = "Snapdragon 8 Gen 2 handheld"
+
+# Leaves the slot for steamling-perfd, which only allows schedutil.
+[cpu_scaling]
+driver = "none"

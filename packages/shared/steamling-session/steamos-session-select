@@ -1,0 +1,39 @@
+#!/bin/bash
+# SteamOS-contract name: Steam calls it. The supervisor relaunches when the compositor exits;
+# never restart the session to switch (see steamling-session).
+set -u
+
+STATE_HOME="${XDG_STATE_HOME:-${HOME:-/home/deck}/.local/state}"
+CHOICE_FILE="${STATE_HOME}/steamling-session"
+
+usage() { echo "usage: steamos-session-select [gamescope|desktop|plasma]" >&2; exit 2; }
+
+case "${1:-}" in
+  desktop|plasma)        sel=plasma    ;;
+  gamescope|game|steam)  sel=gamescope ;;
+  ""|*)                  usage         ;;
+esac
+
+mkdir -p "${STATE_HOME}"
+printf '%s\n' "${sel}" > "${CHOICE_FILE}"
+# Arms steamling-session's straggler kill for the session being left.
+touch "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/steamling-session.switch"
+echo "steamos-session-select: next session = ${sel} (signalling current compositor to exit)" >&2
+
+# No -x: the patterns must also catch the wrappers (kwin_wayland_wrapper, etc.).
+uid="$(id -u)"
+pkill -u "${uid}" -TERM gamescope    2>/dev/null || true
+kwin=0
+pkill -u "${uid}" -TERM kwin_wayland 2>/dev/null && kwin=1
+# Not every desktop runs kwin: stop the session steamling-desktop exec'd instead.
+if [ "${kwin}" = 0 ]; then
+  pid="$(cat "${XDG_RUNTIME_DIR:-/run/user/${uid}}/steamling-desktop.pid" 2>/dev/null)" \
+    && kill -TERM "${pid}" 2>/dev/null || true
+fi
+# Steam outlives gamescope and keeps its single-instance lock ("Steam is already running").
+if [ "${sel}" = plasma ]; then
+  # -x: a bare "steam" also matches this script ("steamos-session").
+  pkill -u "${uid}" -TERM -x steam       2>/dev/null || true
+  pkill -u "${uid}" -TERM steamwebhelper 2>/dev/null || true
+fi
+exit 0

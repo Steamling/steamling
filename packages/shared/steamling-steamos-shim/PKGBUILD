@@ -1,0 +1,34 @@
+# steamling-steamos-shim — stubs for the SteamOS update/branch/BIOS helpers the Deck UI
+# (-steamos3 -steamdeck) shells out to; without them the OOBE "required update" step dead-ends.
+pkgname=steamling-steamos-shim
+pkgver=0.1.0
+pkgrel=7
+pkgdesc="SteamOS update/branch/timezone/format helper stubs for the Steam Deck UI on a non-SteamOS base (until real OTA)"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# The format shims pkexec /usr/lib/hwsupport/format-device.sh, shipped by steamling-sdcard-automount.
+depends=('steamling-sdcard-automount' 'polkit')
+source=('steamos-update' 'steamos-select-branch' 'steamos-set-timezone'
+        'steamos-format-device' 'steamos-format-sdcard' 'jupiter-biosupdate')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  # Steam calls these helpers by their FULL /usr/bin/steamos-polkit-helpers/ path, not via PATH,
+  # so each one ships at both that path and the plain /usr/bin name the checks also use.
+  install -Dm755 "${srcdir}/steamos-update"        "${pkgdir}/usr/bin/steamos-polkit-helpers/steamos-update"
+  install -Dm755 "${srcdir}/steamos-update"        "${pkgdir}/usr/bin/steamos-update"
+  install -Dm755 "${srcdir}/steamos-select-branch" "${pkgdir}/usr/bin/steamos-select-branch"
+  install -Dm755 "${srcdir}/steamos-set-timezone"  "${pkgdir}/usr/bin/steamos-polkit-helpers/steamos-set-timezone"
+  install -Dm755 "${srcdir}/steamos-set-timezone"  "${pkgdir}/usr/bin/steamos-set-timezone"
+  # Both spellings ship: newer clients call steamos-format-device, older ones -sdcard.
+  install -Dm755 "${srcdir}/steamos-format-device" "${pkgdir}/usr/bin/steamos-polkit-helpers/steamos-format-device"
+  install -Dm755 "${srcdir}/steamos-format-device" "${pkgdir}/usr/bin/steamos-format-device"
+  install -Dm755 "${srcdir}/steamos-format-sdcard" "${pkgdir}/usr/bin/steamos-polkit-helpers/steamos-format-sdcard"
+  install -Dm755 "${srcdir}/steamos-format-sdcard" "${pkgdir}/usr/bin/steamos-format-sdcard"
+  # jupiter-biosupdate needs its OWN always-exit-0 stub, not steamos-update: see its header.
+  install -Dm755 "${srcdir}/jupiter-biosupdate"    "${pkgdir}/usr/bin/steamos-polkit-helpers/jupiter-biosupdate"
+  install -Dm755 "${srcdir}/jupiter-biosupdate"    "${pkgdir}/usr/bin/jupiter-biosupdate"
+  # Do NOT add a jupiter-dock-updater stub: its presence makes Steam believe a dock is attached
+  # and prompt for a dock update.
+}

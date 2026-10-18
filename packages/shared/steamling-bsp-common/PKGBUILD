@@ -1,0 +1,174 @@
+# steamling-bsp-common — the device-NEUTRAL board support shared by every steamling device.
+# Device-specific quirks (input maps, audio UCM, SoC suspend config, device.conf)
+# live in devices/<name>/packages/steamling-bsp-<name>, which depends on this package.
+pkgname=steamling-bsp-common
+pkgver=0.1.0
+pkgrel=26.7
+pkgdesc="steamling shared board support: sleep.d dispatcher, suspend hooks, power-key policy, session udev rules, wheel sudo, fan/scheduler daemons, ABL updater, power profiles daemon, realtime priority ladder, zram swap and memory sysctls, deck session limits, kernel /flash deploy, volume rocker daemon, journal cap, iwd Wi-Fi backend, panel refresh calibration"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# steamling-core rides along so a plain -Syu delivers the mandatory layer to devices that
+# predate it: a new package name only reaches installed devices via a dep edge.
+depends=('bash' 'sudo' 'steamling-core' 'python' 'python-gobject' 'python-evdev' 'cpio' 'zram-generator')
+# Older kernels own the /flash deploy files: the versioned conflict makes pacman upgrade the
+# kernel in the same transaction instead of failing on file conflicts.
+conflicts=('linux-steamling-sm8550<7.2.10-3')
+optdepends=('inputplumber: the 001-inputplumber suspend hooks manage its USB/IP deck target'
+            'scx-scheds: scx_lavd for steamling-lavd.service (unit self-skips without it)')
+install=steamling-bsp-common.install
+backup=('etc/security/limits.d/60-steamling-deck.conf')
+source=('steamling-sleep' 'sdam-debug-pre' 'sdam-debug-post'
+        'drain-log-pre' 'drain-log-post'
+        'inputplumber-sleep-pre' 'inputplumber-sleep-post'
+        'usb-role-sleep-pre' 'usb-role-sleep-post'
+        '20-steamling-powerkey.conf'
+        '90-steamling-backlight.rules' '60-steamling-controllers.rules'
+        '10-steamling-wheel'
+        'steamling-fancontrol' 'steamling-fan-mode' 'steamling-lavd-mode'
+        'steamling-fancontrol.service' 'steamling-lavd.service' 'steamling-game-mode.conf'
+        'steamling-update-abl' '52-steamling-abl.rules'
+        'steamling-refresh-abl-kit'
+        'steamling-gamepad-target' 'steamling-gamepad-target.service'
+        'iwd-wait-wlan0.conf'
+        'steamling-perfd' 'steamling_perf.py' 'steamling-perf' 'steamling-perfd.service'
+        'org.steamling.Perf.service' 'org.steamling.Perf.conf' 'power-profiles.conf'
+        '60-steamling-sdl-xb360.conf' 'steamling-sdl-xb360.sh'
+        'steamling-rt-ladder' 'steamling-rt-ladder.service' 'rtkit-limits.conf'
+        '70-steamling-cache.conf' '10-steamling-stop-timeout.conf' 'steamling-coredump.conf'
+        '60-steamling-gaming.conf' 'zram-generator.conf' 'steamling-mglru.conf'
+        'steamling-zram-recompress' 'steamling-zram-recompress.service' 'steamling-zram-recompress.timer'
+        '60-steamling-deck.conf'
+        'steamling-cmdline-sync' '91-steamling-cmdline.hook' 'cores.sh'
+        'steamling-boot-deploy' 'steamling-build-bootimg' '90-linux-steamling.hook'
+        'steamling-volumed' 'steamling-volumed.service' '10-steamling-journal.conf'
+        '20-steamling-wifi-backend.conf'
+        'steamling-panel-calibration' 'steamling-panel-calibration.service')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-sleep" \
+    "${pkgdir}/usr/lib/systemd/system-sleep/steamling-sleep"
+
+  # sleep.d hooks run in name order; the numeric prefixes are that ordering.
+  install -Dm755 "${srcdir}/inputplumber-sleep-pre" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/pre/001-inputplumber"
+  install -Dm755 "${srcdir}/inputplumber-sleep-post" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/post/001-inputplumber"
+  install -Dm755 "${srcdir}/usb-role-sleep-pre" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/pre/002-usb-role"
+  install -Dm755 "${srcdir}/usb-role-sleep-post" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/post/002-usb-role"
+  install -Dm755 "${srcdir}/sdam-debug-pre" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/pre/003-sdam-debug"
+  install -Dm755 "${srcdir}/sdam-debug-post" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/post/003-sdam-debug"
+  install -Dm755 "${srcdir}/drain-log-pre" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/pre/004-drain-log"
+  install -Dm755 "${srcdir}/drain-log-post" \
+    "${pkgdir}/usr/lib/steamling/sleep.d/post/004-drain-log"
+
+  install -Dm644 "${srcdir}/20-steamling-powerkey.conf" \
+    "${pkgdir}/usr/lib/systemd/logind.conf.d/20-steamling-powerkey.conf"
+
+  install -Dm644 "${srcdir}/90-steamling-backlight.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/90-steamling-backlight.rules"
+  install -Dm644 "${srcdir}/60-steamling-controllers.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/60-steamling-controllers.rules"
+
+  # 0440 is a sudoers.d requirement: sudo skips group/world-writable files.
+  install -Dm440 "${srcdir}/10-steamling-wheel" \
+    "${pkgdir}/etc/sudoers.d/10-steamling-wheel"
+
+  install -Dm755 "${srcdir}/steamling-fancontrol" "${pkgdir}/usr/bin/steamling-fancontrol"
+  install -Dm755 "${srcdir}/steamling-fan-mode"   "${pkgdir}/usr/bin/steamling-fan-mode"
+  install -Dm755 "${srcdir}/steamling-lavd-mode"  "${pkgdir}/usr/bin/steamling-lavd-mode"
+  install -Dm644 "${srcdir}/steamling-fancontrol.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-fancontrol.service"
+  install -Dm644 "${srcdir}/steamling-lavd.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-lavd.service"
+  install -Dm644 "${srcdir}/steamling-game-mode.conf" \
+    "${pkgdir}/usr/lib/tmpfiles.d/steamling-game-mode.conf"
+
+  install -Dm755 "${srcdir}/steamling-update-abl" "${pkgdir}/usr/bin/steamling-update-abl"
+  install -Dm755 "${srcdir}/steamling-refresh-abl-kit" "${pkgdir}/usr/bin/steamling-refresh-abl-kit"
+  install -Dm644 "${srcdir}/52-steamling-abl.rules" \
+    "${pkgdir}/usr/share/polkit-1/rules.d/52-steamling-abl.rules"
+
+  # Enabled by a wants symlink rather than an enable hook: it is pulled in by InputPlumber itself.
+  install -Dm755 "${srcdir}/steamling-gamepad-target" "${pkgdir}/usr/bin/steamling-gamepad-target"
+  install -Dm644 "${srcdir}/steamling-gamepad-target.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-gamepad-target.service"
+  install -d "${pkgdir}/usr/lib/systemd/system/inputplumber.service.wants"
+  ln -sf "../steamling-gamepad-target.service" \
+    "${pkgdir}/usr/lib/systemd/system/inputplumber.service.wants/steamling-gamepad-target.service"
+  install -Dm644 "${srcdir}/60-steamling-sdl-xb360.conf" \
+    "${pkgdir}/usr/lib/environment.d/60-steamling-sdl-xb360.conf"
+  install -Dm644 "${srcdir}/steamling-sdl-xb360.sh" "${pkgdir}/etc/profile.d/steamling-sdl-xb360.sh"
+
+  install -Dm644 "${srcdir}/iwd-wait-wlan0.conf" \
+    "${pkgdir}/usr/lib/systemd/system/iwd.service.d/10-steamling-wait-wlan0.conf"
+
+  install -Dm755 "${srcdir}/steamling-perfd" "${pkgdir}/usr/lib/steamling/steamling-perfd"
+  install -Dm644 "${srcdir}/steamling_perf.py" "${pkgdir}/usr/lib/steamling/steamling_perf.py"
+  install -Dm755 "${srcdir}/steamling-perf" "${pkgdir}/usr/bin/steamling-perf"
+  install -Dm644 "${srcdir}/power-profiles.conf" "${pkgdir}/usr/share/steamling/power-profiles.conf"
+  install -Dm644 "${srcdir}/steamling-perfd.service" "${pkgdir}/usr/lib/systemd/system/steamling-perfd.service"
+  install -d "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants"
+  ln -sf "../steamling-perfd.service" "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-perfd.service"
+  install -Dm644 "${srcdir}/org.steamling.Perf.service" "${pkgdir}/usr/share/dbus-1/system-services/org.steamling.Perf.service"
+  install -Dm644 "${srcdir}/org.steamling.Perf.conf" "${pkgdir}/usr/share/dbus-1/system.d/org.steamling.Perf.conf"
+
+  install -Dm644 "${srcdir}/cores.sh" "${pkgdir}/usr/lib/steamling/cores.sh"
+  install -Dm755 "${srcdir}/steamling-rt-ladder" "${pkgdir}/usr/lib/steamling/steamling-rt-ladder"
+  install -Dm644 "${srcdir}/steamling-rt-ladder.service" "${pkgdir}/usr/lib/systemd/system/steamling-rt-ladder.service"
+  ln -sf "../steamling-rt-ladder.service" "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-rt-ladder.service"
+  install -Dm644 "${srcdir}/rtkit-limits.conf" \
+    "${pkgdir}/usr/lib/systemd/system/rtkit-daemon.service.d/10-steamling-limits.conf"
+  install -Dm644 "${srcdir}/60-steamling-deck.conf" "${pkgdir}/etc/security/limits.d/60-steamling-deck.conf"
+  install -Dm644 "${srcdir}/70-steamling-cache.conf" "${pkgdir}/usr/lib/sysctl.d/70-steamling-cache.conf"
+  install -Dm644 "${srcdir}/10-steamling-stop-timeout.conf" \
+    "${pkgdir}/usr/lib/systemd/system.conf.d/10-steamling-stop-timeout.conf"
+  install -Dm644 "${srcdir}/10-steamling-stop-timeout.conf" \
+    "${pkgdir}/usr/lib/systemd/user.conf.d/10-steamling-stop-timeout.conf"
+  install -Dm644 "${srcdir}/steamling-coredump.conf" "${pkgdir}/usr/lib/tmpfiles.d/steamling-coredump.conf"
+  # Memory: zram swap (lz4, idle pages recompressed to zstd), its sysctls, MGLRU thrash guard.
+  install -Dm644 "${srcdir}/60-steamling-gaming.conf" "${pkgdir}/usr/lib/sysctl.d/60-steamling-gaming.conf"
+  install -Dm644 "${srcdir}/zram-generator.conf" "${pkgdir}/usr/lib/systemd/zram-generator.conf"
+  install -Dm644 "${srcdir}/steamling-mglru.conf" "${pkgdir}/usr/lib/tmpfiles.d/steamling-mglru.conf"
+  install -Dm755 "${srcdir}/steamling-zram-recompress" "${pkgdir}/usr/lib/steamling/steamling-zram-recompress"
+  install -Dm644 "${srcdir}/steamling-zram-recompress.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-zram-recompress.service"
+  install -Dm644 "${srcdir}/steamling-zram-recompress.timer" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-zram-recompress.timer"
+  install -d "${pkgdir}/usr/lib/systemd/system/timers.target.wants"
+  ln -sf "../steamling-zram-recompress.timer" \
+    "${pkgdir}/usr/lib/systemd/system/timers.target.wants/steamling-zram-recompress.timer"
+
+  install -Dm755 "${srcdir}/steamling-boot-deploy" "${pkgdir}/usr/lib/steamling/steamling-boot-deploy"
+  install -Dm755 "${srcdir}/steamling-build-bootimg" "${pkgdir}/usr/bin/steamling-build-bootimg"
+  install -Dm644 "${srcdir}/90-linux-steamling.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/90-linux-steamling.hook"
+  # qcom-abl boot images bake the cmdline in.
+  install -Dm755 "${srcdir}/steamling-cmdline-sync" "${pkgdir}/usr/lib/steamling/steamling-cmdline-sync"
+  install -Dm644 "${srcdir}/91-steamling-cmdline.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/91-steamling-cmdline.hook"
+
+  install -Dm755 "${srcdir}/steamling-volumed" "${pkgdir}/usr/lib/steamling/steamling-volumed"
+  install -Dm644 "${srcdir}/steamling-volumed.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-volumed.service"
+  ln -sf "../steamling-volumed.service" \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-volumed.service"
+  install -Dm644 "${srcdir}/10-steamling-journal.conf" \
+    "${pkgdir}/usr/lib/systemd/journald.conf.d/10-steamling-journal.conf"
+  install -Dm644 "${srcdir}/20-steamling-wifi-backend.conf" \
+    "${pkgdir}/usr/lib/NetworkManager/conf.d/20-steamling-wifi-backend.conf"
+
+  # Panels with frame_len_<rate> attributes (RP6, kernel 0508): Steamling Control measures and
+  # saves the trim, the unit writes it back at boot.
+  install -Dm755 "${srcdir}/steamling-panel-calibration" "${pkgdir}/usr/lib/steamling/steamling-panel-calibration"
+  install -Dm644 "${srcdir}/steamling-panel-calibration.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-panel-calibration.service"
+  ln -sf "../steamling-panel-calibration.service" \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-panel-calibration.service"
+}

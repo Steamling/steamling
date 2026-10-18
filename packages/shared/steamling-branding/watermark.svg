@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Plymouth watermark: the still pose of the boot logo (logo.svg, which steamling.awk writes at
+     build time), in LOGICAL pixels, with no wording. two-step draws images at DeviceScale (2x
+     here), so 266x252 fills 532x504 device pixels. The logo box (0,0 266x252) is shared with
+     throbber.svg so every frame lands exactly on it. The 36 transparent rows below it are what
+     line the two up: see the alignment note in the PKGBUILD. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="266" height="288" viewBox="0 0 266 288">
+  <image x="0" y="1.74" width="266" height="248.52" xlink:href="logo.svg"/>
+</svg>

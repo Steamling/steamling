@@ -1,0 +1,81 @@
+#!/bin/bash
+# steamling-lavd-mode — get/set/toggle the scx_lavd power mode, persisted in
+# /var/lib/steamling/lavd-mode. Switching mid-game is safe: sched_ext swaps schedulers live and
+# tasks fall back to EEVDF for the moment scx_lavd is down. Setting a mode needs root.
+MODE_FILE=/var/lib/steamling/lavd-mode
+GAME_MODE_FILE=/run/steamling/game-mode
+DEFAULT=autopilot
+
+# read_mode and effective run every tick of `run`, so they set m with builtins, never forking.
+read_mode() {  # -> m
+  m=""
+  IFS= read -r m 2>/dev/null < "${MODE_FILE}"
+  # sanitize: an unknown word here would exec `scx_lavd --<garbage>` and crash-loop
+  case "${m}" in autopilot|performance|balanced|powersave) ;; *) m="${DEFAULT}" ;; esac
+}
+
+current() {
+  read_mode
+  printf '%s\n' "${m}"
+}
+
+# Per-game override record; format and lifetime documented in steamling-fancontrol.
+effective() {  # -> m
+  local pid _ lavd
+  if read -r pid _ lavd 2>/dev/null < "${GAME_MODE_FILE}"; then
+    case "${lavd}" in
+      autopilot|performance|balanced|powersave)
+        if [ -n "${pid}" ] && [ -d "/proc/${pid}" ]; then
+          m="${lavd}"
+          return
+        fi
+        ;;
+    esac
+  fi
+  read_mode
+}
+
+case "${1:-}" in
+  "")
+    current
+    ;;
+  run)
+    child=""
+    trap 'kill "${child}" 2>/dev/null; exit 0' INT TERM
+    # Timed read on a pipe held open at both ends: the 3 s tick without forking sleep. If it
+    # cannot be opened, /dev/null ends every read at once and sleep does the waiting.
+    { exec {TICK}<> <(:); } 2>/dev/null || exec {TICK}</dev/null
+    tick() { read -r -t "$1" -u "${TICK}" && return; [ $? -gt 128 ] || sleep "$1"; }
+    running=""
+    while :; do
+      effective
+      want="${m}"
+      if [ "${want}" != "${running}" ] || ! kill -0 "${child}" 2>/dev/null; then
+        [ -n "${child}" ] && { kill "${child}" 2>/dev/null; wait "${child}" 2>/dev/null; }
+        # 0.5 ms slices while a pinned task waits (every game is pinned); deadline order even on
+        # lightly loaded CPUs instead of FIFO.
+        /usr/bin/scx_lavd "--${want}" --pinned-slice-us 500 --lb-local-dsq-util-pct 0 {TICK}<&- &
+        child=$!
+        running="${want}"
+      fi
+      tick 3
+    done
+    ;;
+  toggle|autopilot|performance|balanced|powersave)
+    m="${1}"
+    if [ "${m}" = toggle ]; then
+      if [ "$(current)" = performance ]; then m=autopilot; else m=performance; fi
+    fi
+    mkdir -p "$(dirname "${MODE_FILE}")" 2>/dev/null
+    if ! printf '%s\n' "${m}" > "${MODE_FILE}" 2>/dev/null; then
+      echo "steamling-lavd-mode: cannot write ${MODE_FILE} (run as root)" >&2
+      exit 1
+    fi
+    systemctl restart steamling-lavd.service
+    echo "scx_lavd mode: ${m}"
+    ;;
+  *)
+    echo "usage: steamling-lavd-mode [autopilot|performance|balanced|powersave|toggle]" >&2
+    exit 2
+    ;;
+esac

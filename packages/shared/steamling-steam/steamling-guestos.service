@@ -1,0 +1,14 @@
+[Unit]
+Description=steamling: present the FEX x86 rootfs at the path Steam's FEX compat tool expects
+Documentation=https://github.com/dvandenburgh/steamling
+ConditionPathExists=/usr/share/fex-emu/RootFS/ArchLinux.sqsh
+Before=graphical.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/steamling/steamling-guestos-mount start
+ExecStop=/usr/lib/steamling/steamling-guestos-mount stop
+
+[Install]
+WantedBy=multi-user.target

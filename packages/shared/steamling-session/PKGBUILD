@@ -1,0 +1,27 @@
+pkgname=steamling-session
+pkgver=0.1.0
+pkgrel=5.2
+pkgdesc="steamling tty1 session service + game/desktop session supervisor"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('bash' 'systemd')
+# steamos-session-select lived in steamling-desktop up to -26; a lone install against that collides.
+conflicts=('steamling-desktop<0.1.0-27')
+backup=('etc/pam.d/steamling-session')
+install='steamling-session.install'
+source=('steamling-session' 'steamling-session.service' 'steamling-session.pam' 'steamling-plymouth-handoff'
+        'steamos-session-select' '50-steamling-deck.rules')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-session" "${pkgdir}/usr/lib/steamling/steamling-session"
+  install -Dm755 "${srcdir}/steamling-plymouth-handoff" "${pkgdir}/usr/lib/steamling/steamling-plymouth-handoff"
+  install -Dm644 "${srcdir}/steamling-session.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-session.service"
+  install -Dm644 "${srcdir}/steamling-session.pam" "${pkgdir}/etc/pam.d/steamling-session"
+  install -Dm755 "${srcdir}/steamos-session-select" "${pkgdir}/usr/bin/steamos-session-select"
+  # What the Deck UI does as deck (power, Wi-Fi, timezone, units, storage) without a password prompt.
+  install -Dm644 "${srcdir}/50-steamling-deck.rules" \
+    "${pkgdir}/usr/share/polkit-1/rules.d/50-steamling-deck.rules"
+}

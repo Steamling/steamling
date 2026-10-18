@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Id": "com.steamling.splash",
+        "Name": "Steamling",
+        "Description": "Steamling logo splash",
+        "Authors": [{ "Name": "David J. Vandenburgh" }],
+        "License": "GPL-2.0-or-later",
+        "Version": "1.0"
+    }
+}

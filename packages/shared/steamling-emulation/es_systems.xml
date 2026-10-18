@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<!--
+  steamling ES-DE custom system definitions, seeded to ~/ES-DE/custom_systems/ by steamling-roms-init.
+  A custom entry REPLACES the bundled system of the same name, so every entry here must be the
+  FULL definition, not a delta. Each one exists because the bundled launch commands name cores or
+  standalones we do not ship: ps2 offers only the LRPS2 core, psx names a DuckStation standalone
+  (ours is the SwanStation libretro core), gc/wii default to the RetroArch dolphin
+  core; cps1/cps2/cps3/arcade/mame all default to mame_libretro, which we do not ship.
+  All commands go through the /usr/lib/steamling/es-* wrappers: the big-core pin for the
+  standalones, the frame-pacing pin (es-retroarch) for the libretro cores (psx and the
+  arcade systems). n64, dreamcast and saturn are here only for that pin: the bundled entries
+  launch RetroArch bare, and n64's ParaLLEl-RDP needs the Vulkan context the pin gives it. steamling-play mirrors these defaults for the Steam tiles.
+-->
+<systemList>
+    <system>
+        <name>gc</name>
+        <fullname>Nintendo GameCube</fullname>
+        <path>%ROMPATH%/gc</path>
+        <extension>.ciso .CISO .dff .DFF .dol .DOL .elf .ELF .gcm .GCM .gcz .GCZ .iso .ISO .json .JSON .m3u .M3U .rvz .RVZ .tgc .TGC .wad .WAD .wbfs .WBFS .wia .WIA .7z .7Z .zip .ZIP</extension>
+        <command label="Dolphin">/usr/lib/steamling/es-dolphin -b -e %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>gc</platform>
+        <theme>gc</theme>
+    </system>
+    <system>
+        <name>wii</name>
+        <fullname>Nintendo Wii</fullname>
+        <path>%ROMPATH%/wii</path>
+        <extension>.ciso .CISO .dff .DFF .dol .DOL .elf .ELF .gcm .GCM .gcz .GCZ .iso .ISO .json .JSON .m3u .M3U .rvz .RVZ .tgc .TGC .wad .WAD .wbfs .WBFS .wia .WIA .7z .7Z .zip .ZIP</extension>
+        <command label="Dolphin">/usr/lib/steamling/es-dolphin -b -e %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>wii</platform>
+        <theme>wii</theme>
+    </system>
+    <system>
+        <name>psx</name>
+        <fullname>Sony PlayStation</fullname>
+        <path>%ROMPATH%/psx</path>
+        <extension>.bin .BIN .cbn .CBN .ccd .CCD .chd .CHD .cue .CUE .ecm .ECM .exe .EXE .img .IMG .iso .ISO .m3u .M3U .mdf .MDF .mds .MDS .minipsf .MINIPSF .pbp .PBP .psexe .PSEXE .psf .PSF .toc .TOC .z .Z .znx .ZNX .7z .7Z .zip .ZIP</extension>
+        <command label="SwanStation">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/swanstation_libretro.so %ROM%</command>
+        <command label="PCSX ReARMed">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/pcsx_rearmed_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>psx</platform>
+        <theme>psx</theme>
+    </system>
+    <system>
+        <name>ps2</name>
+        <fullname>Sony PlayStation 2</fullname>
+        <path>%ROMPATH%/ps2</path>
+        <extension>.bin .BIN .chd .CHD .ciso .CISO .cso .CSO .desktop .dump .DUMP .elf .ELF .gz .GZ .m3u .M3U .mdf .MDF .img .IMG .iso .ISO .isz .ISZ .ngr .NRG .zso .ZSO</extension>
+        <command label="ARMSX2">/usr/lib/steamling/es-armsx2 -batch -fullscreen -- %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>ps2</platform>
+        <theme>ps2</theme>
+    </system>
+    <system>
+        <name>psp</name>
+        <fullname>Sony PlayStation Portable</fullname>
+        <path>%ROMPATH%/psp</path>
+        <extension>.chd .CHD .cso .CSO .elf .ELF .iso .ISO .pbp .PBP .prx .PRX .zso .ZSO</extension>
+        <command label="PPSSPP">/usr/lib/steamling/es-psp --fullscreen %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>psp</platform>
+        <theme>psp</theme>
+    </system>
+    <system>
+        <name>xbox</name>
+        <fullname>Microsoft Xbox</fullname>
+        <path>%ROMPATH%/xbox</path>
+        <extension>.iso .ISO .xiso .XISO</extension>
+        <command label="xemu">/usr/lib/steamling/es-xemu -full-screen -dvd_path %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>xbox</platform>
+        <theme>xbox</theme>
+    </system>
+    <system>
+        <name>n3ds</name>
+        <fullname>Nintendo 3DS</fullname>
+        <path>%ROMPATH%/n3ds</path>
+        <extension>.3ds .3DS .3dsx .3DSX .app .APP .axf .AXF .cci .CCI .cxi .CXI .elf .ELF .z3dsx .Z3DSX .zcci .ZCCI .zcxi .ZCXI</extension>
+        <command label="Azahar">/usr/lib/steamling/es-azahar %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>n3ds</platform>
+        <theme>n3ds</theme>
+    </system>
+    <system>
+        <name>ps3</name>
+        <fullname>Sony PlayStation 3</fullname>
+        <path>%ROMPATH%/ps3</path>
+        <extension>.ps3 .PS3 .ps3dir .PS3DIR .bin .BIN .elf .ELF .self .SELF</extension>
+        <command label="RPCS3">/usr/lib/steamling/es-rpcs3 --no-gui %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>ps3</platform>
+        <theme>ps3</theme>
+    </system>
+    <system>
+        <name>wiiu</name>
+        <fullname>Nintendo Wii U</fullname>
+        <path>%ROMPATH%/wiiu</path>
+        <extension>.elf .ELF .rpx .RPX .tmd .TMD .wua .WUA .wud .WUD .wuhb .WUHB .wux .WUX</extension>
+        <command label="Cemu">/usr/lib/steamling/es-cemu -f -g %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>wiiu</platform>
+        <theme>wiiu</theme>
+    </system>
+    <system>
+        <name>psvita</name>
+        <fullname>Sony PlayStation Vita</fullname>
+        <path>%ROMPATH%/psvita</path>
+        <extension>.psvita .PSVITA</extension>
+        <command label="Vita3K">/usr/lib/steamling/es-vita3k -r %BASENAME%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>psvita</platform>
+        <theme>psvita</theme>
+    </system>
+    <system>
+        <name>cps1</name>
+        <fullname>Capcom Play System I</fullname>
+        <path>%ROMPATH%/cps1</path>
+        <extension>.7z .7Z .zip .ZIP</extension>
+        <command label="FinalBurn Neo">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/fbneo_libretro.so %ROM%</command>
+        <command label="MAME 2003-Plus">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mame2003_plus_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>arcade</platform>
+        <theme>cps1</theme>
+    </system>
+    <system>
+        <name>cps2</name>
+        <fullname>Capcom Play System II</fullname>
+        <path>%ROMPATH%/cps2</path>
+        <extension>.7z .7Z .zip .ZIP</extension>
+        <command label="FinalBurn Neo">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/fbneo_libretro.so %ROM%</command>
+        <command label="MAME 2003-Plus">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mame2003_plus_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>arcade</platform>
+        <theme>cps2</theme>
+    </system>
+    <system>
+        <name>cps3</name>
+        <fullname>Capcom Play System III</fullname>
+        <path>%ROMPATH%/cps3</path>
+        <extension>.7z .7Z .zip .ZIP</extension>
+        <command label="FinalBurn Neo">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/fbneo_libretro.so %ROM%</command>
+        <command label="MAME 2003-Plus">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mame2003_plus_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>arcade</platform>
+        <theme>cps3</theme>
+    </system>
+    <system>
+        <name>arcade</name>
+        <fullname>Arcade</fullname>
+        <path>%ROMPATH%/arcade</path>
+        <extension>.cmd .CMD .desktop .gam .GAM .neo .NEO .sh .7z .7Z .zip .ZIP</extension>
+        <command label="FinalBurn Neo">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/fbneo_libretro.so %ROM%</command>
+        <command label="MAME 2003-Plus">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mame2003_plus_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>arcade</platform>
+        <theme>arcade</theme>
+    </system>
+    <system>
+        <name>mame</name>
+        <fullname>Multiple Arcade Machine Emulator</fullname>
+        <path>%ROMPATH%/mame</path>
+        <extension>.cmd .CMD .desktop .gam .GAM .neo .NEO .sh .7z .7Z .zip .ZIP</extension>
+        <command label="FinalBurn Neo">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/fbneo_libretro.so %ROM%</command>
+        <command label="MAME 2003-Plus">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mame2003_plus_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>arcade</platform>
+        <theme>mame</theme>
+    </system>
+    <system>
+        <name>n64</name>
+        <fullname>Nintendo 64</fullname>
+        <path>%ROMPATH%/n64</path>
+        <extension>.bin .BIN .d64 .D64 .n64 .N64 .ndd .NDD .u1 .U1 .v64 .V64 .z64 .Z64 .7z .7Z .zip .ZIP</extension>
+        <command label="Mupen64Plus-Next">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/mupen64plus_next_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>n64</platform>
+        <theme>n64</theme>
+    </system>
+    <system>
+        <name>dreamcast</name>
+        <fullname>Sega Dreamcast</fullname>
+        <path>%ROMPATH%/dreamcast</path>
+        <extension>.cdi .CDI .chd .CHD .cue .CUE .dat .DAT .elf .ELF .gdi .GDI .iso .ISO .lst .LST .m3u .M3U .7z .7Z .zip .ZIP</extension>
+        <command label="Flycast">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/flycast_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>dreamcast</platform>
+        <theme>dreamcast</theme>
+    </system>
+    <system>
+        <name>saturn</name>
+        <fullname>Sega Saturn</fullname>
+        <path>%ROMPATH%/saturn</path>
+        <extension>.bin .BIN .ccd .CCD .chd .CHD .cue .CUE .iso .ISO .m3u .M3U .mds .MDS .toc .TOC .7z .7Z .zip .ZIP</extension>
+        <command label="YabaSanshiro">/usr/lib/steamling/es-retroarch -L %CORE_RETROARCH%/yabasanshiro_libretro.so %ROM%</command>
+        <command label="Shortcut or script">%ENABLESHORTCUTS% %EMULATOR_OS-SHELL% %ROM%</command>
+        <platform>saturn</platform>
+        <theme>saturn</theme>
+    </system>
+</systemList>

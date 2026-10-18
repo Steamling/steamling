@@ -1,0 +1,14 @@
+[Unit]
+Description=steamling: seed the Steamling wallpaper on first login
+PartOf=graphical-session.target
+After=plasma-plasmashell.service
+ConditionPathExists=!%E/steamling/branding-seeded
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/steamling-branding-init
+# oneshot defaults to no start timeout; the seed waits up to 60s for the shell's first desktop.
+TimeoutStartSec=90
+
+[Install]
+WantedBy=plasma-plasmashell.service

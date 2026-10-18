@@ -1,0 +1,33 @@
+# The flavour owns its DE stack, so `pacman -Rs` of it removes exactly that DE. Build with
+# ./nodeps: makepkg -s would drag all of KDE/Qt into the chroot for a data package.
+pkgname=steamling-desktop-plasma-mobile
+pkgver=0.1.0
+pkgrel=2
+pkgdesc="steamling desktop flavour: Plasma Mobile"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('bash'
+         'steamling-desktop-kde'
+         'plasma-mobile'
+         'steamling-homescreen'
+         'plasma-nano'
+         'plasma-settings'
+         'qt6-tools')        # qdbus6 for the taskpanel removal
+provides=('steamling-desktop-flavour')
+# These files lived in steamling-desktop up to -26; a lone install against that would collide.
+conflicts=('steamling-desktop<0.1.0-27')
+install='steamling-desktop-plasma-mobile.install'
+source=('steamling-desktop-remove-taskpanel' 'steamling-desktop-remove-taskpanel.desktop'
+        'steamling-panel-touchfix' '98-steamling-panel-touchfix.hook')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-desktop-remove-taskpanel" \
+    "${pkgdir}/usr/bin/steamling-desktop-remove-taskpanel"
+  install -Dm644 "${srcdir}/steamling-desktop-remove-taskpanel.desktop" \
+    "${pkgdir}/etc/xdg/autostart/steamling-desktop-remove-taskpanel.desktop"
+  install -Dm755 "${srcdir}/steamling-panel-touchfix" "${pkgdir}/usr/bin/steamling-panel-touchfix"
+  install -Dm644 "${srcdir}/98-steamling-panel-touchfix.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/98-steamling-panel-touchfix.hook"
+}

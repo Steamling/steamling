@@ -1,0 +1,91 @@
+#!/bin/bash
+# ORDER: system tools must be mirrored in, and proton-prep.d hooks run, before the client STARTS
+# (steamling-steam runs this synchronously). --watch picks up tools installed mid-session. Per-game
+# tweaks live in steamling-game-launch.
+set -u
+
+STEAM="${HOME}/.local/share/Steam"
+HOOKS=/usr/lib/steamling/proton-prep.d
+
+# Dirs an older registration left behind; they duplicate Steam's own entries.
+LEGACY_TOOLDIRS=(proton-11-arm64 proton-experimental-arm64)
+
+# Only remove dirs WE wrote: "steamling-steam" is the one marker both vdf eras carry.
+prune_legacy_tools() {
+  local dir
+  for dir in "${LEGACY_TOOLDIRS[@]}"; do
+    dir="${STEAM}/compatibilitytools.d/${dir}"
+    [ -d "${dir}" ] || continue
+    grep -q 'steamling-steam' "${dir}/compatibilitytool.vdf" 2>/dev/null || continue
+    rm -rf "${dir}"
+  done
+  # A dangling mirror symlink is a broken dropdown entry, and the -e guard below would re-create it.
+  for dir in "${STEAM}"/compatibilitytools.d/*; do
+    [ -L "${dir}" ] && [ ! -e "${dir}" ] && rm -f "${dir}"
+  done
+}
+
+# Every library a tool can be installed to: the internal one plus libraryfolders.vdf's paths.
+library_commons() {
+  printf '%s\n' "${STEAM}/steamapps/common"
+  sed -n 's/^[[:space:]]*"path"[[:space:]]*"\(.*\)"[[:space:]]*$/\1\/steamapps\/common/p' \
+    "${STEAM}/steamapps/libraryfolders.vdf" 2>/dev/null
+}
+
+# Undo an older release's entry-point claim so the runtime runs as Valve ships it. The
+# shim file stays: Steam caches the manifest per client session and may still exec it until restart.
+restore_slr() { # <runtime dir>
+  local slr_dir="$1" entry="$1/_v2-entry-point" real="$1/_v2-entry-point.real"
+  if [ -f "${real}" ] && ! grep -q steamling-proton-wrapper "${real}" \
+     && grep -q steamling-proton-wrapper "${entry}" 2>/dev/null; then
+    mv -f "${real}" "${entry}"
+  fi
+  if grep -q '"/steamling-proton ' "${slr_dir}/toolmanifest.vdf" 2>/dev/null; then
+    sed -i 's|"/steamling-proton |"/_v2-entry-point |' "${slr_dir}/toolmanifest.vdf"
+  fi
+}
+
+apply() {
+  prune_legacy_tools
+  local common slr_dir
+  while IFS= read -r common; do
+    [ -d "${common}" ] || continue
+    for slr_dir in "${common}"/SteamLinuxRuntime*; do
+      [ -d "${slr_dir}" ] && restore_slr "${slr_dir}"
+    done
+  done < <(library_commons | sort -u)
+
+  # One symlink to the constant tool dir, so pacman updates flow through without a re-link.
+  local sysd name
+  [ -d "${STEAM}/compatibilitytools.d" ] || mkdir -p "${STEAM}/compatibilitytools.d"
+  for sysd in /usr/share/steam/compatibilitytools.d/*/; do
+    [ -d "${sysd}" ] || continue
+    name="${sysd%/}"; name="${name##*/}"
+    [ -e "${STEAM}/compatibilitytools.d/${name}" ] || ln -sfn "${sysd%/}" "${STEAM}/compatibilitytools.d/${name}"
+  done
+}
+
+# Fixups other packages need in place before the client starts (one pass each); they own
+# their own watching, so --watch never runs them.
+run_hooks() {
+  local hook
+  for hook in "${HOOKS}"/*; do
+    [ -x "${hook}" ] || continue
+    "${hook}" || echo "[steamling-proton-prep] hook ${hook##*/} failed" >&2
+  done
+}
+
+case "${1:-}" in
+  --watch)
+    # A pipe this shell holds both ends of never reaches EOF: a timed read on it is a sleep
+    # that starts no process. If it cannot be opened, /dev/null ends every read at once and
+    # sleep does the waiting.
+    { exec {TICK}<> <(:); } 2>/dev/null || exec {TICK}</dev/null
+    tick() { read -r -t "$1" -u "${TICK}" && return; [ $? -gt 128 ] || sleep "$1"; }
+    while :; do apply; tick 20; done
+    ;;
+  *)
+    apply
+    run_hooks
+    ;;
+esac

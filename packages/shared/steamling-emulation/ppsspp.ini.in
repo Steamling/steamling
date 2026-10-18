@@ -1,0 +1,4 @@
+# steamling PPSSPP seed (partial). PPSSPP's "auto" scales with the window and lands
+# inconsistently on rotated panels, so roms-init pins iInternalResolution per panel.
+[Graphics]
+iInternalResolution = 4

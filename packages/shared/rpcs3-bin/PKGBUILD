@@ -1,0 +1,53 @@
+# rpcs3-bin — RPCS3, the PS3 emulator, vendored from the official aarch64 AppImage. The main
+# repo's vX.Y.Z releases carry no arm64 asset: arm64 builds live in
+# RPCS3/rpcs3-binaries-linux-arm64, one release per commit tagged build-<sha>.
+pkgname=rpcs3-bin
+pkgver=0.0.43.20210
+pkgrel=1.1
+pkgdesc="RPCS3 — PS3 emulator, official aarch64 AppImage (vendored)"
+arch=('aarch64')
+url="https://rpcs3.net"
+license=('GPL2')
+depends=('fuse2')
+options=('!strip')
+_build=build-fcbed0bc6d803abc4d7ed1a722f2ac54d4591eee
+_asset=rpcs3-v0.0.43-20210-fcbed0bc_linux_aarch64.AppImage
+source=("rpcs3-${pkgver}.AppImage::https://github.com/RPCS3/rpcs3-binaries-linux-arm64/releases/download/${_build}/${_asset}"
+        'steamling-rpcs3.desktop')
+sha256sums=('3e306fec3eb8fc3fdb991373a6b9d5e197439ff350d8483c36f840e61887cb1f'
+            'SKIP')
+noextract=("rpcs3-${pkgver}.AppImage")
+
+# The icon comes from the AppImage's own --appimage-extract (no FUSE needed). Run as is it would
+# fail on an x86 build host: the chroot reaches aarch64 code through qemu's binfmt rule, which
+# needs ELF header bytes 8-10 zero, and an AppImage keeps its "AI\2" marker there. A copy with
+# the marker cleared runs; the runtime never reads it back.
+_appimage_icon() {  # <AppImage> <out>: the file its .DirIcon resolves to
+  local run="${srcdir}/.appimage-run" root=squashfs-root t=.DirIcon l n=0
+  cp "$1" "${run}"
+  printf '\0\0\0' | dd of="${run}" bs=1 seek=8 conv=notrunc status=none
+  chmod u+x "${run}"
+  rm -rf squashfs-root AppDir
+  "${run}" --appimage-extract "${t}" >/dev/null 2>&1 || true
+  [ -d AppDir ] && root=AppDir
+  while [ -L "${root}/${t}" ] && [ "${n}" -lt 8 ]; do
+    l="$(readlink "${root}/${t}")"
+    case "${l}" in /*) t="${l#/}" ;; *) t="$(dirname "${t}")/${l}"; t="${t#./}" ;; esac
+    "${run}" --appimage-extract "${t}" >/dev/null 2>&1 || true
+    n=$((n + 1))
+  done
+  rm -f "${run}"
+  cp -L "${root}/${t}" "$2" && [ -s "$2" ]   # fails the build if the icon vanished upstream
+}
+
+prepare() {
+  cd "${srcdir}"
+  _appimage_icon "rpcs3-${pkgver}.AppImage" "${srcdir}/icon.svg"
+}
+
+package() {
+  install -Dm755 "${srcdir}/rpcs3-${pkgver}.AppImage" \
+    "${pkgdir}/opt/steamling/emulators/rpcs3/rpcs3.AppImage"
+  install -Dm644 "${srcdir}/icon.svg" "${pkgdir}/opt/steamling/emulators/rpcs3/icon.svg"
+  install -Dm644 "${srcdir}/steamling-rpcs3.desktop" "${pkgdir}/usr/share/applications/steamling-rpcs3.desktop"
+}

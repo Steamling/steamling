@@ -1,0 +1,8 @@
+{
+    "KPlugin": {
+        "Id": "SteamlingOS",
+        "Name": "Steamling",
+        "Authors": [{ "Name": "David J. Vandenburgh" }],
+        "License": "GPL-2.0-or-later"
+    }
+}

@@ -1,0 +1,17 @@
+# Enable on upgrade too: without the mount, x86 Proton does not run at all.
+_guestos() {
+  systemctl daemon-reload >/dev/null 2>&1 || true
+  systemctl enable --now steamling-guestos.service >/dev/null 2>&1 || true
+}
+# The FEX binfmt switch was an image overlay file set. /etc units and /etc/pacman.d/hooks shadow
+# the packaged copies of the same name, and the old ones run the /usr/local script.
+_retire_overlay_fex_binfmt() {
+  rm -f /usr/local/bin/steamling-fex-binfmt /etc/systemd/system/steamling-fex-binfmt.service \
+        /etc/systemd/system/multi-user.target.wants/steamling-fex-binfmt.service \
+        /etc/pacman.d/hooks/90-steamling-fex-binfmt.hook
+  [ -d /run/systemd/system ] && systemctl daemon-reload
+  return 0
+}
+post_install() { _retire_overlay_fex_binfmt; _guestos; }
+post_upgrade() { _retire_overlay_fex_binfmt; _guestos; }
+pre_remove() { systemctl disable --now steamling-guestos.service >/dev/null 2>&1 || true; }

@@ -1,0 +1,98 @@
+# Older images shipped the fan/scheduler daemons as unowned overlay files. /etc units shadow
+# the packaged /usr/lib ones and the old enable symlinks point at /etc, so both must go.
+_migrate_fan_lavd() {
+  rm -f /usr/local/bin/steamling-fancontrol /usr/local/bin/steamling-fan-mode \
+        /usr/local/bin/steamling-lavd-mode \
+        /etc/systemd/system/steamling-fancontrol.service \
+        /etc/systemd/system/steamling-lavd.service \
+        /etc/tmpfiles.d/steamling-game-mode.conf
+  if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/steamling-game-mode.conf 2>/dev/null || true
+    systemctl enable steamling-fancontrol.service steamling-lavd.service 2>/dev/null || true
+    systemctl try-restart steamling-fancontrol.service steamling-lavd.service 2>/dev/null || true
+  fi
+}
+
+# steamling-powerd (an image overlay daemon) is retired: logind owns the power key. Nothing is
+# stopped or reloaded: until the reboot that boots the patched kernel, the running powerd and
+# logind's old setting are what keeps the wake press from re-suspending.
+_retire_powerd() {
+  rm -f /usr/local/bin/steamling-powerd /etc/systemd/system/steamling-powerd.service \
+        /etc/systemd/system/multi-user.target.wants/steamling-powerd.service
+  [ -d /run/systemd/system ] && systemctl daemon-reload
+  return 0
+}
+
+# The image overlay's root helper that held gamescope at RR 40 is retired; gamescope's threads
+# stay RR until the session restarts.
+_retire_gamescope_rt() {
+  [ -d /run/systemd/system ] && systemctl disable --now steamling-gamescope-rt.service 2>/dev/null
+  rm -f /usr/local/bin/steamling-gamescope-rt /etc/systemd/system/steamling-gamescope-rt.service \
+        /etc/systemd/system/multi-user.target.wants/steamling-gamescope-rt.service
+  return 0
+}
+
+# 60-steamling-deck.conf replaces the overlay's limits file. Only the two versions the overlay
+# shipped are removed; a user-edited copy is left in place.
+_retire_gaming_limits() {
+  f=/etc/security/limits.d/60-steamling-gaming.conf
+  [ -f "${f}" ] || return 0
+  case "$(sha256sum "${f}" | cut -d' ' -f1)" in
+    036a0245493fff6c5afaecc71970ba50f159e075a1d23acc5481799044fe7fab|\
+    2ad0dda0f16e3ee1951821eb156f55c6a35dbe65d33f0f7c997ab7615d41139e) rm -f "${f}" ;;
+  esac
+}
+
+# The volume daemon, the journal cap and the iwd backend were image overlay files. The /etc unit
+# shadows the packaged one, and NetworkManager reads /etc after /usr/lib, so the old copies go: the
+# Wi-Fi file only when it is one the overlay shipped, since an admin may have edited it.
+_retire_overlay_system() {
+  rm -f /usr/local/bin/steamling-volumed /etc/systemd/system/steamling-volumed.service \
+        /etc/systemd/system/multi-user.target.wants/steamling-volumed.service \
+        /usr/lib/systemd/journald.conf.d/10-steamling-flash.conf
+  f=/etc/NetworkManager/conf.d/20-wifi-backend.conf
+  if [ -f "${f}" ]; then
+    case "$(sha256sum "${f}" | cut -d' ' -f1)" in
+      35eb1e312c4d99575a7d517c8820c5eca9c84673b18a69fa5b54fdb2d4bd7a9a|\
+      fe419f1e47ec9628194de10c6f2f3e14cb3e77e7e6238692fa9daf00d71baa41) rm -f "${f}" ;;
+    esac
+  fi
+  [ -d /run/systemd/system ] || return 0
+  systemctl daemon-reload
+  systemctl restart steamling-volumed.service 2>/dev/null || true
+}
+
+# Enabled by its wants symlink; restart picks up a new daemon or profile file without a reboot.
+_perfd() {
+  [ -d /run/systemd/system ] || return 0
+  systemctl daemon-reload
+  systemctl reload dbus.service 2>/dev/null || true
+  systemctl restart steamling-perfd.service 2>/dev/null || true
+}
+
+# Applies the kernel-thread priorities now rather than at the next boot; reruns are harmless.
+_rt_ladder() {
+  [ -d /run/systemd/system ] || return 0
+  systemctl restart --no-block steamling-rt-ladder.service 2>/dev/null || true
+}
+
+post_install() {
+  _retire_overlay_system
+  _migrate_fan_lavd
+  _retire_powerd
+  _retire_gamescope_rt
+  _retire_gaming_limits
+  _perfd
+  _rt_ladder
+}
+
+post_upgrade() {
+  _retire_overlay_system
+  _migrate_fan_lavd
+  _retire_powerd
+  _retire_gamescope_rt
+  _retire_gaming_limits
+  _perfd
+  _rt_ladder
+}

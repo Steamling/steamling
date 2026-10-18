@@ -1,0 +1,4 @@
+#!/bin/sh
+# steamling-proton — compat-tool entrypoint shim; see steamling-steam/steamling-proton-wrapper. Ships
+# in-package because the tool dir is root-owned, out of reach of the user-level prep.
+exec /usr/lib/steamling/steamling-proton-wrapper "$(dirname "$0")/proton" "$@"

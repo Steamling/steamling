@@ -1,0 +1,27 @@
+# build output
+/build/*
+!/build/.gitkeep
+
+# vendored upstream (re-created by `make sync`)
+/vendor/*
+!/vendor/.gitkeep
+
+# locally built packages
+/packages/**/*.pkg.tar.zst
+/packages/**/src/
+/packages/**/pkg/
+# the makepkg srcdir rule above must not swallow the plugin's TypeScript sources
+!/packages/shared/steamling-decky/steamling-control/src/
+
+# decky plugin frontend build deps (dist/ IS committed — built on the dev Mac, needed by PKGBUILD)
+/packages/shared/steamling-decky/steamling-control/node_modules/
+
+# local Claude Code settings + context (private, never shipped)
+/.claude/
+/CLAUDE.md
+
+
+# macOS / editor cruft
+.DS_Store
+*.swp
+__pycache__/

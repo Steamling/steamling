@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Steamling Tools
+Comment=Snapshot rollback and system maintenance
+Exec=/usr/bin/steamling-tools
+TryExec=/usr/bin/steamling-tools
+Icon=preferences-system
+Terminal=false
+Categories=System;
+Keywords=rollback;snapshot;restore;undo;rolling;maintenance;

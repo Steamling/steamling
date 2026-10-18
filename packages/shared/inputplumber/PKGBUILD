@@ -1,0 +1,40 @@
+# inputplumber — input router/remapper daemon: presents a unified virtual controller so Steam
+# Input sees a proper pad (Guide button, rumble). Upstream's PREBUILT aarch64 release, so the
+# build chroot needs no Rust toolchain; the per-device config ships in steamling-bsp-<soc>.
+pkgname=inputplumber
+pkgver=0.82.0
+pkgrel=1.1
+pkgdesc="Open source input router and remapper daemon (prebuilt aarch64 release)"
+arch=('aarch64')
+url="https://github.com/ShadowBlip/InputPlumber"
+license=('GPL3')
+depends=('systemd' 'libevdev' 'polkit' 'dbus')
+provides=('inputplumber')
+conflicts=('inputplumber')
+# Prebuilt binary.
+options=('!strip' '!debug' '!lto')
+# Upstream device configs a steamling BSP replaces with its own: two configs matching one board
+# compete for the same source devices, and which one grabs the pad is down to load order.
+_bsp_replaces=(50-retroid_pocket6.yaml)
+source=("inputplumber-aarch64-${pkgver}.tar.gz::https://github.com/ShadowBlip/InputPlumber/releases/download/v${pkgver}/inputplumber-aarch64.tar.gz")
+sha256sums=('2695fc677f2ec1945a642e530029105d78be7d3058f412f31e83c37be5c9eeea')
+
+package() {
+  # The release tarball has usr/ at the top, sometimes inside one wrapper dir.
+  local usrdir
+  if [ -d "${srcdir}/usr" ]; then
+    usrdir="${srcdir}/usr"
+  else
+    usrdir="$(find "${srcdir}" -maxdepth 2 -type d -name usr | head -1)"
+  fi
+  [ -n "${usrdir}" ] || { echo "could not find usr/ in the release tarball"; return 1; }
+  cp -a "${usrdir}" "${pkgdir}/usr"
+  local f
+  for f in "${_bsp_replaces[@]}"; do
+    rm "${pkgdir}/usr/share/inputplumber/devices/${f}"
+  done
+  # Loads iio_trig_hrtimer for IMU polling. No steamling kernel builds it (no board has an IMU
+  # InputPlumber drives), and a module that is not there fails systemd-modules-load every boot.
+  rm "${pkgdir}/usr/lib/modules-load.d/inputplumber-hrtimer.conf"
+  rmdir "${pkgdir}/usr/lib/modules-load.d"
+}

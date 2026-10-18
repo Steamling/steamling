@@ -1,0 +1,41 @@
+# steamling-decky — Decky Loader (QAM plugin framework) + the Steamling Control plugin.
+# Everything ships under /usr/share; steamling-decky-sync seeds deck's ~/homebrew at boot.
+# The plugin frontend (dist/index.js) is prebuilt and committed — no node at package build time.
+pkgname=steamling-decky
+pkgver=0.1.0
+pkgrel=44.2
+pkgdesc="Decky Loader (under FEX, namespaced binfmt) + Steamling Control QAM plugin"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# Every game's launch options name steamling-game-launch; older steamling-steam releases lack it.
+depends=('fex-emu' 'fex-rootfs' 'steamling-steam>=0.1.0-67')
+_loaderver=v3.2.10
+source=('steamling-decky-run' 'steamling-decky-sync' 'steamling-decky-killall' 'steamling-decky-sync.service'
+        'steamling-decky-loader.service' 'PluginLoader.json'
+        "PluginLoader-${_loaderver}::https://github.com/SteamDeckHomebrew/decky-loader/releases/download/${_loaderver}/PluginLoader")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'c2cf316a53e1c1d318c6dda8821c827e5db275922987f9097956d7a1576e8258')
+
+package() {
+  install -Dm755 "${srcdir}/PluginLoader-${_loaderver}" "${pkgdir}/usr/share/decky-loader/PluginLoader"
+  printf '%s\n' "${_loaderver}" > "${srcdir}/loader.version"
+  install -Dm644 "${srcdir}/loader.version"          "${pkgdir}/usr/share/decky-loader/.loader.version"
+
+  install -Dm755 "${srcdir}/steamling-decky-run"       "${pkgdir}/usr/lib/steamling/steamling-decky-run"
+  install -Dm755 "${srcdir}/steamling-decky-sync"      "${pkgdir}/usr/lib/steamling/steamling-decky-sync"
+  install -Dm755 "${srcdir}/steamling-decky-killall"   "${pkgdir}/usr/lib/steamling/decky-bin/killall"
+  install -Dm644 "${srcdir}/steamling-decky-sync.service"   "${pkgdir}/usr/lib/systemd/system/steamling-decky-sync.service"
+  install -Dm644 "${srcdir}/steamling-decky-loader.service" "${pkgdir}/usr/lib/systemd/system/steamling-decky-loader.service"
+  # Decky's self-updater restarts plugin_loader.service; the symlink aliases it to ours.
+  ln -s steamling-decky-loader.service "${pkgdir}/usr/lib/systemd/system/plugin_loader.service"
+  install -Dm644 "${srcdir}/PluginLoader.json"       "${pkgdir}/usr/share/fex-emu/AppConfig/PluginLoader.json"
+
+  local plug="${startdir}/steamling-control" dest="${pkgdir}/usr/share/decky-plugins/SteamlingControl"
+  install -d -m755 "${dest}"
+  cp -a "${plug}/plugin.json" "${plug}/package.json" "${plug}/main.py" "${plug}/fex-profiles.json" "${dest}/"
+  cp -a "${plug}/py_modules" "${plug}/dist" "${dest}/"
+  rm -f "${dest}/dist"/*.map
+  find "${dest}" -name __pycache__ -type d -prune -exec rm -rf {} +
+  install -Dm644 "${plug}/LICENSE.gpcal" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.gpcal"
+}

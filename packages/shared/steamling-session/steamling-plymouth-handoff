@@ -1,0 +1,17 @@
+#!/bin/bash
+# --retain-splash cannot hold the image: the kernel restores the console framebuffer when
+# plymouthd exits. So plymouth is only deactivated at session start and quit here, once the
+# scanout has changed hands. Unreadable DRM state waits out the cap (the compositor has the panel).
+[ "${1:-}" = --wait ] || { "$0" --wait & exit 0; }
+
+start="$(date +%s%N)"
+for _ in $(seq 1 450); do  # 200ms ticks, 90s cap
+  pgrep -x plymouthd >/dev/null || exit 0
+  owners="$(grep -hs 'allocated by' /sys/kernel/debug/dri/*/state)"
+  if [ -n "${owners}" ] && ! grep -q plymouthd <<<"${owners}"; then
+    break
+  fi
+  sleep 0.2
+done
+plymouth quit --retain-splash
+echo "steamling-plymouth-handoff: plymouth quit after $(( ($(date +%s%N) - start) / 1000000 ))ms"

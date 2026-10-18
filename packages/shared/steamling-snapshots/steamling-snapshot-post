@@ -1,0 +1,28 @@
+#!/bin/bash
+# steamling-snapshot-post — alpm PostTransaction hook body: the transaction committed.
+set -uo pipefail
+
+. /usr/lib/steamling/snapshot-lib.sh
+steamling_snap_supported || exit 0
+
+RUN=/run/steamling
+lt="${RUN}/last-transaction.json"
+[ -f "${lt}" ] || exit 0
+
+id="$(jq -r '.snapshot_id // empty' "${lt}")"
+kin="$(jq -r '.kernel_in_transaction' "${lt}")"
+
+if [ -n "${id}" ] && [ -f "${SNAP_DIR}/${id}/info.json" ]; then
+  jq --arg fin "$(date -u +%FT%TZ)" '.transaction_ok = true | .finished = $fin' \
+    "${SNAP_DIR}/${id}/info.json" > "${SNAP_DIR}/${id}/.info.tmp" \
+    && mv "${SNAP_DIR}/${id}/.info.tmp" "${SNAP_DIR}/${id}/info.json"
+fi
+
+# on tmpfs, so it clears itself on the reboot it asks for
+[ "${kin}" = true ] && touch "${RUN}/reboot-required"
+
+# a completed transaction supersedes the rolled-back state the UI reports
+rm -f /var/lib/steamling/rollback-info.json
+
+steamling-snapshots prune --quiet || true
+exit 0

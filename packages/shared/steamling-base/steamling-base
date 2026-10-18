@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# steamling-base — show or switch the device's package base (locked snapshot vs live ALARM).
+# rolling appends the live repos BELOW [steamling] so steamling packages keep winning name
+# resolution, and -Syu's in the same breath: never leave the half-frozen partial-upgrade
+# state the lock exists to prevent. The rolling-mode flag is admin intent — it is what
+# stops steamling-lock-migrate auto-relocking the device.
+
+set -euo pipefail
+
+CONF=/etc/pacman.conf
+FLAG=/etc/steamling/rolling-mode
+MIGRATE=/usr/lib/steamling/steamling-lock-migrate
+PENDING=/var/lib/steamling/lock-migrate-pending
+BLOCKED=/var/lib/steamling/lock-converge-blocked
+
+die() { printf 'steamling-base: %s\n' "$*" >&2; exit 1; }
+
+mode() {
+  if grep -q '^\[pocknix-base\]' "${CONF}"; then echo locked
+  elif grep -q '^\[core\]' "${CONF}"; then echo rolling
+  else echo unknown; fi
+}
+
+# the snapshot id IS the steamling-base-lock pkgver (the stable repo url carries none)
+snapshot_id() { pacman -Q steamling-base-lock 2>/dev/null | awk '{print $2}' | cut -d- -f1; }
+
+# Installed but in neither locked repo. Guard: on an unsynced device (fresh image,
+# no dbs) an empty repo list would make every installed package look foreign.
+foreign() {
+  local repo
+  repo="$(pacman -Slq steamling steamling-shared steamling-base 2>/dev/null | LC_ALL=C sort -u)"
+  [ -n "${repo}" ] || return 0
+  LC_ALL=C comm -23 <(pacman -Qq | LC_ALL=C sort) <(printf '%s\n' "${repo}")
+}
+
+status() {
+  local m n
+  m="$(mode)"
+  case "${m}" in
+    locked)  echo "mode          : LOCKED (supported)"
+             echo "base snapshot : $(snapshot_id || true)" ;;
+    rolling) echo "mode          : ROLLING (bleeding edge, unsupported)"
+             echo "                'sudo steamling-base locked' returns to the supported base" ;;
+    unknown) echo "mode          : UNKNOWN (neither [pocknix-base] nor [core] in ${CONF})" ;;
+  esac
+  echo "repos         : $(grep -o '^\[[^]]*\]' "${CONF}" | tr -d '[]' | grep -v '^options$' | paste -sd' ' -)"
+  if [ -f "${BLOCKED}" ]; then
+    echo "base update   : BLOCKED by $(paste -sd' ' "${BLOCKED}")"
+    echo "                remove it (pacman -Rs <name>) then: steamling-base locked"
+  elif [ -f "${PENDING}" ]; then
+    echo "base update   : pending (runs on the next connect; systemctl start steamling-lock-converge)"
+  fi
+  n="$(foreign | grep -c . || true)"
+  if [ "${m}" = locked ] && [ "${n}" != 0 ]; then
+    echo "not from steamling (${n}): $(foreign | paste -sd' ' -)"
+    echo "                these keep working but do not update on a locked device"
+  fi
+}
+
+case "${1:-status}" in
+  status) status ;;
+
+  rolling)
+    [ "$(id -u)" -eq 0 ] || die "must run as root (sudo steamling-base rolling)"
+    [ "$(mode)" = locked ] || die "device is not in locked mode (current: $(mode))"
+    cat <<'EOF'
+
+  BLEEDING-EDGE MODE tracks live Arch Linux ARM.
+
+  Steamling's own stack (gamescope, mesa, the Steam session) is built against
+  the FROZEN base. Once rolling, any ALARM update can break it without
+  warning until the next steamling release — up to and including a black
+  screen on boot.
+
+  This mode is UNSUPPORTED: bugs must be reproduced on a locked device.
+
+  Seatbelts that remain: every update is still btrfs-snapshot-wrapped
+  (steamling-rollback undoes the last one), and 'sudo steamling-base locked'
+  returns fully to the supported state at any time.
+
+EOF
+    read -rp "  Type ROLL to continue: " a
+    [ "${a}" = "ROLL" ] || { echo "cancelled."; exit 0; }
+    # both conf generators emit the section as header/SigLevel/Server, so the range is stable
+    sed -i '/^\[pocknix-base\]$/,/^Server = /d' "${CONF}"
+    cat >> "${CONF}" <<'EOF'
+
+# BLEEDING-EDGE: live Arch Linux ARM (steamling-base rolling). [steamling] stays
+# first so steamling's own packages keep winning name resolution.
+[core]
+Include = /etc/pacman.d/mirrorlist
+[extra]
+Include = /etc/pacman.d/mirrorlist
+[alarm]
+Include = /etc/pacman.d/mirrorlist
+[aur]
+Include = /etc/pacman.d/mirrorlist
+EOF
+    install -d /etc/steamling
+    echo "bleeding-edge rolling mode, chosen $(date -u +%F). 'steamling-base locked' returns." > "${FLAG}"
+    echo
+    echo "==> switching to a coherent rolling state (full pacman -Syu)..."
+    pacman -Syu --noconfirm
+    echo
+    echo "Device is now ROLLING. steamling-rollback undoes the last update;"
+    echo "'sudo steamling-base locked' returns to the supported locked base."
+    ;;
+
+  locked)
+    [ "$(id -u)" -eq 0 ] || die "must run as root (sudo steamling-base locked)"
+    [ -x "${MIGRATE}" ] || die "${MIGRATE} missing (steamling-lock-migrate not installed?)"
+    # A converge refused by a blocking package leaves the device locked with the migration
+    # still armed, so "remove it, re-run" must resume here, not fail the rolling-mode check.
+    if [ "$(mode)" = locked ] && [ -f "${PENDING}" ]; then
+      echo "The base update is still pending on this device; resuming the converge."
+      echo
+      "${MIGRATE}" converge
+      exit 0
+    fi
+    [ "$(mode)" = rolling ] || die "device is not in rolling mode (current: $(mode))"
+    echo "Returning to the locked base: every base package converges (down) to the"
+    echo "snapshot. Software installed while rolling may block this if it pins newer"
+    echo "libraries — the converge names it and this command can be re-run after"
+    echo "removing it. Anything that survives but was built against newer libraries"
+    echo "may need removal too (the btrfs snapshot from unlock still covers a full"
+    echo "steamling-rollback)."
+    echo
+    rm -f "${FLAG}"
+    "${MIGRATE}" prepare
+    "${MIGRATE}" converge
+    ;;
+
+  *) die "usage: steamling-base [status|rolling|locked]" ;;
+esac

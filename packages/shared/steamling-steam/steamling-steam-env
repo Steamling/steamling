@@ -1,0 +1,16 @@
+# steamling-steam-env — sourced by both Steam launchers. Pins every game launch to the board's big
+# cores via Valve's steam-launch-wrapper (shortcuts included), and gives Wine a CPU topology over
+# the same cores: a topology that disagrees with the pin shows the game CPUs it may not use.
+# Values already in the env win. No guessed fallback: a board without the key is not pinned.
+# Steam Remote Play's V4L2 decoder path resets the decoder after its last buffer, which iris
+# needs to come back with a picture after a source change (with kernel 1096/1097).
+export STEAMLINK_V4L2_RESET_AFTER_LAST_BUF="${STEAMLINK_V4L2_RESET_AFTER_LAST_BUF:-1}"
+. /usr/lib/steamling/cores.sh
+_steamling_list="$(steamling_big_cores)"
+if [ -n "${_steamling_list}" ]; then
+  _steamling_topology="$(printf '%s' "${_steamling_list}" | awk -F, '{ print NF }'):${_steamling_list}"
+  export STEAM_LAUNCH_WRAPPER_AFFINITY_LIST="${STEAM_LAUNCH_WRAPPER_AFFINITY_LIST:-$(steamling_cores_mask "${_steamling_list}")}"
+  export WINE_CPU_TOPOLOGY="${WINE_CPU_TOPOLOGY:-${_steamling_topology}}"
+  export PROTON_CPU_TOPOLOGY="${PROTON_CPU_TOPOLOGY:-${_steamling_topology}}"
+fi
+unset _steamling_list _steamling_topology

@@ -1,0 +1,24 @@
+# Upstreams this tree tracks, kept as bare clones under build/mirrors by `make mirrors`
+# (scripts/mirrors.sh; scripts/mirrors.ps1 on a Windows checkout). Reference material for
+# rebases and patch work: no build step reads them.
+#
+#   <name>             <url>                                                         <clone>  [<branches>]
+# clone: full | shallow (depth 1) | blobless (contents fetched on first read).
+# <name>.git:<remote> adds a second remote to an existing mirror; its <branches> glob lands
+# under refs/heads/<remote>/.
+mesa.git                    https://gitlab.freedesktop.org/mesa/mesa.git                    full
+libliftoff.git              https://gitlab.freedesktop.org/emersion/libliftoff.git          full
+es-de.git                   https://gitlab.com/es-de/emulationstation-de.git                full
+linux-firmware.git          https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git  shallow
+linux.git                   https://github.com/torvalds/linux.git                           blobless
+linux.git:stable            https://github.com/gregkh/linux.git                             blobless  linux-7.*
+rocknix-distribution.git    https://github.com/ROCKNIX/distribution.git                     blobless
+gamescope.git               https://github.com/ValveSoftware/gamescope.git                  blobless
+gamescope-session.git       https://github.com/ChimeraOS/gamescope-session.git              full
+fex.git                     https://github.com/FEX-Emu/FEX.git                              blobless
+scx.git                     https://github.com/sched-ext/scx.git                            blobless
+inputplumber.git            https://github.com/ShadowBlip/InputPlumber.git                  full
+mupen64plus-libretro-nx.git https://github.com/libretro/mupen64plus-libretro-nx.git         full
+flycast.git                 https://github.com/flyinghead/flycast.git                       blobless
+swanstation.git             https://github.com/libretro/swanstation.git                     full
+libretro-core-info.git      https://github.com/libretro/libretro-core-info.git              full

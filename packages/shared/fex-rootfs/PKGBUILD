@@ -1,0 +1,95 @@
+# Maintainer: steamling
+#
+# fex-rootfs — the x86_64 Arch userland FEXServer FUSE-mounts as / for every translated x86
+# process, so x86 programs can resolve x86 libraries on our all-ARM device. Baked into the
+# package rather than fetched at first boot. Its Config.json ships from packages/soc/fex-emu.
+
+pkgname=fex-rootfs
+_rootfsdate=2026-01-08             # pinned dated image from FEX's rootfs CDN (immutable path)
+_mesaver=26.2.4-1                  # x86_64 turnip dropped INTO the image (see repack below)
+# Per-game Mesa Version payloads (same pins as steamling-turnip-x86) must live INSIDE the image:
+# pressure-vessel captures graphics against this rootfs, not the host, so host-only payloads are
+# invisible to it. vk-x86-container.list ships to the host as steamling-game-launch's SLR pin gate.
+_vkvers=('25.2.7-1' '25.3.5-1' '26.0.6-1' '26.1.6-1' "${_mesaver}")
+pkgver=${_rootfsdate//-/}          # 20260108
+pkgrel=10
+pkgdesc="x86_64 ArchLinux RootFS for FEX (x86 game userland + native Turnip GPU passthrough)"
+arch=('aarch64')
+url="https://rootfs.fex-emu.gg/"
+license=('custom')                 # a full Arch x86 userland — mixed upstream licensing
+depends=('fex-emu' 'squashfuse' 'vulkan-freedreno')
+makedepends=('squashfs-tools')
+options=('!strip' '!debug')
+
+# Mesa overlay: the CDN image's bundled x86 turnip reports storageBuffer8BitAccess=false, which
+# DXVK 3.x hard-requires, so the sqsh is repacked with newer vulkan-freedreno plus the two deps
+# the image lacks. Overlay the LIBS only — the image's freedreno_icd.*.json already point at
+# /usr/lib/libvulkan_freedreno.so, and adding the pkgs' unsuffixed json double-enumerates it.
+source=("ArchLinux-${_rootfsdate}.sqsh::https://rootfs.fex-emu.gg/ArchLinux/${_rootfsdate}/ArchLinux.sqsh"
+        "vulkan-freedreno-${_mesaver}-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/v/vulkan-freedreno/vulkan-freedreno-1%3A${_mesaver}-x86_64.pkg.tar.zst"
+        "libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/l/libdisplay-info/libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst"
+        "xcb-util-keysyms-0.4.1-5-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/x/xcb-util-keysyms/xcb-util-keysyms-0.4.1-5-x86_64.pkg.tar.zst"
+        "vulkan-freedreno-25.2.7-1-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/v/vulkan-freedreno/vulkan-freedreno-1%3A25.2.7-1-x86_64.pkg.tar.zst"
+        "vulkan-freedreno-25.3.5-1-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/v/vulkan-freedreno/vulkan-freedreno-1%3A25.3.5-1-x86_64.pkg.tar.zst"
+        "vulkan-freedreno-26.0.6-1-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/v/vulkan-freedreno/vulkan-freedreno-1%3A26.0.6-1-x86_64.pkg.tar.zst"
+        "vulkan-freedreno-26.1.6-1-x86_64.pkg.tar.zst::https://archive.archlinux.org/packages/v/vulkan-freedreno/vulkan-freedreno-1%3A26.1.6-1-x86_64.pkg.tar.zst")
+noextract=("ArchLinux-${_rootfsdate}.sqsh"
+           "vulkan-freedreno-${_mesaver}-x86_64.pkg.tar.zst"
+           "libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst"
+           "xcb-util-keysyms-0.4.1-5-x86_64.pkg.tar.zst"
+           "vulkan-freedreno-25.2.7-1-x86_64.pkg.tar.zst"
+           "vulkan-freedreno-25.3.5-1-x86_64.pkg.tar.zst"
+           "vulkan-freedreno-26.0.6-1-x86_64.pkg.tar.zst"
+           "vulkan-freedreno-26.1.6-1-x86_64.pkg.tar.zst")
+sha256sums=('cb059973b7953ad9165845529655189b96f9a174b14a6a149c87ec884b0c5e90'
+            'da30385afabfee1fba0456ff03e1a4f9d8168dc12679323f90bd496e5259e435'
+            '07ab1479ec5e70aea174e2d0e340bd9364b507ed74f2df3bfd51b3c6f40e5787'
+            '312213911881c0742e2a825432feac761e863945b74bb3a6daca97a99778d35e'
+            'b5554bb73674d6a5e7772bee71abd0e9d40929c61b5b690f79aba041ccffb5a8'
+            '6eecca2a8b639458371eca29e93605f83d7dc5ee7a3dab5980beddb758e90331'
+            '3d0c11b665b3409c8b6372f0369192355743d821727248115f973bd2c15bbbde'
+            '6b5785d7b7d7993a828d3f79c6c0e369a619d6e786dd2cfdfd8ac4ab1ad8a2d2')
+
+package() {
+  # Repack under fakeroot so the image's stored ownerships survive the round-trip, and match the
+  # original's compression (zstd, 128K blocks, per unsquashfs -s).
+  unsquashfs -q -d "${srcdir}/rootfs" "${srcdir}/ArchLinux-${_rootfsdate}.sqsh"
+  tar --zstd -xf "${srcdir}/vulkan-freedreno-${_mesaver}-x86_64.pkg.tar.zst" \
+    -C "${srcdir}/rootfs" usr/lib/libvulkan_freedreno.so
+  tar --zstd --wildcards -xf "${srcdir}/libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst" \
+    -C "${srcdir}/rootfs" 'usr/lib/libdisplay-info.so*'
+  tar --zstd --wildcards -xf "${srcdir}/xcb-util-keysyms-0.4.1-5-x86_64.pkg.tar.zst" \
+    -C "${srcdir}/rootfs" 'usr/lib/libxcb-keysyms.so*'
+
+  # Same payload layout + icd rewrite as steamling-turnip-x86; the paths must resolve identically
+  # in the rootfs and on the host.
+  local full ver vkdir
+  for full in "${_vkvers[@]}"; do
+    ver="${full%-*}"
+    vkdir="${srcdir}/rootfs/usr/share/steamling/vk-x86/${ver}"
+    mkdir -p "${vkdir}"
+    tar --zstd -xOf "${srcdir}/vulkan-freedreno-${full}-x86_64.pkg.tar.zst" \
+      usr/lib/libvulkan_freedreno.so > "${vkdir}/libvulkan_freedreno.so"
+    chmod 0755 "${vkdir}/libvulkan_freedreno.so"
+    tar --zstd -xOf "${srcdir}/vulkan-freedreno-${full}-x86_64.pkg.tar.zst" \
+      --wildcards 'usr/share/vulkan/icd.d/freedreno_icd*.json' \
+      | sed -E "s|\"library_path\": *\"[^\"]*\"|\"library_path\": \"/usr/share/steamling/vk-x86/${ver}/libvulkan_freedreno.so\"|" \
+      > "${vkdir}/icd.json"
+    chmod 0644 "${vkdir}/icd.json"
+  done
+
+  mksquashfs "${srcdir}/rootfs" "${srcdir}/ArchLinux-repacked.sqsh" \
+    -comp zstd -b 131072 -no-progress -quiet
+
+  # Config.json RootFS="ArchLinux.sqsh" resolves under this dir, which fex-emu's package() creates.
+  install -Dm0644 "${srcdir}/ArchLinux-repacked.sqsh" \
+    "${pkgdir}/usr/share/fex-emu/RootFS/ArchLinux.sqsh"
+
+  # The Vulkan host thunk loads turnip from here. Symlink rather than copy, so it always tracks
+  # the installed vulkan-freedreno instead of freezing at fex-rootfs build time.
+  install -d "${pkgdir}/usr/share/fex-emu"
+  ln -s /usr/lib/libvulkan_freedreno.so "${pkgdir}/usr/share/fex-emu/libvulkan_freedreno.so"
+
+  printf '%s\n' "${_vkvers[@]%-*}" > "${srcdir}/vk-x86-container.list"
+  install -Dm644 "${srcdir}/vk-x86-container.list" "${pkgdir}/usr/share/fex-emu/vk-x86-container.list"
+}

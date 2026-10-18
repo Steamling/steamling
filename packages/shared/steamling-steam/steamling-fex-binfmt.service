@@ -1,0 +1,14 @@
+# Re-assert the persisted FEX x86 binfmt choice once systemd-binfmt has registered the
+# handlers (root only: the deck session can't write binfmt_misc). Rationale: steamling-fex-binfmt.
+[Unit]
+Description=steamling: apply FEX x86 binfmt policy (default on)
+After=systemd-binfmt.service
+Wants=systemd-binfmt.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/steamling-fex-binfmt apply
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: shuuri-labs <61762328+shuuri-labs@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 17:20:02 +0200
+Subject: [PATCH 3/4] steamcompmgr: fix gamepad cursor sprite frozen via XTest
+
+---
+diff --git a/src/steamcompmgr.cpp b/src/steamcompmgr.cpp
+index 18be197..819d58b 100644
+--- a/src/steamcompmgr.cpp
++++ b/src/steamcompmgr.cpp
+@@ -2015,20 +2015,31 @@ MouseCursor::MouseCursor(xwayland_ctx_t *ctx)
+ 
+ void MouseCursor::UpdatePosition()
+ {
++	Window root_ret, child_ret;
++	int root_x = m_x, root_y = m_y, win_x = 0, win_y = 0;
++	unsigned int mask;
++	XQueryPointer( m_ctx->dpy, DefaultRootWindow( m_ctx->dpy ),
++	               &root_ret, &child_ret,
++	               &root_x, &root_y,
++	               &win_x, &win_y,
++	               &mask );
++
+ 	wlserver_lock();
+ 	struct wlr_pointer_constraint_v1 *pConstraint = wlserver.GetCursorConstraint();
+ 	m_bConstrained = !!pConstraint;
+-	if ( pConstraint && pConstraint->current.cursor_hint.enabled )
+-	{
+-		m_x = pConstraint->current.cursor_hint.x;
+-		m_y = pConstraint->current.cursor_hint.y;
+-	}
+-	else
++	wlserver_unlock();
++
++	if ( root_x != m_x || root_y != m_y )
+ 	{
+-		m_x = wlserver.mouse_surface_cursorx;
+-		m_y = wlserver.mouse_surface_cursory;
++		m_x = root_x;
++		m_y = root_y;
++		if ( !m_imageEmpty )
++		{
++			wlserver.ulLastMovedCursorTime = get_time_in_nanos();
++			wlserver.bCursorHidden = !wlserver.bCursorHasImage;
++			hasRepaintNonBasePlane = true;
++		}
+ 	}
+-	wlserver_unlock();
+ }
+ 
+ void MouseCursor::checkSuspension()

@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
+#
+# steamling-panel-calibration - trim a DSI panel's refresh rate to its nominal value through the
+# panel driver's frame_len_<rate> attributes (RP6 VTDR6130, kernel 0508), and keep the result.
+# Panels leave the factory a little fast or slow; emulators that pace to the display then drift
+# against their audio. The measuring loop is ROCKNIX's rocknix-panel-calibration.
+#
+#   steamling-panel-calibration status    JSON: available, the rates, current and saved values
+#   steamling-panel-calibration run       calibrate the mode the panel is running now, then save
+#   steamling-panel-calibration restore   write the saved values (boot, steamling-panel-calibration.service)
+#   steamling-panel-calibration reset     put the driver's own values back and forget the saved ones
+#
+# The conf keeps frame_len_<rate> (applied at boot) and default_frame_len_<rate>, the value the
+# driver had before the first calibration, so a reset needs no reboot.
+# Only the running mode is calibrated: game mode owns the display, so the mode is not switched.
+import fcntl
+import glob
+import json
+import os
+import struct
+import sys
+import time
+
+CONF = "/etc/steamling/panel-calibration.conf"
+DRM_IOCTL_WAIT_VBLANK = 0xC018643A
+STEP = 4
+
+
+def panel():
+    for attr in sorted(glob.glob("/sys/bus/mipi-dsi/devices/*/frame_len_*")):
+        return os.path.dirname(attr)
+    return None
+
+
+def rates(dev):
+    out = []
+    for attr in glob.glob(os.path.join(dev, "frame_len_*")):
+        try:
+            out.append(int(attr.rsplit("_", 1)[1]))
+        except ValueError:
+            pass
+    return sorted(out)
+
+
+def read_attr(dev, rate):
+    with open(os.path.join(dev, f"frame_len_{rate}")) as f:
+        return int(f.read().strip(), 0)
+
+
+def write_attr(dev, rate, value):
+    with open(os.path.join(dev, f"frame_len_{rate}"), "w") as f:
+        f.write(str(value))
+
+
+def load():
+    saved = {}
+    try:
+        with open(CONF) as f:
+            for line in f:
+                key, sep, value = line.strip().partition("=")
+                if sep and "frame_len_" in key and not key.startswith("#"):
+                    try:
+                        saved[key] = int(value, 0)
+                    except ValueError:
+                        pass
+    except OSError:
+        pass
+    return saved
+
+
+def applied(saved):
+    # {rate: value} for the keys restore writes
+    out = {}
+    for key, value in saved.items():
+        if key.startswith("frame_len_"):
+            try:
+                out[int(key[len("frame_len_"):])] = value
+            except ValueError:
+                pass
+    return out
+
+
+def store(saved):
+    os.makedirs(os.path.dirname(CONF), exist_ok=True)
+    tmp = CONF + ".tmp"
+    with open(tmp, "w") as f:
+        f.write("# steamling-panel-calibration: measured frame lengths, written to the panel at boot\n")
+        for key in sorted(saved):
+            f.write(f"{key}={saved[key]}\n")
+    os.replace(tmp, CONF)
+
+
+def wait(fd, pipe):
+    buf = bytearray(struct.pack("IIqq", 1 | pipe << 1, 1, 0, 0))
+    fcntl.ioctl(fd, DRM_IOCTL_WAIT_VBLANK, buf)
+    _, _, sec, usec = struct.unpack("IIqq", buf)
+    return sec + usec / 1e6
+
+
+def find_crtc():
+    for card in sorted(glob.glob("/dev/dri/card*")):
+        fd = os.open(card, os.O_RDWR)
+        for pipe in range(8):
+            try:
+                wait(fd, pipe)
+                return fd, pipe
+            except OSError:
+                pass
+        os.close(fd)
+    raise SystemExit("no active display")
+
+
+def measure(fd, pipe, seconds=0.5):
+    ts, end = [], time.monotonic() + seconds
+    while time.monotonic() < end:
+        ts.append(wait(fd, pipe))
+    return (len(ts) - 1) / (ts[-1] - ts[0])
+
+
+def calibrate(dev, rate, fd, pipe):
+    # Nudges the frame length until the measured rate settles just at or above the nominal one.
+    tolerance, big_error = (0.05, 0.1) if rate == 60 else (0.2, 0.4)
+
+    def write(value):
+        write_attr(dev, rate, value)
+        time.sleep(0.5)
+
+    start = read_attr(dev, rate)
+    value = start // STEP * STEP
+    start_rate = measure(fd, pipe)
+    deadline = time.monotonic() + 60
+    adjust_until = time.monotonic() + 15
+    try:
+        write(value)
+        while time.monotonic() < deadline:
+            delta = measure(fd, pipe) - rate
+            settled = 0 <= delta <= tolerance
+            if time.monotonic() < adjust_until:
+                if not settled:
+                    step = STEP if abs(delta) < big_error else 2 * STEP
+                    value += step if delta > 0 else -step
+                    write(value)
+            elif settled:
+                return start, value, start_rate, rate + delta
+            else:
+                adjust_until = time.monotonic() + 3.75
+    except OSError:
+        pass
+    write(start)
+    return None
+
+
+def main():
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
+    dev = panel()
+    # At boot the DSI devices appear when the display driver binds, which can trail the unit.
+    for _ in range(40 if cmd == "restore" and not dev else 0):
+        time.sleep(0.25)
+        dev = panel()
+        if dev:
+            break
+    if cmd == "status":
+        out = {"available": bool(dev), "rates": [], "current": {}, "saved": {}}
+        if dev:
+            out["rates"] = rates(dev)
+            out["current"] = {str(r): read_attr(dev, r) for r in out["rates"]}
+            out["saved"] = {str(r): v for r, v in applied(load()).items()}
+        print(json.dumps(out))
+        return 0
+    if not dev:
+        return 0 if cmd in ("restore", "reset") else 1
+    if cmd == "reset":
+        saved = load()
+        for rate in rates(dev):
+            default = saved.get(f"default_frame_len_{rate}")
+            if default is not None:
+                try:
+                    write_attr(dev, rate, default)
+                except OSError as exc:
+                    print(f"steamling-panel-calibration: frame_len_{rate}={default}: {exc}", file=sys.stderr)
+        try:
+            os.remove(CONF)
+        except FileNotFoundError:
+            pass
+        return 0
+    if cmd == "restore":
+        for rate, value in applied(load()).items():
+            try:
+                write_attr(dev, rate, value)
+            except OSError as exc:
+                print(f"steamling-panel-calibration: frame_len_{rate}={value}: {exc}", file=sys.stderr)
+        return 0
+    if cmd == "run":
+        os.sched_setscheduler(0, os.SCHED_FIFO, os.sched_param(10))
+        fd, pipe = find_crtc()
+        measured = measure(fd, pipe)
+        supported = rates(dev)
+        rate = min(supported, key=lambda r: abs(r - measured))
+        if abs(rate - measured) > 5:
+            print(f"steamling-panel-calibration: running at {measured:.2f} Hz, no frame_len for it", file=sys.stderr)
+            return 1
+        result = calibrate(dev, rate, fd, pipe)
+        if result is None:
+            print(f"steamling-panel-calibration: {rate} Hz: no stable value in range", file=sys.stderr)
+            return 1
+        start, value, before, after = result
+        saved = load()
+        saved.setdefault(f"default_frame_len_{rate}", start)
+        saved[f"frame_len_{rate}"] = value
+        store(saved)
+        print(json.dumps({"rate": rate, "from": start, "to": value, "before": round(before, 3), "after": round(after, 3)}))
+        return 0
+    print(f"usage: {os.path.basename(sys.argv[0])} status|run|restore|reset", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

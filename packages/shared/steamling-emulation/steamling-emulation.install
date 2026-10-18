@@ -1,0 +1,16 @@
+# Older images enabled the user unit with `systemctl --global enable`, a link pacman
+# never owned. rm, not systemctl: this also runs in the image-build chroot.
+_drop_unowned_wants() {
+  rm -f /etc/systemd/user/default.target.wants/steamling-roms-init.service
+}
+# Kept ONCE, never refreshed: it has to describe the templates from before baselines existed,
+# which is what gives such a device a real three-way first merge.
+_stash_prev_templates() {
+  [ -e /var/lib/steamling/seed-prev ] && return 0
+  [ -d /usr/share/steamling-emulation ] || return 0
+  mkdir -p /var/lib/steamling
+  cp -a /usr/share/steamling-emulation /var/lib/steamling/seed-prev 2>/dev/null || true
+}
+pre_upgrade()  { _stash_prev_templates; }
+post_install() { _drop_unowned_wants; }
+post_upgrade() { _drop_unowned_wants; }

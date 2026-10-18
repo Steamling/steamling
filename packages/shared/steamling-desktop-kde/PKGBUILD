@@ -1,0 +1,36 @@
+# Defaults every Plasma flavour shares; the flavours depend on it so no two own the same file.
+# Build with ./nodeps: makepkg -s would drag all of KDE/Qt into the chroot for a data package.
+pkgname=steamling-desktop-kde
+pkgver=0.1.0
+pkgrel=2.3
+pkgdesc="steamling KDE defaults shared by the Plasma desktop flavours"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('bash'
+         'plasma-workspace'
+         'kwin'
+         'powerdevil'
+         'kscreen'           # kscreen-doctor drives the rotated-DSI transform
+         'plasma-nm'
+         'bluedevil')
+# These files lived in steamling-desktop up to -26, and kwinrc in steamling-desktop-plasma -1; a lone
+# install against either would collide.
+conflicts=('steamling-desktop<0.1.0-27' 'steamling-desktop-plasma<0.1.0-1.1')
+source=('steamling-desktop-rotate' 'steamling-desktop-rotate.desktop'
+        'ksplashrc' 'powerdevilrc' 'kscreenlockerrc' '50-kde-power-key.sh'
+        'kwinrc' 'plasmakeyboardrc')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-desktop-rotate"   "${pkgdir}/usr/bin/steamling-desktop-rotate"
+  install -Dm644 "${srcdir}/steamling-desktop-rotate.desktop" \
+    "${pkgdir}/etc/xdg/autostart/steamling-desktop-rotate.desktop"
+  install -Dm644 "${srcdir}/ksplashrc"                "${pkgdir}/etc/xdg/ksplashrc"
+  install -Dm644 "${srcdir}/powerdevilrc"             "${pkgdir}/etc/xdg/powerdevilrc"
+  install -Dm644 "${srcdir}/kscreenlockerrc"          "${pkgdir}/etc/xdg/kscreenlockerrc"
+  install -Dm644 "${srcdir}/kwinrc"                   "${pkgdir}/etc/xdg/kwinrc"
+  install -Dm644 "${srcdir}/plasmakeyboardrc"         "${pkgdir}/etc/xdg/plasmakeyboardrc"
+  install -Dm755 "${srcdir}/50-kde-power-key.sh" \
+    "${pkgdir}/usr/lib/steamling/desktop.d/50-kde-power-key.sh"
+}

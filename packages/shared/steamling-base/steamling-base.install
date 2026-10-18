@@ -1,0 +1,68 @@
+# Unowned overlay leftovers: /usr/local wins PATH and would shadow the packaged
+# /usr/bin copy forever, and an /etc/pacman.d hook shadows the packaged one of the same name.
+_prune_superseded() {
+  rm -f /usr/local/bin/steamling-update \
+        /usr/share/applications/steamling-updater.desktop \
+        /var/lib/steamling/extra-packages \
+        /var/lib/steamling/extra-packages.snapshot \
+        /etc/pacman.d/hooks/95-steamling-paccache.hook
+}
+
+# Retrofits the [steamling-shared] stanza. The URL derives from the installed [steamling] one
+# (LAN-test devices point at their own host); pacman reads its config at transaction start,
+# so it goes live next transaction. The systemd guard keeps image chroots out.
+_add_shared_repo() {
+  [ -d /run/systemd/system ] || return 0
+  local conf=/etc/pacman.conf
+  grep -q '^\[steamling-shared\]' "${conf}" && return 0
+  grep -q '^\[steamling\]' "${conf}" || return 0
+  local server siglevel
+  server="$(awk '/^\[steamling\]$/{f=1;next} /^\[/{f=0} f && sub(/^Server *= */,""){print; exit}' "${conf}")"
+  siglevel="$(awk '/^\[steamling\]$/{f=1;next} /^\[/{f=0} f && sub(/^SigLevel *= */,""){print; exit}' "${conf}")"
+  [ -n "${server}" ] || return 0
+  server="${server%/}"; server="${server%/*}/shared"
+  awk -v srv="${server}" -v sig="${siglevel}" '
+    function emit() { print "[steamling-shared]"
+                      if (sig != "") print "SigLevel = " sig
+                      print "Server = " srv
+                      print ""
+                      done=1 }
+    /^\[/ { if (inpk && !done) emit(); inpk = ($0 == "[steamling]") }
+    { print }
+    END { if (inpk && !done) emit() }
+  ' "${conf}" > "${conf}.steamling-shared" && cat "${conf}.steamling-shared" > "${conf}"
+  rm -f "${conf}.steamling-shared"
+  echo "steamling: added the [steamling-shared] repo (${server}); active from the next update."
+}
+
+# ALARM's default login (password `alarm`, wheel) is a known root credential once SSH is on.
+# The home stays: a single login seeds it, so its contents cannot prove nobody moved in.
+_drop_alarm_user() {
+  [ -d /run/systemd/system ] || return 0
+  id alarm >/dev/null 2>&1 || return 0
+  if pgrep -u alarm >/dev/null 2>&1; then
+    echo "steamling: 'alarm' has running processes; it is removed on the next update instead."
+    return 0
+  fi
+  userdel alarm >/dev/null 2>&1 \
+    && echo "steamling: removed ALARM's default 'alarm' login (its files stay in /home/alarm)."
+}
+
+# The hook only fires from the transaction AFTER it is installed.
+_stamp_os_release() {
+  /usr/lib/steamling/steamling-os-release || true
+}
+
+post_install() {
+  _prune_superseded
+  _add_shared_repo
+  _drop_alarm_user
+  _stamp_os_release
+}
+
+post_upgrade() {
+  _prune_superseded
+  _add_shared_repo
+  _drop_alarm_user
+  _stamp_os_release
+}

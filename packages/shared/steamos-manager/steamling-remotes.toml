@@ -1,0 +1,13 @@
+# Served by steamling-perfd (steamling-bsp-common).
+
+[PerformanceProfile1]
+bus_name = "org.steamling.Perf"
+object_path = "/org/steamling/Perf"
+
+[GpuPerformanceLevel1]
+bus_name = "org.steamling.Perf"
+object_path = "/org/steamling/Perf"
+
+[CpuScaling1]
+bus_name = "org.steamling.Perf"
+object_path = "/org/steamling/Perf"

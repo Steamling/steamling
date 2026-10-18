@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=xemu
+GenericName=Original Xbox Emulator
+Exec=/opt/steamling/emulators/xemu/xemu.AppImage
+Icon=/opt/steamling/emulators/xemu/icon.svg
+Terminal=false
+Categories=Game;Emulator;

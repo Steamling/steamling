@@ -1,0 +1,142 @@
+import asyncio
+
+from steamling_control import calibration, panel
+from steamling_control.config import build_config
+from steamling_control.configio import apply_config, config_dir, export_config, read_config
+from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
+from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
+from steamling_control.sdcard import detect_sdcard, format_sdcard
+from steamling_control.sharing import install_samba, set_share, share_status
+from steamling_control.snapshots import reboot_system, snapshot_status, start_rollback
+from steamling_control.touch import sync_touch
+from steamling_control.tweaks import load_tweaks, save_tweaks
+from steamling_control.updates import check_updates, start_update, update_status
+
+
+class Plugin:
+    # Appid of the running game, reported by the frontend's app-lifetime hook; drives the
+    # touchscreen tweak. Starts None, so a (re)loaded backend turns touch back on.
+    _running_appid = None
+
+    # Offload blocking work to a thread so a slow call can't stall Decky's asyncio loop.
+    async def get_config(self):
+        return await asyncio.to_thread(build_config)
+
+    async def _main(self):
+        await asyncio.to_thread(restore_led)
+        await asyncio.to_thread(calibration.recover)
+        await asyncio.to_thread(sync_touch, self._running_appid)
+
+    async def _unload(self):
+        await asyncio.to_thread(calibration.cancel)
+        await asyncio.to_thread(sync_touch, None)
+
+    async def game_lifetime(self, appid, running):
+        appid = str(appid or "")
+        if running:
+            self._running_appid = appid or None
+        elif appid == self._running_appid:
+            self._running_appid = None
+        await asyncio.to_thread(sync_touch, self._running_appid)
+
+    async def detect_sdcard(self):
+        return await asyncio.to_thread(detect_sdcard)
+
+    async def format_sdcard(self, label):
+        return await asyncio.to_thread(format_sdcard, label)
+
+    async def share_status(self):
+        return await asyncio.to_thread(share_status)
+
+    async def set_share(self, on):
+        return await asyncio.to_thread(set_share, on)
+
+    async def install_samba(self):
+        return await asyncio.to_thread(install_samba)
+
+    # The setters answer with only the fields they change, which is all the frontend reads back:
+    # get_config re-reads the whole Steam library, and this Python runs emulated under FEX.
+    @staticmethod
+    def _modes():
+        return {"fanMode": fan_mode(), "lavdMode": lavd_mode()}
+
+    async def set_fan_mode(self, mode):
+        await asyncio.to_thread(set_fan_mode, mode)
+        return self._modes()
+
+    async def set_lavd_mode(self, mode):
+        await asyncio.to_thread(set_lavd_mode, mode)
+        return self._modes()
+
+    async def save_tweaks(self, data):
+        await asyncio.to_thread(save_tweaks, data)
+        await asyncio.to_thread(sync_touch, self._running_appid)
+        return {"tweaks": await asyncio.to_thread(load_tweaks)}
+
+    async def export_config(self, appid, name, basename, allow_overwrite):
+        return await asyncio.to_thread(export_config, appid, name, basename, allow_overwrite)
+
+    async def config_dir(self):
+        return await asyncio.to_thread(config_dir)
+
+    async def read_config(self, path):
+        return await asyncio.to_thread(read_config, path)
+
+    async def apply_config(self, path, source_appid, target_appid, target_name):
+        return await asyncio.to_thread(apply_config, path, source_appid, target_appid, target_name)
+
+    # Not get_config(): that re-parses the whole Steam library, and a colour slider
+    # commits repeatedly while it is being dialled in.
+    async def set_led(self, side, r, g, b, brightness):
+        return await asyncio.to_thread(set_led, side, r, g, b, brightness)
+
+    async def set_led_linked(self, linked):
+        return await asyncio.to_thread(set_led_linked, linked)
+
+    async def set_led_enabled(self, enabled):
+        return await asyncio.to_thread(set_led_enabled, enabled)
+
+    async def set_led_sides(self, sides):
+        return await asyncio.to_thread(set_led_sides, sides)
+
+    async def check_updates(self):
+        return await asyncio.to_thread(check_updates)
+
+    async def start_update(self):
+        return await asyncio.to_thread(start_update)
+
+    async def update_status(self):
+        return await asyncio.to_thread(update_status)
+
+    async def snapshot_status(self):
+        return await asyncio.to_thread(snapshot_status)
+
+    async def start_rollback(self, snapshot_id):
+        return await asyncio.to_thread(start_rollback, snapshot_id)
+
+    async def reboot_system(self):
+        return await asyncio.to_thread(reboot_system)
+
+    async def calibration_status(self):
+        return await asyncio.to_thread(calibration.status)
+
+    async def calibration_start(self):
+        return await asyncio.to_thread(calibration.start)
+
+    async def calibration_cancel(self):
+        return await asyncio.to_thread(calibration.cancel)
+
+    async def calibration_save(self):
+        return await asyncio.to_thread(calibration.save)
+
+    async def calibration_reset(self):
+        return await asyncio.to_thread(calibration.reset)
+
+    async def panel_status(self):
+        return await asyncio.to_thread(panel.status)
+
+    async def panel_calibrate(self):
+        return await asyncio.to_thread(panel.run)
+
+    async def panel_reset(self):
+        return await asyncio.to_thread(panel.reset)

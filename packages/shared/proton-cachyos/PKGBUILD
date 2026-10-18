@@ -1,0 +1,56 @@
+# proton-cachyos — CachyOS's official ARM64 Proton, shipped as a SYSTEM compat tool. This is the
+# reference for the other steamling Proton packages (proton-ge, the *-dxvk2 variants).
+#
+# The tool dir and the compatibilitytool.vdf internal name must both stay CONSTANT across bumps:
+# Steam records that internal name in per-game config.vdf selections, so keeping it lets a
+# pacman -Syu swap the files underneath while every game already set to it keeps working. For the
+# same reason the dropdown label carries the MAJOR version only, never the release date.
+#
+# steamling-proton-prep (steamling-steam) does the user-dir registration, since the tool dir is
+# root-owned and cannot symlink itself into ~/.local/share/Steam/compatibilitytools.d.
+pkgname=proton-cachyos
+_srctag=11.0-20261005
+_build=slr
+_major=${_srctag%%.*}
+pkgver=${_srctag//-/.}
+pkgrel=1
+pkgdesc="CachyOS Proton (official ARM64 build) as a system Steam compatibility tool"
+arch=('aarch64')
+url="https://github.com/CachyOS/proton-cachyos"
+license=('BSD' 'LGPL' 'zlib' 'MIT' 'MPL' 'custom')
+depends=('bash' 'python' 'steamling-steam')
+options=('!strip' 'emptydirs')
+_dist="proton-cachyos-${_srctag}-${_build}-arm64"
+source=("https://github.com/CachyOS/proton-cachyos/releases/download/cachyos-${_srctag}-${_build}/${_dist}.tar.xz"
+        'compatibilitytool.vdf.in'
+        'toolmanifest.vdf'
+        'steamling-proton')
+sha512sums=('81ca1b66e841d8f33acee1b1425d4854e3a3245860a6273e12dee1342bddca9ba7cdea41362aca14e33e6da93e4f01d69d281f1c7c59e3f720f97d6299b1c0fa'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+
+build() {
+  sed "s|@VER@|${_major}|" compatibilitytool.vdf.in > compatibilitytool.vdf
+}
+
+package() {
+  local tooldir="usr/share/steam/compatibilitytools.d/${pkgname}"
+  mkdir -p "${pkgdir}/${tooldir}"
+  cp -a "${srcdir}/${_dist}/." "${pkgdir}/${tooldir}/"
+
+  # The shim must land next to `proton`: toolmanifest commandline paths resolve relative to the
+  # tool dir.
+  install -Dm644 "${srcdir}/compatibilitytool.vdf" "${pkgdir}/${tooldir}/compatibilitytool.vdf"
+  install -Dm644 "${srcdir}/toolmanifest.vdf"      "${pkgdir}/${tooldir}/toolmanifest.vdf"
+  install -Dm755 "${srcdir}/steamling-proton"        "${pkgdir}/${tooldir}/steamling-proton"
+
+  # Tolerant of absence: upstream moves these between releases.
+  local f
+  for f in LICENSE LICENSE.OFL PATENTS.AV1; do
+    if [ -f "${pkgdir}/${tooldir}/${f}" ]; then
+      install -Dm644 "${pkgdir}/${tooldir}/${f}" "${pkgdir}/usr/share/licenses/${pkgname}/${f}"
+      rm -f "${pkgdir}/${tooldir}/${f}"
+    fi
+  done
+}

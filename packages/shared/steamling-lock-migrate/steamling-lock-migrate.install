@@ -1,0 +1,7 @@
+post_install() {
+  /usr/lib/steamling/steamling-lock-migrate prepare
+}
+
+post_upgrade() {
+  post_install
+}

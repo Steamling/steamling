@@ -1,0 +1,99 @@
+# steamling-branding — Steamling artwork: the plymouth boot theme, the Plasma splash, and the
+# desktop wallpaper. The boot theme is the steamling (a baby dragon) peeking over the turning
+# handheld, with no wording; the Plasma splash and wallpaper carry the Steamling logo, the same
+# dragon over the steamling wordmark. The boot theme sits on a black field, as on the SteamOS
+# boot (game mode boots like a Deck); the Plasma splash and wallpaper keep the #202126 desktop
+# field. Everything is drawn from SVG at build time: no rendered PNG is committed.
+pkgname=steamling-branding
+pkgver=0.1.0
+pkgrel=2.3
+pkgdesc="Steamling branding: plymouth boot theme, Plasma splash, wallpaper"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('bash')
+install='steamling-branding.install'
+# The plymouth theme is DERIVED from the installed stock spinner at build time, not committed:
+# copied frames would drift from plymouth's own; output in our own dir survives a plymouth upgrade.
+# librsvg: the watermark, boot frames, splash logo and wallpaper are drawn from SVG at build
+# time.
+makedepends=('plymouth' 'librsvg')
+source=('watermark.svg' 'throbber.svg' 'steamling.awk'
+        'steamling-logo.svg' 'wallpaper.svg'
+        'Splash.qml' 'splash-metadata.json' 'wallpaper-metadata.json'
+        'steamling-branding-init' 'steamling-branding-init.service')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+_spinner=/usr/share/plymouth/themes/spinner
+
+build() {
+  # makepkg symlinks local sources into srcdir, and librsvg refuses <image> hrefs that resolve
+  # outside the referencing file's directory, so render from real copies.
+  local w="${srcdir}/render" f n
+  rm -rf "${w}"
+  install -d "${w}"
+  cp -L "${srcdir}"/{watermark.svg,throbber.svg,steamling-logo.svg,wallpaper.svg} "${w}/"
+  # two-step redraws its throbber at 30 fps over a fixed 2 s loop: 60 frames, one per redraw.
+  # The same script writes logo.svg, the still pose the watermark shows.
+  awk -v frames=60 -v out="${w}" -f "${srcdir}/steamling.awk"
+  rsvg-convert "${w}/watermark.svg" -o "${w}/watermark.png"
+  for f in "${w}"/particles-*.svg; do
+    n="${f##*/particles-}"
+    cp "${f}" "${w}/particles.svg"
+    rsvg-convert "${w}/throbber.svg" -o "${w}/throbber-${n%.svg}.png"
+  done
+  # the splash logo at twice its 380x420 size, for 2x panels
+  rsvg-convert -w 760 "${w}/steamling-logo.svg" -o "${w}/logo.png"
+  rsvg-convert "${w}/wallpaper.svg" -o "${w}/wallpaper-1920x1080.png"
+}
+
+package() {
+  # --- plymouth boot theme -------------------------------------------------------------
+  [ -d "${_spinner}" ] || { echo "steamling-branding: ${_spinner} missing (is plymouth installed?)" >&2; return 1; }
+  local theme="${pkgdir}/usr/share/plymouth/themes/steamling"
+  install -d "${theme}"
+  cp -a "${_spinner}/." "${theme}/"
+  mv "${theme}/spinner.plymouth" "${theme}/steamling.plymouth"
+  # the still pose replaces the Arch watermark (sized in logical px, see watermark.svg), and the
+  # boot frames (the handheld turning, the steam rising) replace the spinner's throbber frames
+  install -Dm644 "${srcdir}/render/watermark.png" "${theme}/watermark.png"
+  rm -f "${theme}"/throbber-*.png
+  install -m644 "${srcdir}"/render/throbber-*.png "${theme}/"
+
+  # Name/Description/ImageDir point at OUR dir; the black field follows the SteamOS boot
+  # screen. two-step tops the watermark at a(H-h) but centres the throbber on aH, so the still
+  # logo and the frames share a top on any screen only when a*h(watermark) = h(throbber)/2. a = 7/16
+  # with the 288-high watermark and the 252-high throbber (288a = 126) puts the logo's centre
+  # just above the screen's, where logo and wordmark sat together. Both are exact in binary, so
+  # the two truncate to the same pixel. Messages move to the corner, clear of the logo;
+  # steamling-steam-splash reads the field and alignment back.
+  sed -i -e '/^Name\[[^]]*\]=/d' \
+         -e 's|^Name=.*|Name=Steamling|' \
+         -e 's|^Description=.*|Description=Steamling boot splash: a baby dragon peeks over the handheld, puffing steam, while the handheld turns over.|' \
+         -e "s|^ImageDir=.*|ImageDir=/usr/share/plymouth/themes/steamling|" \
+         -e 's|^BackgroundStartColor=.*|BackgroundStartColor=0x000000|' \
+         -e 's|^BackgroundEndColor=.*|BackgroundEndColor=0x000000|' \
+         -e 's|^WatermarkVerticalAlignment=.*|WatermarkVerticalAlignment=.4375|' \
+         -e 's|^VerticalAlignment=.*|VerticalAlignment=.4375|' \
+         -e 's|^MessageBelowAnimation=.*|MessageBelowAnimation=false|' \
+         "${theme}/steamling.plymouth"
+
+  # --- Plasma splash (KSplash look-and-feel) -------------------------------------------
+  local splash="${pkgdir}/usr/share/plasma/look-and-feel/com.steamling.splash"
+  install -Dm644 "${srcdir}/splash-metadata.json" "${splash}/metadata.json"
+  install -Dm644 "${srcdir}/Splash.qml"           "${splash}/contents/splash/Splash.qml"
+  install -Dm644 "${srcdir}/render/logo.png"      "${splash}/contents/splash/images/logo.png"
+
+  # --- wallpaper -----------------------------------------------------------------------
+  local wall="${pkgdir}/usr/share/wallpapers/SteamlingOS"
+  install -Dm644 "${srcdir}/wallpaper-metadata.json"    "${wall}/metadata.json"
+  install -Dm644 "${srcdir}/render/wallpaper-1920x1080.png" "${wall}/contents/images/1920x1080.png"
+
+  # --- first-login wallpaper seed ------------------------------------------------------
+  install -Dm755 "${srcdir}/steamling-branding-init" "${pkgdir}/usr/bin/steamling-branding-init"
+  install -Dm644 "${srcdir}/steamling-branding-init.service" \
+    "${pkgdir}/usr/lib/systemd/user/steamling-branding-init.service"
+  install -d "${pkgdir}/usr/lib/systemd/user/plasma-plasmashell.service.wants"
+  ln -s ../steamling-branding-init.service \
+    "${pkgdir}/usr/lib/systemd/user/plasma-plasmashell.service.wants/steamling-branding-init.service"
+}

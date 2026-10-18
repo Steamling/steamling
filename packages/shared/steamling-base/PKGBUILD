@@ -1,0 +1,36 @@
+# steamling-base — base-mode tooling for locked devices: the locked<->rolling
+# switch and the desktop updater.
+pkgname=steamling-base
+pkgver=0.2.0
+pkgrel=6.1
+pkgdesc="Locked/rolling base mode switch, desktop updater and pacman cache trim for steamling"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+# base-lock rides along so `steamling-base status` can always name the snapshot
+depends=('pacman' 'steamling-base-lock' 'pacman-contrib')
+install=steamling-base.install
+source=('steamling-base'
+        'steamling-update'
+        'steamling-update.desktop'
+        '51-steamling-update.rules'
+        'steamling-os-release'
+        '50-steamling-os-release.hook'
+        '95-steamling-paccache.hook')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-base" "${pkgdir}/usr/bin/steamling-base"
+  # /usr/bin, not the old /usr/local path: that would file-conflict with the unowned
+  # overlay copy on fielded devices (the scriptlet prunes it instead)
+  install -Dm755 "${srcdir}/steamling-update" "${pkgdir}/usr/bin/steamling-update"
+  install -Dm644 "${srcdir}/steamling-update.desktop" \
+    "${pkgdir}/usr/share/applications/steamling-update.desktop"
+  install -Dm644 "${srcdir}/51-steamling-update.rules" \
+    "${pkgdir}/usr/share/polkit-1/rules.d/51-steamling-update.rules"
+  install -Dm755 "${srcdir}/steamling-os-release" "${pkgdir}/usr/lib/steamling/steamling-os-release"
+  install -Dm644 "${srcdir}/50-steamling-os-release.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/50-steamling-os-release.hook"
+  install -Dm644 "${srcdir}/95-steamling-paccache.hook" \
+    "${pkgdir}/usr/share/libalpm/hooks/95-steamling-paccache.hook"
+}

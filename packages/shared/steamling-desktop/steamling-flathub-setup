@@ -1,0 +1,32 @@
+#!/bin/bash
+# steamling-flathub-setup — register the Flathub remote and seed the apps shipped as flatpaks
+# rather than frozen-base packages (browser CVEs cannot wait for a steamling release).
+# NM-dispatched on every link-up, so offline or failed attempts heal on the next connect.
+set -e
+# Stamp, not a "present?" test, so a deliberate uninstall survives reboots. Stamped
+# only after a confirmed seed, or an offline first boot would give up browserless.
+STAMP=/var/lib/steamling/flathub-seeded
+seed_firefox() {
+  [ -e "${STAMP}" ] && return 0
+  flatpak info org.mozilla.firefox >/dev/null 2>&1 || \
+    flatpak install --system --noninteractive flathub org.mozilla.firefox || return 1
+  mkdir -p /var/lib/steamling
+  touch "${STAMP}"
+}
+
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+# A reboot mid-seed (Steam's OOBE forces one on first boot) leaves a ref that looks
+# installed but cannot be read; only repair drops it, so a plain retry fails forever.
+seed_firefox || { flatpak repair --system; seed_firefox; }
+# Retire the pacman browsers only once the flatpak is present, never leaving a device
+# browserless. Fail hard: under RemainAfterExit=yes a swallowed error leaves the unit
+# active(exited), so the dispatcher's `systemctl start` no-ops and the retry never happens.
+if flatpak info org.mozilla.firefox >/dev/null 2>&1; then
+  stale="$(pacman -Qq firefox angelfish 2>/dev/null || true)"
+  if [ -n "${stale}" ]; then
+    pacman -Rns --noconfirm ${stale} || {
+      echo "steamling-flathub-setup: removing the pacman browsers (${stale//$'\n'/ }) failed (db locked?) — retrying on the next link-up" >&2
+      exit 1
+    }
+  fi
+fi

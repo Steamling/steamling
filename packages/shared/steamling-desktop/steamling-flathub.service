@@ -1,0 +1,13 @@
+[Unit]
+Description=steamling: register the Flathub remote for Discover/flatpak
+# remote-add fetches flathub.flatpakrepo, so the first run needs the network; later runs no-op.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/steamling-flathub-setup
+RemainAfterExit=yes
+
+# Do not add [Install]: only the NM dispatcher hook (50-steamling-flathub) may start this - see
+# steamling-flathub-dispatcher for why a boot transaction cannot work.

@@ -1,0 +1,64 @@
+#!/bin/sh
+# steamling-fex-binfmt — get/set/apply the global FEX x86 binfmt handlers (on|off).
+#
+# DEFAULT IS ON: binfmt is what makes x86 Proton + Steam Linux Runtime work out of the box
+# (x86_64 ELFs such as pressure-vessel, x86 Wine and native x86 Linux games exec transparently
+# through FEX). It is harmless to the ARM Proton path, whose x86 game code goes Wine->FEX
+# internally, not via Linux binfmt.
+#
+# "off" remains available for debugging/troubleshooting. The choice persists across
+# reboots in /var/lib/steamling/fex-binfmt (absent = on, the shipped default) and is
+# applied live: systemd-binfmt registers the handlers, on/off only flips their enable
+# bit. `apply` re-asserts the persisted choice onto /proc and is called by
+# steamling-fex-binfmt.service at boot AND by the 90-steamling-fex-binfmt pacman hook after
+# anything re-registers binfmt.d entries (a fex-emu upgrade re-enables the handlers via
+# systemd's own hook — the apply hook re-imposes an "off" choice immediately instead of
+# leaking until reboot).
+#
+#   steamling-fex-binfmt          # print the current LIVE state
+#   steamling-fex-binfmt on|off   # set + persist + apply (root)
+#   steamling-fex-binfmt apply    # re-assert the persisted choice (root; boot/hook use)
+MODE_FILE=/var/lib/steamling/fex-binfmt
+DEFAULT=on
+
+live_state() {
+  head -1 /proc/sys/fs/binfmt_misc/FEX-x86_64 2>/dev/null | grep -q enabled && echo on || echo off
+}
+
+wanted_state() {
+  m="$(cat "${MODE_FILE}" 2>/dev/null)"
+  case "${m}" in on|off) echo "${m}" ;; *) echo "${DEFAULT}" ;; esac
+}
+
+apply_state() {
+  v=0; [ "$(wanted_state)" = on ] && v=1
+  for h in FEX-x86_64 FEX-x86; do
+    echo "${v}" > "/proc/sys/fs/binfmt_misc/${h}" 2>/dev/null
+  done
+}
+
+case "${1:-}" in
+  "")
+    live_state
+    ;;
+  apply)
+    apply_state
+    ;;
+  on|off)
+    mkdir -p "$(dirname "${MODE_FILE}")" 2>/dev/null
+    if ! printf '%s\n' "${1}" > "${MODE_FILE}" 2>/dev/null; then
+      echo "steamling-fex-binfmt: cannot write ${MODE_FILE} (run as root)" >&2
+      exit 1
+    fi
+    apply_state
+    if [ "$(live_state)" != "${1}" ]; then
+      echo "steamling-fex-binfmt: cannot flip /proc/sys/fs/binfmt_misc/FEX-* (run as root; handlers registered?)" >&2
+      exit 1
+    fi
+    echo "fex binfmt: ${1}"
+    ;;
+  *)
+    echo "usage: steamling-fex-binfmt [on|off|apply]" >&2
+    exit 2
+    ;;
+esac

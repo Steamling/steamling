@@ -1,0 +1,27 @@
+# steamling pacman.conf template: the Arch Linux ARM base, valid on its own.
+# lib.sh render_base_pacman_conf renders it, swapping the live repos for [pocknix-base]
+# when a snapshot is pinned; build-image.sh inserts [steamling] + [steamling-shared] ABOVE
+# the first base repo so unqualified names resolve to ours before ALARM's.
+
+[options]
+Architecture = aarch64
+HoldPkg     = pacman glibc
+# NOTE: CheckSpace is intentionally OMITTED. Inside a chroot it can't resolve the
+# cachedir mount point (mountinfo shows host-absolute paths), failing with
+# "could not determine cachedir mount point / not enough free disk space" even
+# with ample space. Standard for chroot/bootstrap builds.
+SigLevel    = Required DatabaseOptional
+LocalFileSigLevel = Optional
+ParallelDownloads = 5
+
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+[alarm]
+Include = /etc/pacman.d/mirrorlist
+
+[aur]
+Include = /etc/pacman.d/mirrorlist

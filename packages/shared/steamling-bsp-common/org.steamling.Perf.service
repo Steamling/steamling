@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.steamling.Perf
+Exec=/bin/false
+User=root
+SystemdService=steamling-perfd.service

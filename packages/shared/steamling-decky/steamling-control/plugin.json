@@ -1,0 +1,6 @@
+{
+  "name": "Steamling Control",
+  "author": "Steamling",
+  "flags": ["root"],
+  "api_version": 1
+}

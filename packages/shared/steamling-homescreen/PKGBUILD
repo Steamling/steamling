@@ -1,0 +1,23 @@
+# Plasma Mobile boots to an empty, user-immutable homescreen. On the first Plasma Mobile login
+# this puts the default apps on the dock and unlocks it; after that the layout is the user's.
+pkgname=steamling-homescreen
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Plasma Mobile homescreen defaults: dock apps, unlocked, set once"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('bash' 'python' 'plasma-mobile')
+source=('steamling-homescreen-seed' 'steamling-homescreen-init' 'steamling-homescreen-init.service')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-homescreen-seed" "${pkgdir}/usr/bin/steamling-homescreen-seed"
+  install -Dm755 "${srcdir}/steamling-homescreen-init" "${pkgdir}/usr/bin/steamling-homescreen-init"
+  local units="${pkgdir}/usr/lib/systemd/user"
+  install -Dm644 "${srcdir}/steamling-homescreen-init.service" "${units}/steamling-homescreen-init.service"
+  # Pulled in by the shell's own unit, as steamling-branding does: --user units cannot be
+  # enabled at install time, there is no user yet.
+  install -d "${units}/plasma-plasmashell.service.wants"
+  ln -s ../steamling-homescreen-init.service "${units}/plasma-plasmashell.service.wants/steamling-homescreen-init.service"
+}

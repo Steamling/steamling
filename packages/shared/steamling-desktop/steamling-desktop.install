@@ -1,0 +1,53 @@
+# Dropping [Install] does not remove an existing enable symlink and systemd still honours it.
+# rm, not `systemctl disable`: this also runs in the image-build chroot.
+_drop_stale_flathub_wants() {
+  rm -f /etc/systemd/system/multi-user.target.wants/steamling-flathub.service
+}
+
+# The hook only fires when fontconfig is next touched; prune here so this upgrade repairs the device.
+_prune_fontcache() {
+  /usr/bin/steamling-fontcache-prune 2>/dev/null || true
+}
+
+# Devices seeded before the stamp existed: backfill so an uninstall sticks from the
+# first -Syu. Upgrade-only, a fresh image must still seed.
+_backfill_flathub_stamp() {
+  [ -e /var/lib/steamling/flathub-seeded ] && return 0
+  if flatpak info org.mozilla.firefox >/dev/null 2>&1; then
+    mkdir -p /var/lib/steamling
+    touch /var/lib/steamling/flathub-seeded
+  fi
+}
+
+# The Waydroid helpers were image overlay files: the /etc unit shadows the packaged one, and the
+# deck user's copy of the .apk handler would shadow the system entry and run the removed script.
+# That copy goes only when it is one the overlay shipped.
+_retire_overlay_waydroid() {
+  rm -f /usr/local/bin/steamling-waydroid-tuning /usr/local/bin/steamling-waydroid-apk-install \
+        /etc/systemd/system/steamling-waydroid-tuning.service \
+        /etc/systemd/system/waydroid-container.service.wants/steamling-waydroid-tuning.service
+  local home f
+  for home in ${STEAMLING_HOME_ROOT:-/home}/*; do
+    f="${home}/.local/share/applications/waydroid-apk-install.desktop"
+    [ -f "${f}" ] || continue
+    case "$(sha256sum "${f}" | cut -d' ' -f1)" in
+      19c55a459b1a7733b62159ed539381909b8b0cdd60ddecd0ee6798ae8478a8ce|\
+      918d27bee911aff09c08cca89e7f96f16f90b8ec8424edfe68ae94b09b881a7a) rm -f "${f}" ;;
+    esac
+  done
+  [ -d /run/systemd/system ] && systemctl daemon-reload
+  return 0
+}
+
+post_install() {
+  _retire_overlay_waydroid
+  _drop_stale_flathub_wants
+  _prune_fontcache
+}
+
+post_upgrade() {
+  _retire_overlay_waydroid
+  _drop_stale_flathub_wants
+  _prune_fontcache
+  _backfill_flathub_stamp
+}

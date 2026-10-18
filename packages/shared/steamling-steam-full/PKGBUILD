@@ -1,0 +1,25 @@
+# steamling-steam-full — the Steam gaming-session layer. Hard depends= so
+# `pacman -Rs steamling-steam-full` removes exactly this layer. Per-SoC members (the proton
+# compat tools) hang off the steamling-device-<soc> metapackages instead.
+pkgname=steamling-steam-full
+pkgver=0.1.0
+pkgrel=3
+pkgdesc="steamling optional layer: Steam gamescope session, FEX x86 runtime, Decky"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('steamling-steam'
+         'gamescope'            # must be ours: vanilla black-screens rotated panels
+         'mangohud'             # must be ours: vanilla has no Adreno sysfs reader
+         'xorg-xwayland'
+         'steamling-steamos-shim'
+         'steamos-manager'
+         'steamling-decky'
+         'fex-emu'
+         'fex-rootfs'
+         'steamling-turnip-arm'
+         'steamling-turnip-x86')
+
+package() {
+  :   # pure metapackage
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ES-DE
+GenericName=Game Library Frontend
+Comment=Browse and launch your ROM library
+Exec=es-de
+Icon=/opt/steamling/es-de/icon.png
+Terminal=false
+Categories=Game;

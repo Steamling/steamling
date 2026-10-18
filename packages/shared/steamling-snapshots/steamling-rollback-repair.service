@@ -1,0 +1,11 @@
+[Unit]
+Description=steamling: finish an interrupted rollback (activate staged /flash boot files)
+ConditionPathExists=/var/lib/steamling/rollback-info.json
+RequiresMountsFor=/flash
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/steamling-rollback-repair
+
+[Install]
+WantedBy=multi-user.target

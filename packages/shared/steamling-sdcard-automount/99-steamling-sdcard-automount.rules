@@ -1,0 +1,5 @@
+# Hands inserted/removed SD partitions to sdcard-mount.sh. Internal storage is UFS (sd*), so
+# matching mmcblk* cannot pick up an internal partition. systemd-run --no-block returns at once,
+# keeping the serialized udev event off the mount and the Steam IPC round-trip.
+ACTION=="add",    SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="mmcblk[0-9]p[0-9]", ENV{ID_FS_TYPE}=="ext4", RUN{program}+="/usr/bin/systemd-run --no-block /usr/lib/hwsupport/sdcard-mount.sh add %k"
+ACTION=="remove", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="mmcblk[0-9]p[0-9]", RUN{program}+="/usr/bin/systemd-run --no-block /usr/lib/hwsupport/sdcard-mount.sh remove %k"

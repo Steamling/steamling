@@ -1,0 +1,29 @@
+# es-de — the ES-DE frontend, vendored from upstream's official aarch64 AppImage. A source
+# build is not an option: it hard-depends on freeimage, which ALARM has no aarch64 build of.
+# The source URL's package_files id is NOT immutable — on a 404 take the new id from the
+# release page's "ES-DE_aarch64.AppImage" link and bump the sha256 with it.
+pkgname=es-de
+pkgver=3.5.0
+pkgrel=1
+pkgdesc="ES-DE frontend for browsing and launching games (official aarch64 AppImage)"
+arch=('aarch64')
+url="https://es-de.org"
+license=('MIT')
+provides=('emulationstation-de')
+conflicts=('emulationstation-de')
+depends=('fuse2')
+options=('!strip')
+source=("ES-DE-${pkgver}.AppImage::https://gitlab.com/es-de/emulationstation-de/-/package_files/357718204/download"
+        'es-de-wrapper'
+        'es-de.desktop'
+        'es-de-icon.png')
+sha256sums=('b6d34657842db89628d5bc42ed465b605108b45cb1d16b15332d6c9f60136a4b' 'SKIP' 'SKIP' 'SKIP')
+noextract=("ES-DE-${pkgver}.AppImage")
+
+package() {
+  install -Dm755 "${srcdir}/ES-DE-${pkgver}.AppImage" "${pkgdir}/opt/steamling/es-de/ES-DE.AppImage"
+  install -Dm755 "${srcdir}/es-de-wrapper" "${pkgdir}/usr/bin/es-de"
+  # The AppImage hides its icon inside the squashfs, so the desktop entry needs its own copy.
+  install -Dm644 "${srcdir}/es-de-icon.png" "${pkgdir}/opt/steamling/es-de/icon.png"
+  install -Dm644 "${srcdir}/es-de.desktop" "${pkgdir}/usr/share/applications/es-de.desktop"
+}

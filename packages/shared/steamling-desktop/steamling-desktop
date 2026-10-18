@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+export HOME="${HOME:-/home/deck}"
+
+session="$(steamling-desktop-select current)" || {
+  echo "steamling-desktop: no usable desktop in /usr/share/wayland-sessions" >&2
+  exit 1
+}
+entry="/usr/share/wayland-sessions/${session}.desktop"
+exec_line="$(sed -n 's/^Exec=//p' "${entry}" | head -1)"
+desktops="$(sed -n 's/^DesktopNames=//p' "${entry}" | head -1)"
+desktops="${desktops%;}"
+echo "steamling-desktop: starting ${session}: ${exec_line}" >&2
+
+# kwin starts XWayland only if /tmp/.X11-unix is sticky, and gamescope leaves it deck:0755.
+mkdir -p /tmp/.X11-unix 2>/dev/null || true
+chmod 1777 /tmp/.X11-unix 2>/dev/null || true
+
+# The game-mode `deck` target publishes no evdev joystick; see steamling-gamepad-target.
+if command -v steamling-gamepad-target >/dev/null 2>&1; then
+  steamling-gamepad-target xb360 || true
+fi
+
+# What a display manager exports: DEs are tested against that, and the supervisor's own
+# session says XDG_SESSION_TYPE=tty.
+export XDG_SESSION_TYPE=wayland DESKTOP_SESSION="${session}"
+export XDG_SESSION_DESKTOP="${desktops%%;*}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-${session}}"
+[ -n "${desktops}" ] && export XDG_CURRENT_DESKTOP="${desktops//;/:}"
+
+# Flavours drop pre-start hooks here: some DE config is only read when its session starts. Run,
+# not sourced, so a failing hook can never keep the desktop from starting.
+for _hook in /usr/lib/steamling/desktop.d/*.sh; do
+  [ -r "${_hook}" ] && { bash "${_hook}" || echo "steamling-desktop: hook ${_hook} failed" >&2; }
+done
+
+# exec keeps this PID, so it names the session for steamos-session-select and
+# steamling-desktop-select --now; the supervisor deletes it once the session ends.
+# Plain word splitting: session Exec lines carry no quoting or field codes.
+read -ra argv <<< "${exec_line}"
+echo "$$" > "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/steamling-desktop.pid"
+exec "${argv[@]}"

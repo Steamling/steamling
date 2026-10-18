@@ -1,0 +1,18 @@
+[Unit]
+Description=steamling: unlock and seed the homescreen on first login
+PartOf=graphical-session.target
+# plasma-plasmashell.service is desktop Plasma's shell too; this only edits Plasma Mobile's
+# layout, and the init's shell restart must never hit the other one.
+ConditionEnvironment=DESKTOP_SESSION=plasma-mobile
+After=plasma-plasmashell.service
+# The wallpaper seed talks to the shell this unit is about to restart; let it finish first.
+After=steamling-branding-init.service
+ConditionPathExists=!%E/steamling/homescreen-seeded
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/steamling-homescreen-init
+TimeoutStartSec=120
+
+[Install]
+WantedBy=plasma-plasmashell.service

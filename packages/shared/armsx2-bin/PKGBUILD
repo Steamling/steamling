@@ -1,0 +1,55 @@
+# armsx2-bin — ARMSX2, the native-ARM64 PCSX2 fork, as a vendored aarch64 AppImage.
+# Stable tags are Android-APK-only, so the nightlies are the only Linux channel; upstream renames
+# those assets without warning, so a bump that 404s needs the release page's asset list re-read,
+# not just an edited _nightly/_gitsha. Take the 4K-page variant: our kernels use 4K pages.
+pkgname=armsx2-bin
+_nightly=20261008
+_gitsha=b1f3196b9e
+pkgver=2.8.2.nightly${_nightly}
+pkgrel=1.1
+pkgdesc="ARMSX2 — PS2 emulator, native-ARM64 PCSX2 fork (vendored AppImage, official nightly)"
+arch=('aarch64')
+url="https://github.com/ARMSX2/ARMSX2"
+license=('GPL3')
+depends=('fuse2')
+options=('!strip')   # AppImage = ELF runtime + squashfs payload; strip would corrupt it
+source=("ARMSX2-${pkgver}.AppImage::https://github.com/ARMSX2/ARMSX2/releases/download/nightly-${_nightly}/ARMSX2-nightly-${_nightly}-${_gitsha}-Linux-arm64-4K-pages.AppImage"
+        'steamling-armsx2.desktop')
+sha256sums=('ea2183d0ddc229b45661c77b5795c5908b918b92e0b97502b708aa9df6e82915'
+            'SKIP')
+noextract=("ARMSX2-${pkgver}.AppImage")
+
+# The icon comes from the AppImage's own --appimage-extract (no FUSE needed). Run as is it would
+# fail on an x86 build host: the chroot reaches aarch64 code through qemu's binfmt rule, which
+# needs ELF header bytes 8-10 zero, and an AppImage keeps its "AI\2" marker there. A copy with
+# the marker cleared runs; the runtime never reads it back.
+_appimage_icon() {  # <AppImage> <out>: the file its .DirIcon resolves to
+  local run="${srcdir}/.appimage-run" root=squashfs-root t=.DirIcon l n=0
+  cp "$1" "${run}"
+  printf '\0\0\0' | dd of="${run}" bs=1 seek=8 conv=notrunc status=none
+  chmod u+x "${run}"
+  rm -rf squashfs-root AppDir
+  "${run}" --appimage-extract "${t}" >/dev/null 2>&1 || true
+  [ -d AppDir ] && root=AppDir
+  while [ -L "${root}/${t}" ] && [ "${n}" -lt 8 ]; do
+    l="$(readlink "${root}/${t}")"
+    case "${l}" in /*) t="${l#/}" ;; *) t="$(dirname "${t}")/${l}"; t="${t#./}" ;; esac
+    "${run}" --appimage-extract "${t}" >/dev/null 2>&1 || true
+    n=$((n + 1))
+  done
+  rm -f "${run}"
+  cp -L "${root}/${t}" "$2" && [ -s "$2" ]   # fails the build if the icon vanished upstream
+}
+
+prepare() {
+  cd "${srcdir}"
+  _appimage_icon "ARMSX2-${pkgver}.AppImage" "${srcdir}/icon.png"
+}
+
+package() {
+  # Name is fixed: es_find_rules.xml and emu-resolve.sh both hardcode this path.
+  install -Dm755 "${srcdir}/ARMSX2-${pkgver}.AppImage" \
+    "${pkgdir}/opt/steamling/emulators/armsx2/ARMSX2.AppImage"
+  install -Dm644 "${srcdir}/icon.png" "${pkgdir}/opt/steamling/emulators/armsx2/icon.png"
+  install -Dm644 "${srcdir}/steamling-armsx2.desktop" "${pkgdir}/usr/share/applications/steamling-armsx2.desktop"
+}

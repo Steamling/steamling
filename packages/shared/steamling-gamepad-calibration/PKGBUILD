@@ -1,0 +1,25 @@
+# steamling-gamepad-calibration: replays Steamling Control's saved calibration into the gamepad
+# driver's module parameters at boot, before InputPlumber claims the pad.
+pkgname=steamling-gamepad-calibration
+pkgver=0.1.0
+pkgrel=3.1
+pkgdesc="steamling gamepad calibration: replays the saved stick/trigger calibration at boot"
+arch=('any')
+url="https://github.com/dvandenburgh/steamling"
+license=('GPL-2.0-or-later')
+depends=('systemd')
+# retires the GPcal app's python-pyxel
+replaces=('python-pyxel')
+conflicts=('python-pyxel')
+source=('steamling-gamepad-calibration-restore' 'steamling-gamepad-calibration.service')
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/steamling-gamepad-calibration-restore" \
+    "${pkgdir}/usr/bin/steamling-gamepad-calibration-restore"
+  install -Dm644 "${srcdir}/steamling-gamepad-calibration.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-gamepad-calibration.service"
+  install -d "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants"
+  ln -s ../steamling-gamepad-calibration.service \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-gamepad-calibration.service"
+}

@@ -1,0 +1,137 @@
+# mesa (steamling) — Mesa trimmed to freedreno GL + turnip Vulkan, CPU-tuned per SoC.
+# x11+GLX stays enabled: Steam and desktop apps run under XWayland and need GLX/EGL-x11.
+# epoch=2 outranks ALARM's epoch=1 mesa.
+pkgbase=mesa
+pkgname=(mesa vulkan-freedreno)
+epoch=2
+pkgver=26.2.5
+# differs from pkgver only for RCs: the tarball keeps the hyphen makepkg forbids in pkgver
+_srcver=${pkgver}
+pkgrel=1.1
+pkgdesc="Mesa trimmed for Qualcomm handhelds: freedreno GL + turnip Vulkan, SoC-tuned (${_srcver})"
+arch=('aarch64')
+url="https://www.mesa3d.org/"
+license=("MIT AND BSD-3-Clause AND SGI-B-2.0")
+# glslang: newer mesa folds freedreno into the BVH shader set, so glslangValidator is a hard
+# requirement of any build with vulkan-drivers=freedreno.
+makedepends=(
+  meson ninja python-mako python-packaging python-yaml python-ply glslang
+  expat libdrm libglvnd libdisplay-info spirv-tools systemd-libs vulkan-icd-loader
+  wayland wayland-protocols zlib zstd
+  xorgproto libx11 libxcb libxext libxshmfence libxxf86vm libxrandr xcb-util-keysyms
+)
+# upstream considers LTO broken until explicit notice
+options=(!lto)
+source=("https://archive.mesa3d.org/mesa-${_srcver}.tar.xz")
+sha256sums=('794b3d1729075dae7ebd47c7283b7ca0cdb5dec668f7f11cc0a5d82f6138a0a5')
+
+prepare() {
+  cd "mesa-${_srcver}"
+  # package release in the version string so Chromium/CEF (steamwebhelper) invalidates
+  # its GPU cache across our rebuilds.
+  echo "${pkgver}-steamling${epoch}.${pkgrel}" > VERSION
+}
+
+build() {
+  # Appended after ALARM's defaults so -march/-mtune override; buildtype=plain below is
+  # what makes meson honour them. Fallback = the sm8550 string, so a standalone makepkg
+  # without build-packages.sh's STEAMLING_TUNE_CFLAGS still reproduces the shipped build.
+  local _rocknix_tune="${STEAMLING_TUNE_CFLAGS:--march=armv9-a+fp16+crypto+i8mm+bf16+memtag+sm4+sha3+nosve+nosve2 -mtune=cortex-x3 -mno-outline-atomics}"
+  export CFLAGS="${CFLAGS} ${_rocknix_tune}"
+  export CXXFLAGS="${CXXFLAGS} ${_rocknix_tune}"
+
+  # llvm=disabled kills llvmpipe/lavapipe and the llvm-libs runtime dep — softpipe is then
+  # the only CPU fallback, so it must stay in gallium-drivers.
+  local _meson=(
+    --prefix=/usr --buildtype=plain
+    -Db_ndebug=true
+    -Dplatforms=x11,wayland
+    -Dglx=dri
+    -Degl=enabled
+    -Dgbm=enabled
+    -Dglvnd=enabled
+    -Dopengl=true
+    -Dgles1=disabled
+    -Dgles2=enabled
+    -Dgallium-drivers=freedreno,zink,softpipe
+    -Dvulkan-drivers=freedreno
+    -Dfreedreno-kmds=msm
+    -Dvulkan-layers=
+    -Dllvm=disabled
+    -Ddraw-use-llvm=false
+    -Dgallium-rusticl=false
+    -Dgallium-va=disabled
+    -Dgallium-extra-hud=false
+    -Dshader-cache=enabled
+    -Dandroid-libbacktrace=disabled
+    -Dlibunwind=disabled
+    -Dlmsensors=disabled
+    -Dvalgrind=disabled
+    -Dmicrosoft-clc=disabled
+    -Dbuild-tests=false
+  )
+  # Turnip keys its shader cache on its build ID, and these builds are not reproducible, so
+  # every rebuild wiped users' caches. Derive the ID from the build's inputs instead (source,
+  # tuning, options; not the compiler version or pkgrel).
+  local _tu_id
+  _tu_id="$(printf '%s\n' aarch64 "${_rocknix_tune}" "${sha256sums[0]}" "${_meson[*]}" \
+    | sha256sum | cut -c1-40)"
+  meson setup build "mesa-${_srcver}" "${_meson[@]}" -Dtu-build-id="${_tu_id}"
+  meson compile -C build
+}
+
+# _pick: park files from $pkgdir in a side dir for the second package().
+_pick() {
+  local p="$1" f d; shift
+  for f; do
+    d="$srcdir/$p/${f#$pkgdir/}"
+    mkdir -p "$(dirname "$d")"
+    mv -v "$f" "$d"
+    rmdir -p --ignore-fail-on-non-empty "$(dirname "$f")"
+  done
+}
+
+package_mesa() {
+  pkgdesc="Open-source OpenGL drivers, trimmed for Qualcomm handhelds (freedreno + zink + softpipe)"
+  depends=(
+    expat glibc libdrm libglvnd libx11 libxcb libxext libxshmfence libxxf86vm
+    wayland zlib zstd
+  )
+  provides=("mesa-libgl=${epoch}:${pkgver}-${pkgrel}" opengl-driver)
+  conflicts=('mesa-libgl<17.0.1-2')
+  replaces=('mesa-libgl<17.0.1-2')
+
+  meson install -C build --destdir "${pkgdir}" --no-rebuild
+
+  (
+    cd "${pkgdir}"
+    # ICD manifest name has varied across releases, hence the glob; the loader scans the
+    # whole icd.d dir so either name works at runtime.
+    _pick vkfdreno usr/lib/libvulkan_freedreno.so
+    _pick vkfdreno usr/share/vulkan/icd.d/freedreno_icd*.json
+    # indirect rendering (glvnd looks for libGLX_indirect)
+    ln -sr usr/lib/libGLX_{mesa,indirect}.so.0
+  )
+
+  install -Dm644 "mesa-${_srcver}/docs/license.rst" -t "${pkgdir}/usr/share/licenses/${pkgname}"
+}
+
+package_vulkan-freedreno() {
+  pkgdesc="Open-source Vulkan driver for Adreno GPUs (turnip, SoC-tuned)"
+  depends=(
+    expat glibc libdrm libdisplay-info libx11 libxcb libxshmfence spirv-tools
+    systemd-libs vulkan-icd-loader wayland xcb-util-keysyms zlib zstd
+  )
+  provides=(vulkan-driver)
+
+  mv "${srcdir}/vkfdreno"/* "${pkgdir}"
+
+  # Saves steamling-turnip-arm from duplicating the series mesa is on; the pickers need
+  # only <dir>/icd.json, so no library belongs here.
+  install -d "${pkgdir}/usr/share/steamling/vk-arm/${pkgver}"
+  sed -E "s|\"library_path\": *\"[^\"]*\"|\"library_path\": \"/usr/lib/libvulkan_freedreno.so\"|" \
+    "${pkgdir}"/usr/share/vulkan/icd.d/freedreno_icd*.json > "${pkgdir}/usr/share/steamling/vk-arm/${pkgver}/icd.json"
+  chmod 0644 "${pkgdir}/usr/share/steamling/vk-arm/${pkgver}/icd.json"
+
+  install -Dm644 "mesa-${_srcver}/docs/license.rst" -t "${pkgdir}/usr/share/licenses/${pkgname}"
+}
