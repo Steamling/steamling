@@ -1,0 +1,35 @@
+# Kernel config deltas for the shared tree: scripts/config arguments, applied after
+# build-kernel.sh's own set and before olddefconfig.
+
+# arm64 defconfig enables every vendor's platform. These handhelds are all Qualcomm, so the other
+# platforms (and the ~500 modules and ~1000 built-ins that hang off them) only cost build time
+# and image size.
+--disable ARCH_ACTIONS --disable ARCH_AIROHA --disable ARCH_SUNXI --disable ARCH_ALPINE
+--disable ARCH_APPLE --disable ARCH_ARTPEC --disable ARCH_ASPEED --disable ARCH_AXIADO
+--disable ARCH_BCM --disable ARCH_BCM2835 --disable ARCH_BCM_IPROC --disable ARCH_BCMBCA
+--disable ARCH_BRCMSTB --disable ARCH_BERLIN --disable ARCH_BLAIZE --disable ARCH_BST
+--disable ARCH_CIX --disable ARCH_EXYNOS --disable ARCH_K3 --disable ARCH_LG1K --disable ARCH_HISI
+--disable ARCH_KEEMBAY --disable ARCH_MEDIATEK --disable ARCH_MESON --disable ARCH_MICROCHIP
+--disable ARCH_SPARX5 --disable ARCH_MVEBU --disable ARCH_NXP --disable ARCH_LAYERSCAPE
+--disable ARCH_MXC --disable ARCH_S32 --disable ARCH_MA35 --disable ARCH_NPCM --disable ARCH_REALTEK
+--disable ARCH_RENESAS --disable ARCH_ROCKCHIP --disable ARCH_SEATTLE --disable ARCH_INTEL_SOCFPGA
+--disable ARCH_SOPHGO --disable ARCH_STM32 --disable ARCH_SYNQUACER --disable ARCH_TEGRA
+--disable ARCH_TESLA_FSD --disable ARCH_SPRD --disable ARCH_THUNDER --disable ARCH_THUNDER2
+--disable ARCH_UNIPHIER --disable ARCH_VEXPRESS --disable ARCH_VISCONTI --disable ARCH_XGENE
+--disable ARCH_ZYNQMP
+
+# Display blocks none of these SoCs have: SM8250, SM8650 and SM8750 drive DSI and DP through the
+# DPU with the 7nm-family DSI PHY (its 4nm and 3nm variants live in that driver).
+--disable DRM_MSM_MDP4
+--disable DRM_MSM_MDP5
+--disable DRM_MSM_HDMI
+--disable DRM_MSM_HDMI_HDCP
+--disable DRM_MSM_DSI_28NM_PHY
+--disable DRM_MSM_DSI_20NM_PHY
+--disable DRM_MSM_DSI_28NM_8960_PHY
+--disable DRM_MSM_DSI_14NM_PHY
+--disable DRM_MSM_DSI_10NM_PHY
+
+# CPU: every board on the tree has eight cores. 512 also makes arm64 select CPUMASK_OFFSTACK,
+# which allocates every cpumask_var_t on the heap; at 8 they are one word on the stack.
+--set-val NR_CPUS 8

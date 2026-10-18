@@ -3,7 +3,7 @@
 # live in devices/<name>/packages/steamling-bsp-<name>, which depends on this package.
 pkgname=steamling-bsp-common
 pkgver=0.1.0
-pkgrel=26.8
+pkgrel=26.9
 pkgdesc="steamling shared board support: sleep.d dispatcher, suspend hooks, power-key policy, session udev rules, wheel sudo, fan/scheduler daemons, ABL updater, power profiles daemon, realtime priority ladder, zram swap and memory sysctls, deck session limits, kernel /flash deploy, volume rocker daemon, journal cap, iwd Wi-Fi backend, panel refresh calibration, controller MCU mode quirks"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -44,8 +44,9 @@ source=('steamling-sleep' 'sdam-debug-pre' 'sdam-debug-post'
         'steamling-volumed' 'steamling-volumed.service' '10-steamling-journal.conf'
         '20-steamling-wifi-backend.conf'
         'steamling-panel-calibration' 'steamling-panel-calibration.service'
-        'steamling-gamepad-quirk' 'steamling-gamepad-quirk.service' 'steamling-board-env')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        'steamling-gamepad-quirk' 'steamling-gamepad-quirk.service' 'steamling-board-env'
+        '99-steamling-usb-autosuspend.rules' '71-steamling-bottom-touch.rules')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   install -Dm755 "${srcdir}/steamling-sleep" \
@@ -76,6 +77,10 @@ package() {
     "${pkgdir}/usr/lib/udev/rules.d/90-steamling-backlight.rules"
   install -Dm644 "${srcdir}/60-steamling-controllers.rules" \
     "${pkgdir}/usr/lib/udev/rules.d/60-steamling-controllers.rules"
+  install -Dm644 "${srcdir}/71-steamling-bottom-touch.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/71-steamling-bottom-touch.rules"
+  install -Dm644 "${srcdir}/99-steamling-usb-autosuspend.rules" \
+    "${pkgdir}/usr/lib/udev/rules.d/99-steamling-usb-autosuspend.rules"
 
   # 0440 is a sudoers.d requirement: sudo skips group/world-writable files.
   install -Dm440 "${srcdir}/10-steamling-wheel" \
