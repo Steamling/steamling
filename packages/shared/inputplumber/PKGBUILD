@@ -3,7 +3,7 @@
 # build chroot needs no Rust toolchain; the per-device config ships in steamling-bsp-<soc>.
 pkgname=inputplumber
 pkgver=0.82.0
-pkgrel=1.1
+pkgrel=1.2
 pkgdesc="Open source input router and remapper daemon (prebuilt aarch64 release)"
 arch=('aarch64')
 url="https://github.com/ShadowBlip/InputPlumber"
@@ -15,7 +15,15 @@ conflicts=('inputplumber')
 options=('!strip' '!debug' '!lto')
 # Upstream device configs a steamling BSP replaces with its own: two configs matching one board
 # compete for the same source devices, and which one grabs the pad is down to load order.
-_bsp_replaces=(50-retroid_pocket6.yaml)
+# Boards no BSP config covers (Thor Lite, Pocket DS, Pocket S2, Odin 3, the KONKRs) keep
+# upstream's.
+_bsp_replaces=(
+  50-retroid_pocket6.yaml 50-retroid_pocket_nova.yaml               # sm8550 01-rsinput
+  50-ayn_odin2.yaml 50-ayn_odin2_mini.yaml                          # sm8550 01-rsinput
+  50-ayn_thor.yaml                                                  # sm8550 02-ayn-thor
+  50-retroid_pocket5.yaml 50-retroid_pocket_mini.yaml               # sm8250 01-retroid
+  50-retroid_pocket_flip2.yaml                                      # sm8250 01-retroid-flip2
+)
 source=("inputplumber-aarch64-${pkgver}.tar.gz::https://github.com/ShadowBlip/InputPlumber/releases/download/v${pkgver}/inputplumber-aarch64.tar.gz")
 sha256sums=('2695fc677f2ec1945a642e530029105d78be7d3058f412f31e83c37be5c9eeea')
 
