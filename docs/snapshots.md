@@ -1,62 +1,71 @@
-# Snapshots, rollback and the update safety net
+# Snapshots and rolling back an update
 
-Every update takes a snapshot of the system first, so if one breaks something you can undo it
-with one button (or one command) and a reboot. **A rollback never touches your games, saves or
-settings**: only the system itself goes back. If the update included a new kernel, the previous
-kernel comes back too.
+Before every update, Steamling saves a copy of the system called a snapshot. If an update breaks
+something, you can put the system back the way it was with one button (or one command) and a
+reboot.
 
-Snapshots are skipped when storage is nearly full. The update still installs; you just cannot
-undo that one.
+**Rolling back never touches your games, saves or settings.** Only the system itself goes back.
+If the update brought a new kernel, the old kernel comes back too.
 
-## Using it
+If your storage is nearly full, the snapshot is skipped. The update still installs, you just
+can't undo that one.
 
-Three front-ends, one mechanism - pick whichever still works when things go wrong:
+## Rolling back
 
-- **Game mode (QAM):** Steamling Control → Updater tab → **Roll Back Last Update**. The
-  confirmation lists what gets restored; confirm, then **Reboot Now**. It only ever offers the
-  last update.
-- **Desktop mode:** **Steamling Tools** → *Roll back the last update...* lists every snapshot,
-  newest first; pick one, confirm, and it offers the reboot. Use this when Steam or the
-  plugin is what broke. Booted from the SD with Steamling also on internal storage, *Roll back
-  the INTERNAL install...* does the same for the internal copy.
-- **CLI (terminal/ssh):**
+There are three ways to do it. They all do the same thing, so use whichever one still works:
+
+- **In game mode:** open the Quick Access Menu, go to **Steamling Control**, then the
+  **Updater** tab, and press **Roll Back Last Update**. It shows what will be restored. Confirm,
+  then press **Reboot Now**. This button only ever undoes the most recent update.
+- **In desktop mode:** open **Steamling Tools** and pick *Roll back the last update...*. This
+  lists every snapshot, newest first. Pick one, confirm, and reboot when it asks. Use this one
+  if Steam or the plugin is the thing that broke.
+  (If you booted from the SD card and also have Steamling on internal storage, *Roll back the
+  INTERNAL install...* does the same for the internal copy.)
+- **In a terminal** (on the device, or over SSH):
 
 ```bash
-steamling-snapshots list          # what you can roll back to
-steamling-snapshots status        # running root / boots-next / free space
-sudo steamling-rollback           # newest snapshot, interactive confirm
-sudo steamling-rollback --to 0003 # jump straight to a specific snapshot
-sudo steamling-rollback --yes     # skip the confirm (scripts)
-sudo steamling-rollback --internal --to 0003  # roll back the internal install from the SD
-steamling-rollback --list         # same as steamling-snapshots list (--status likewise)
-sudo steamling-snapshots prune    # apply the retention now (updates do this themselves)
+steamling-snapshots list          # show the snapshots you can go back to
+steamling-snapshots status        # which one is running, which boots next, free space
+sudo steamling-rollback           # go back to the newest snapshot (asks first)
+sudo steamling-rollback --to 0003 # go back to snapshot 0003
+sudo steamling-rollback --yes     # don't ask first (for scripts)
+sudo steamling-rollback --internal --to 0003  # roll back the internal install, from the SD card
+sudo steamling-snapshots prune    # delete old snapshots now (updates do this on their own)
 ```
 
-Snapshots are full photographs of the system, not incremental steps, so `--to` is always a
-**single jump** - no rolling back one update at a time. It is also directionless: from a
-restored older state, `--to` a newer snapshot moves you forward again. The QAM only ever
-offers the *last* update (the common case); anything deeper is for Steamling Tools or the CLI. Times are
-stored in UTC but always displayed in local time.
+### Good to know
 
-Rolling back a rollback works the same way - every rollback creates a fresh root from an
-immutable read-only snapshot, and the abandoned root is kept (one deep) for inspection.
-After a rollback the QAM shows a *"System was rolled back"* notice and hides the rollback
-button (you are already on that snapshot's state); the next update clears the notice,
-takes a fresh snapshot, and brings the button back.
+- Each snapshot is a complete copy of the system, so `--to` jumps straight to that snapshot. You
+  don't have to step back one update at a time.
+- You can also jump forward. If you rolled back and want the newer system again, roll "back" to
+  the newer snapshot.
+- Changed your mind about a rollback? Roll back again. The system you left behind is kept until
+  the next rollback, in case you want to look at it.
+- After a rollback, the Updater tab shows a *"System was rolled back"* note and hides the
+  rollback button, because you're already on the older system. Your next update clears the note
+  and brings the button back.
+- Snapshot times are shown in your local time.
 
-## Manual recovery (device won't boot after a kernel update)
+## If the device won't boot after a kernel update
 
-Every kernel update keeps the previous boot image as `/flash/KERNEL.bak`. If the device
-no longer boots and you can't get a shell:
+Every kernel update keeps the previous kernel as a file called `KERNEL.bak`. If the device won't
+boot at all and you can't get to a terminal, you can swap the old kernel back in by hand:
 
-1. Power off. Put the SD in a card reader (internal installs: boot a Steamling SD instead and
-   mount the internal FAT).
-2. On the boot FAT partition:
+1. Power the device off and take out the SD card. Put it in a card reader on your PC.
+   (If Steamling is on internal storage, boot a Steamling SD card instead and open the internal
+   boot partition from there.)
+2. Open the small boot partition (it's a FAT partition, so Windows, macOS and Linux can all read
+   it). In a terminal in that folder, run:
+
    ```bash
    mv KERNEL KERNEL.bad
    mv KERNEL.bak KERNEL
-   md5sum KERNEL > KERNEL.md5    # MANDATORY - the ABL refuses a KERNEL whose md5 mismatches
+   md5sum KERNEL > KERNEL.md5
    ```
-3. Boot. The old kernel now runs with the newer modules - degraded (Wi-Fi/audio may be
-   missing) but alive. Run `sudo steamling-rollback` on the device to make kernel and rootfs
-   coherent again.
+
+   Don't skip the last line. The bootloader checks that file and won't boot a kernel that doesn't
+   match it.
+3. Put the card back and boot. The old kernel is now running with the newer system around it, so
+   some things (Wi-Fi or sound, for example) may not work, but it boots. Run
+   `sudo steamling-rollback` to put the rest of the system back in step with the old kernel.

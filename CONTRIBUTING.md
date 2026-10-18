@@ -115,7 +115,7 @@ sudo make packages PKG="steamling-decky"    # -> build/localrepo/shared/ (per-So
 ./build.sh              # every step, asking sudo once -> build/image/<soc>/ (--ssh: SSH on)
 ```
 
-This tree builds the Retroid Pocket 6 (SoC family `sm8550`). `STEAMLING_EMULATION=1`
+This tree builds four SoC families: `sm8550` (the Retroid Pocket 6, the reference board, and the default), `sm8250`, `sm8650` and `sm8750`. `STEAMLING_EMULATION=1`
 (`--emulation`) bakes the emulation layer into the image.
 
 Packages compress as `.pkg.tar.zst` (seeded and older ones as `.pkg.tar.xz`), so glob

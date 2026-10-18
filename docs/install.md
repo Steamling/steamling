@@ -14,8 +14,8 @@ larger is recommended.
 
 Build the image yourself with the [build guide](building/README.md), or grab one from the
 [Releases](https://github.com/dvandenburgh/steamling/releases) page once there are some (those are
-compressed: decompress with `zstd -d` or 7-Zip, or let your flasher do it). Flash it to the
-microSD card with balenaEtcher, Rufus or `dd`.
+compressed, but balenaEtcher opens them as they are). Flash it to the microSD card with
+[balenaEtcher](https://etcher.balena.io/), Rufus or `dd`.
 
 ## 2. Install the ROCKNIX bootloader
 
@@ -26,7 +26,8 @@ The flashed SD card carries the install kit in its `rocknix_abl` folder, visible
 the card is inserted.
 
 1. Copy the `rocknix_abl` folder from the SD card to the root of Android's internal storage.
-2. Open **Settings → Handheld Settings → Advanced → Run Script as Root**, go into the `rocknix_abl`
+2. Open **Settings → Handheld Settings → Advanced → Run Script as Root** (that's where it is on
+   Retroid handhelds; AYN, AYANEO and the others put it elsewhere), go into the `rocknix_abl`
    folder you just copied, and run `backup_abl.sh` (saves your stock bootloader next to the
    scripts), then `flash_abl.sh`.
 3. **(Recommended)** copy the `abl_a.img` / `abl_b.img` backups from that folder to somewhere off

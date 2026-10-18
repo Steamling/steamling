@@ -16,7 +16,7 @@ hardware before merging, and without steps the PR stalls.
 
 ## Tested
 
-<!-- Device(s), model (RP6 / RP6 TOP-DPAD), and how you installed it (pacman -U a built
+<!-- Device(s) and model (for example RP6, RP6 TOP-DPAD, Odin 2), and how you installed it (pacman -U a built
      package / hand-copied files / fresh image). Then what you actually exercised. -->
 
 - Device / SoC:

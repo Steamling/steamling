@@ -6,7 +6,7 @@
 
 ## The ROCKNIX boot menu
 
-Everything below is driven from the bootloader menu, so it is worth knowing first. **Hold Volume −**
+Everything below uses the bootloader menu, so here's how it works first. **Hold Volume −**
 while powering on to open it. **Volume keys move through the entries** (the highlighted one is the
 banner at the top of the screen) and the **power key selects**. The current settings are listed
 under **ABL Settings**:
@@ -30,7 +30,8 @@ in a terminal.
 > next boot. Android still boots, but its apps and data are gone - effectively a factory reset. Back
 > up anything you care about first.
 
-You must be **booted from a Steamling SD** (the installer clones the *running* system to internal).
+You must be **booted from a Steamling SD card**: the installer copies the system you're running
+onto internal storage.
 
 **Everything on the SD's Steamling partition has to fit on internal storage**, Steam games and ROMs
 included, in the space Android does not keep. The installer checks this before touching anything
@@ -44,9 +45,9 @@ storage Android keeps, and let it run. Or from a terminal:
 # 1. dry-run - prints the exact partition plan, makes NO changes. Review it.
 steamling-install-internal --dry-run
 
-# 2. for real. It asks for the new Android userdata size (or pass --userdata-gib N),
-#    then shrinks userdata, creates the boot + STEAMLING_ROOT partitions, and rsyncs the
-#    running rootfs across (the clone is the slow part - minutes off a slow SD).
+# 2. for real. It asks how much space Android keeps (or pass --userdata-gib N), shrinks
+#    Android's partition, makes room for Steamling, then copies the running system across.
+#    The copy is the slow part: several minutes from a slow SD card.
 steamling-install-internal
 #   non-interactive equivalent:
 #   steamling-install-internal --yes --userdata-gib 16
@@ -142,7 +143,8 @@ Then, from Android:
    (copy it off a Steamling SD card, same as during install), and **copy your `abl_a.img` and
    `abl_b.img` backups into it**. The names and the location matter - the script reads exactly
    `rocknix_abl/abl_a.img` and `rocknix_abl/abl_b.img`.
-3. Open **Settings → Handheld Settings → Advanced → Run Script as Root**, navigate to that folder,
+3. Open **Settings → Handheld Settings → Advanced → Run Script as Root** (on Retroid handhelds;
+   other brands put it elsewhere), go into that folder,
    and run **`restore_backup_abl.sh`**.
 4. Reboot. The device is back on its factory bootloader and boots Android the way it shipped.
 

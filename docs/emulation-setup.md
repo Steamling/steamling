@@ -52,8 +52,9 @@ and saves all travel together.
 
 ### Putting ROMs on an SD card
 
-The ROM directory can live anywhere, and ES-DE is the single source of truth. Go to **ES-DE Menu
-→ Other Settings → ROM directory** and point it at the new location (for example
+Your ROMs folder can live anywhere, as long as ES-DE knows where. Everything else (Steam
+favorites included) asks ES-DE. Go to **ES-DE Menu → Other Settings → ROM directory** and point it
+at the new location (for example
 `/run/media/deck/<card label>/ROMs`). Move your files there, then rescan. `BIOS/`, `Saves/`, and `States/`
 stay in `~/Emulation`.
 
@@ -118,7 +119,7 @@ on the next entry, never mid-session.
 
 ## Tweaking individual emulator settings
 
-Defaults are tuned for the RP6, but you can change per-emulator settings any time:
+The defaults were set up on the Retroid Pocket 6, and you can change any emulator's settings whenever you like:
 
 - **RetroArch systems** (NES, SNES, N64, Game Boy, GBA, DS, Genesis, Saturn, Dreamcast,
   PlayStation, Arcade, and more): while a game is running, open the **RetroArch Quick Menu**

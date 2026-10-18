@@ -46,7 +46,9 @@ missing for an image build.
 
 ## Quick start
 
-This tree builds the Retroid Pocket 6 (SoC family `sm8550`).
+`./build.sh` builds for the SM8550 handhelds (the Retroid Pocket 6 and the rest of that family).
+Add `--device sm8250`, `sm8650` or `sm8750` for the other chips; [Supported devices](../devices.md)
+lists which handheld uses which.
 
 ```bash
 git clone https://github.com/dvandenburgh/steamling && cd steamling

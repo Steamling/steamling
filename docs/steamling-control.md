@@ -123,7 +123,7 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 - **Stick Lights** (boards with stick LEDs): **Enable**, **Link Left & Right** to give both
   sticks one colour, **Side Lights** to match the side lighting to the sticks, then colour and
   brightness per stick.
-- **Display** (panels with adjustable timing, the RP6): **Calibrate Display**, then
+- **Display** (only on screens with adjustable timing, which so far means the RP6): **Calibrate Display**, then
   **Calibrate**, measures the screen's refresh rate for up to a minute and trims it onto the
   nominal rate (panels ship slightly fast or slow, which drifts emulator audio against video).
   The result is kept across reboots; **Reset to Factory** puts the panel's own timing back.

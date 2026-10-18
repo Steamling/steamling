@@ -8,6 +8,10 @@ Copyright (C) 2026 David J. Vandenburgh and the Steamling contributors.
 Copyright (C) 2026 shuuri-labs and the pocknix-os contributors. Steamling began as a fork of
 [Pocknix](https://github.com/shuuri-labs/pocknix-os), and much of this repo is their work.
 
+The support for every handheld besides the Retroid Pocket 6, and many of the patches, come from
+[armada](https://github.com/armada-os/armada) (GPL-2.0-or-later, copyright the armada
+contributors), renamed to fit Steamling. [PATCHES.md](../PATCHES.md) says which parts.
+
 "Original work" covers everything authored for this project: the build harness (`scripts/`,
 `Makefile`, `config/`), device profiles (`devices/`), the rootfs overlay (`overlay/`),
 all `steamling-*` packages, PKGBUILDs, and patches written for Steamling. Each package we
@@ -36,6 +40,7 @@ not and cannot relicense them. The main ones:
 |---|---|---|
 | Linux kernel + patch series | `kernel/`, `packages/soc/linux-steamling/` | GPL-2.0-only |
 | ROCKNIX patches, scripts, BSP material | `kernel/*/patches`, various packages | GPL-2.0 |
+| armada device support, patches and settings | `kernel/steamling/`, `devices/*`, various packages | GPL-2.0-or-later |
 | ROCKNIX ABL (fetched, pinned) | `packages/soc/steamling-bootloader-*` | BSD-3-Clause (Qualcomm edk2 LinuxLoader) |
 | gamescope + patch set | `packages/soc/gamescope` | BSD-2-Clause (the patch set: GPL-2.0; origins in PATCHES.md) |
 | Mesa | `packages/soc/mesa` | MIT |

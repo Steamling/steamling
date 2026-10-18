@@ -21,7 +21,8 @@ You have two easy options:
 
 **Aurora Store (recommended).** Aurora is an open-source client for the Google Play catalog, so
 you can browse and install the same apps you would from the Play Store, using anonymous sign-in.
-Install its APK (see below) once, then use it like a store.
+Download its APK once from [auroraoss.com](https://auroraoss.com/) or F-Droid, install it the
+way the next option describes, then use it like any app store.
 
 **Sideload an APK.** Download any `.apk` file, then open it from your file manager with
 **Open With → Install with Waydroid**. It installs the app (starting a Waydroid session first if
