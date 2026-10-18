@@ -2,7 +2,7 @@
 # Shadows the base's copy by repo order: a newer base scx never reaches devices while published.
 pkgname=scx-scheds
 pkgver=1.1.3
-pkgrel=1
+pkgrel=2
 _commit=c8728c6b6a3fde451f0f10b95f99aad7a32a750a
 _rustver=1.99.0
 pkgdesc='sched_ext schedulers and tools'
@@ -24,7 +24,15 @@ sha256sums=('SKIP'
             'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 _toolchain() {
-  export PATH="${srcdir}/rust/bin:${PATH}"
+  # libbpf-cargo and bindgen pipe every generated skeleton and binding through rustfmt. A
+  # rustfmt that cannot run (a rustup proxy with no toolchain, a mismatched build) exits at once
+  # and the build dies with "Failed to generate skeleton ... Broken pipe". Formatting changes
+  # nothing the compiler sees, so a pass-through rustfmt stands in for it.
+  mkdir -p "${srcdir}/shim"
+  printf '#!/bin/sh\ncase "$1" in -V|--version) echo "rustfmt 1.8.0-stable"; exit 0 ;; esac\nexec cat\n' \
+    > "${srcdir}/shim/rustfmt"
+  chmod 755 "${srcdir}/shim/rustfmt"
+  export PATH="${srcdir}/shim:${srcdir}/rust/bin:${PATH}"
   # Crate downloads cached beside the other sources so rebuilds stay offline.
   export CARGO_HOME="${SRCDEST:-${srcdir}}/cargo-home"
 }
