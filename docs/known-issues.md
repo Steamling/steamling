@@ -19,3 +19,22 @@ Open an [issue on GitHub](https://github.com/dvandenburgh/steamling/issues).
 
 - **Gyro does not work yet.** The motion sensors are not wired up, so games and emulators that
   use gyro aim or tilt controls see no input.
+
+## Untested ports
+
+Everything below applies to the handhelds marked "untested port" in
+[Supported devices](devices.md). They build and should boot, but nobody has run Steamling on
+them yet, so treat this list as a starting point rather than the whole story.
+
+- **Second screens stay dark.** The AYN Thor, AYN Thor Lite and AYANEO Pocket DS show Steam on
+  the top screen only; the bottom screen's touch input is switched off so it doesn't land on the
+  top one.
+- **Older Windows games on the Snapdragon 865 (SM8250) handhelds.** Its Adreno 650 can't run
+  DXVK 3, which the bundled Protons use for Direct3D 9 to 11. Those games won't start until
+  Protons built with DXVK 2 are packaged for it. Native and Direct3D 12 games are not affected.
+- **AYANEO and KONKR controls.** Their controllers are switched into the right mode at boot
+  (`steamling-gamepad-quirk`). Some AYANEO extras (the custom buttons, the gamepad mode switch)
+  rely on drivers in armada's kernel that the SM8550 kernel here doesn't carry yet.
+- **Screen settings are first guesses.** Resolution, rotation and HDR brightness for each
+  handheld come from its panel driver and armada's settings. If the picture is sideways or the
+  wrong size, the fix is usually one line in that handheld's board file.

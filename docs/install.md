@@ -1,5 +1,9 @@
 # Install Steamling
 
+These steps are written for the Retroid Pocket 6. On the other handhelds (all untested ports,
+see [Supported devices](devices.md)) the idea is the same, but the Android menus and the
+bootloader's device model differ; that page points to model-specific help.
+
 Steamling runs from a microSD card. Once it is up you can [move it to internal
 storage](install-to-internal.md) for faster loading.
 

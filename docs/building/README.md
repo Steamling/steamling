@@ -99,6 +99,19 @@ cd ~/steamling
 
 It picks up where it left off instead of starting over.
 
+### Building for a handheld other than the RP6
+
+`./build.sh` on its own builds for the Snapdragon 8 Gen 2 handhelds (the Retroid Pocket 6 and
+friends). For anything else, add your handheld's chip, which you'll find in
+[Supported devices](../devices.md). For example, for a Retroid Pocket 5:
+
+```bash
+./build.sh --device sm8250
+```
+
+Keep in mind every handheld besides the RP6 is an untested port. In the next steps, swap
+`sm8550` in the file names for your chip.
+
 ## Step 5: Find your image
 
 When it finishes you'll have an image file here:

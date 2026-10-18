@@ -2,6 +2,8 @@
 
 User guides for Steamling. New here? Start with the [project README](../README.md).
 
+- [devices.md](devices.md) - every supported handheld, what "untested port" means, and how to
+  help test one
 - [install.md](install.md) - flashing the SD card, installing the ROCKNIX bootloader, first boot,
   and updating
 - [known-issues.md](known-issues.md) - what does not work, or not well, yet

@@ -11,6 +11,9 @@ first so we can agree the shape before you spend the time.
 
 Especially welcome:
 
+- **Reports from the untested handhelds.** If you own one of the handhelds marked "untested
+  port" in [docs/devices.md](docs/devices.md), trying it and telling me what happened is the
+  single most useful thing right now, even if all you can say is "it booted".
 - **Emulator configs** that you have dialled in on a device.
 - **Steamling Control features and fixes.**
 - **Docs corrections** - these need no hardware and no build.

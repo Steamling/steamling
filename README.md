@@ -39,11 +39,18 @@ open a terminal and do whatever you like.
 
 ## Supported devices
 
-| Device | Chip | Status |
+| Chip | Handhelds | Status |
 |---|---|---|
-| Retroid Pocket 6 (and the TOP-DPAD model) | Snapdragon 8 Gen 2 (SM8550) | Being brought up |
+| Snapdragon 8 Gen 2 (SM8550) | Retroid Pocket 6 (and TOP-DPAD) | Reference device, being brought up |
+| Snapdragon 8 Gen 2 (SM8550) | Retroid Pocket Nova, AYN Odin 2 / Mini / Portal, AYN Thor, AYANEO Pocket ACE / DMG / DS / EVO / S | Untested ports |
+| Snapdragon 865 (SM8250) | Retroid Pocket 5, Flip 2, Mini, Mini V2, AYN Thor Lite, MANGMI Air Y Pro, MANGMI Pocket Max, AYANEO Pocket MICRO 2 | Untested ports |
+| Snapdragon 8 Gen 3 (SM8650) | AYANEO Pocket S2, KONKR Pocket FIT | Untested ports |
+| Snapdragon 8 Elite (SM8750) | AYN Odin 3, KONKR Pocket FIT Elite | Untested ports |
 
-The tree is laid out so more devices can be added later without reshuffling everything.
+"Untested port" means the device support is in place, it builds, and it should boot (it comes
+from [armada](https://github.com/armada-os/armada), where these handhelds already run), but
+nobody has tried Steamling on one yet. If you own one, you can help: [Supported devices](docs/devices.md)
+explains how to build for it and what to report.
 
 ## Getting started
 
@@ -56,6 +63,7 @@ The tree is laid out so more devices can be added later without reshuffling ever
 
 ## Docs
 
+- [Supported devices](docs/devices.md): the full list, and how to help test one
 - [Install guide](docs/install.md): flashing, the bootloader, first boot
 - [Install to internal storage](docs/install-to-internal.md): faster loading, uninstalling, going back to stock
 - [Steamling Control](docs/steamling-control.md): the Quick Access Menu plugin
@@ -71,7 +79,8 @@ The tree is laid out so more devices can be added later without reshuffling ever
 Steamling stands on a lot of other people's work. It started life as a fork of
 [Pocknix](https://github.com/shuuri-labs/pocknix-os) by shuuri-labs, its kernel and device
 support come from [ROCKNIX](https://github.com/ROCKNIX/distribution), and much of the handheld
-polish comes from [armada](https://github.com/armada-os/armada). The full list, with my thanks,
+polish, and the support for every handheld besides the RP6, comes from
+[armada](https://github.com/armada-os/armada). The full list, with my thanks,
 is in [About Steamling](docs/about.md).
 
 ## License

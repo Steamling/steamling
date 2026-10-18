@@ -32,6 +32,8 @@ these projects some love too.
   and the panel refresh calibration all come from ROCKNIX. None of this runs without them.
 - **[armada](https://github.com/armada-os/armada)**, for the HDR and color work, the suspend
   fixes, the gamescope and MangoHud patches, the RP6 firmware and a long list of kernel fixes.
+  armada is also where Steamling's support for every handheld besides the RP6 comes from: their
+  combined kernel, device trees, controller and audio setups made those ports possible.
 - **[thorch](https://github.com/thorch-os/thorch)**, for the power and suspend work shared
   with armada.
 - **[Arch Linux ARM](https://archlinuxarm.org/)**, the base everything sits on.
