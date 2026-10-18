@@ -201,6 +201,10 @@ configure_keyring() {
   log "initialising pacman keyring (archlinuxarm)"
   chroot "${root}" pacman-key --init
   chroot "${root}" pacman-key --populate archlinuxarm
+  # The rolling ALARM tarball can carry an older keyring than the base's packages were
+  # signed with: take the base's keyring first, so the big install below verifies.
+  chroot "${root}" pacman -Sy --noconfirm --needed archlinuxarm-keyring
+  chroot "${root}" pacman-key --populate archlinuxarm
 }
 
 # Generate a UTF-8 locale (ALARM base is "C" only). Qt/Plasma warn + fall back to C.UTF-8 otherwise.
@@ -224,7 +228,7 @@ install_packages() {
   # -Syy (force DB refresh): a reused rootfs keeps a stale sync DB, and plain -Sy won't
   # re-download a DB pacman thinks is current -> valid extra pkgs (vulkan-tools, alsa-utils,
   # alsa-ucm-conf) show up as "target not found". Safe here: this is a fresh-image -Su anyway.
-  chroot "${root}" pacman -Syyu --noconfirm --needed "${pkgs[@]}"
+  chroot "${root}" pacman "$(base_sync_flags)y" --noconfirm --needed "${pkgs[@]}"
 }
 
 # Bake the native ARM Steam client at BUILD time so first boot needs no network: the on-device

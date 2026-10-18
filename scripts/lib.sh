@@ -237,8 +237,19 @@ maybe_install_qemu() {
 # Fetch + verify the ALARM base tarball into CACHE_DIR. One implementation for
 # bootstrap.sh (rootfs) and build-packages.sh (build chroot), so the two bases cannot diverge.
 fetch_alarm_tarball() {
-  local tarball="${CACHE_DIR}/${ALARM_TARBALL}"
+  local tarball="${CACHE_DIR}/${ALARM_TARBALL}" md5=""
   mkdir -p "${CACHE_DIR}"
+  # Unpinned: ALARM's rolling "latest" keeps its name when it moves, so the cached copy is
+  # checked against the .md5 ALARM publishes beside it and fetched again when it differs.
+  if [ -z "${STEAMLING_ALARM_SHA256}" ]; then
+    md5="$(curl -fsSL --retry 3 "${STEAMLING_ALARM_TARBALL_URL}.md5" 2>/dev/null | awk 'NR==1{print $1}')"
+    if [ -z "${md5}" ]; then
+      warn "could not read ${STEAMLING_ALARM_TARBALL_URL}.md5 — using the tarball as is"
+    elif [ -f "${tarball}" ] && ! echo "${md5}  ${tarball}" | md5sum -c - >/dev/null 2>&1; then
+      log "ALARM has published a new ${ALARM_TARBALL}; replacing the cached copy"
+      rm -f "${tarball}"
+    fi
+  fi
   if [ ! -f "${tarball}" ]; then
     log "downloading ALARM rootfs: ${STEAMLING_ALARM_TARBALL_URL}"
     curl -fL --retry 3 -o "${tarball}" "${STEAMLING_ALARM_TARBALL_URL}"
@@ -250,8 +261,20 @@ fetch_alarm_tarball() {
       || die "ALARM tarball sha256 mismatch — refusing to build"
     ok "ALARM tarball checksum verified"
   else
+    if [ -n "${md5}" ]; then
+      echo "${md5}  ${tarball}" | md5sum -c - >/dev/null \
+        || die "ALARM tarball does not match ${STEAMLING_ALARM_TARBALL_URL}.md5 (truncated download?) — delete ${tarball} and retry"
+      ok "ALARM tarball matches its published md5"
+    fi
     warn "STEAMLING_ALARM_SHA256 is unset — build is NOT reproducible (pin it for releases)"
   fi
+}
+
+# pacman's sync-upgrade flags for a base chroot: with a frozen base pinned, -Syuu, so packages
+# the ALARM tarball carries at other versions are moved onto exactly what the base serves
+# (downgrades included); live ALARM: plain -Syu.
+base_sync_flags() {
+  if [ -n "${STEAMLING_BASE_SNAPSHOT}" ]; then printf -- '-Syuu'; else printf -- '-Syu'; fi
 }
 
 # Render the base pacman.conf: with a pinned snapshot, the only package source

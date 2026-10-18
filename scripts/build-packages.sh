@@ -119,7 +119,7 @@ setup_chroot() {
     # A PINNED base is frozen, so a chroot already stamped with that pin cannot be stale
     # and a failed -Syu just means offline. On live/unpinned bases the drift is real, and
     # building against a chroot that missed it is exactly what this guard exists to stop.
-    if ! chroot "${BROOT}" pacman -Syu --noconfirm; then
+    if ! chroot "${BROOT}" pacman "$(base_sync_flags)" --noconfirm; then
       if [ -n "${STEAMLING_BASE_SNAPSHOT}" ] && [ "${have_base}" = "${want_base}" ]; then
         warn "chroot -Syu failed, but the base is pinned to ${want_base} and the chroot already matches it — continuing (frozen base cannot have moved)"
       else
@@ -138,7 +138,10 @@ setup_chroot() {
     chroot_mount "${BROOT}"
     chroot "${BROOT}" pacman-key --init
     chroot "${BROOT}" pacman-key --populate archlinuxarm
-    chroot "${BROOT}" pacman -Syu --noconfirm --needed base-devel sudo
+    # same keyring-first step as build-image.sh's configure_keyring
+    chroot "${BROOT}" pacman -Sy --noconfirm --needed archlinuxarm-keyring
+    chroot "${BROOT}" pacman-key --populate archlinuxarm
+    chroot "${BROOT}" pacman "$(base_sync_flags)" --noconfirm --needed base-devel sudo
     chroot_umount "${BROOT}"
     printf '%s\n' "${want_base}" > "${BROOT}/.base-snapshot"
   fi
