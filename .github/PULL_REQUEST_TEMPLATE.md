@@ -46,7 +46,7 @@ ssh root@<device> 'pacman -U /tmp/<pkg>-*.pkg.tar.*'
 
 Expected:
 
-Rollback: `pacman -U /var/cache/pacman/pkg/<previous>.pkg.tar.*`
+Rollback: `pacman -U <previous>.pkg.tar.*`
 
 ## Checklist
 

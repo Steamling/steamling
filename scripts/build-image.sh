@@ -21,10 +21,29 @@ LOCAL_REPO_SHARED_DIR="${LOCALREPO_SHARED_DIR}"   # SoC-neutral: build/localrepo
 # out; =1 bakes them in (and their ALARM deps then need no base-extras.list entry).
 STEAMLING_EMULATION="${STEAMLING_EMULATION:-0}"
 
+# Documentation nobody reads on a handheld: package docs, the KDE and GNOME handbooks, gtk-doc.
+# NoExtract keeps them out of every install, the image's and every later update's;
+# strip_docs clears what the base tarball unpacked before pacman.conf existed. Licenses
+# (/usr/share/licenses) and man pages stay.
+STEAMLING_NOEXTRACT="${STEAMLING_NOEXTRACT-usr/share/doc/* usr/share/gtk-doc/* usr/share/help/*}"
+# The image used to carry a copy of every installed package in /var/cache/pacman/pkg, several GB
+# on the card that nothing on the device reads. =1 brings it back (an offline reinstall source).
+STEAMLING_IMAGE_PKG_CACHE="${STEAMLING_IMAGE_PKG_CACHE:-0}"
+
 render_pacman_conf() {
   local out="$1"
   log "rendering pacman.conf (base: ${STEAMLING_BASE_SNAPSHOT:-live ALARM})"
   render_base_pacman_conf "${out}"
+  [ -z "${STEAMLING_NOEXTRACT}" ] || sed -i "/^\[options\]$/a NoExtract   = ${STEAMLING_NOEXTRACT}" "${out}"
+}
+
+strip_docs() {
+  local root="$1" d
+  [ -n "${STEAMLING_NOEXTRACT}" ] || return 0
+  for d in usr/share/doc usr/share/gtk-doc usr/share/help; do
+    [ -d "${root}/${d}" ] && find "${root}/${d}" -mindepth 1 -delete
+  done
+  log "stripped package documentation"
 }
 
 # The local repos live on the host; we bind-mount them to /localrepo{,-shared}
@@ -42,8 +61,8 @@ append_local_repo() {
     "${out}"
 }
 
-# The image keeps each installed package in its own /var/cache/pacman/pkg, as it did while pacman
-# downloaded straight into the rootfs. Hard links into build/cache and build/localrepo make that free.
+# STEAMLING_IMAGE_PKG_CACHE=1: the image keeps each installed package in its own
+# /var/cache/pacman/pkg. Hard links into build/cache and build/localrepo make that free on the host.
 link_installed_into_cache() {
   local root="$1" dst="$1/var/cache/pacman/pkg" d dir f n=0
   ! mountpoint -q "${dst}" || die "${dst} is still the shared cache's mount point"
@@ -332,6 +351,7 @@ main() {
   #    ${KERNEL_BUILD_DIR}/out, the device set). Run `make kernel` first.
   install_local_packages "${ROOTFS_DIR}"
   prune_fontconfig_compat_links "${ROOTFS_DIR}"
+  strip_docs "${ROOTFS_DIR}"
 
   # Build stamp for support: which base snapshot this image shipped with, and
   # when. Separate file: /etc/os-release is owned by the filesystem package.
@@ -344,8 +364,10 @@ main() {
   bootstrap_steam_seed "${ROOTFS_DIR}"
 
   chroot_umount "${ROOTFS_DIR}"; trap - EXIT
-  progress_detail "linking the package cache"
-  link_installed_into_cache "${ROOTFS_DIR}"
+  if [ "${STEAMLING_IMAGE_PKG_CACHE}" = 1 ]; then
+    progress_detail "linking the package cache"
+    link_installed_into_cache "${ROOTFS_DIR}"
+  fi
 
   # The rootfs is complete. Assembling it into a flashable image (partitions, boot KERNEL,
   # first-boot config) is a separate step: scripts/build-sd-image.sh (make sd-image).

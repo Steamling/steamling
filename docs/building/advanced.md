@@ -117,6 +117,8 @@ environment (for example `make image SSH=1`, `export SSH=1` to make it the defau
 | `--password PW` | `SD_ROOT_PASSWORD=PW` | the root and `deck` password baked into the image |
 | `--wifi SSID --wifi-psk PSK --wifi-country US` | `SD_WIFI_SSID= SD_WIFI_PSK= SD_WIFI_COUNTRY=` | pre-configure Wi-Fi in the image |
 | `--emulation` | `STEAMLING_EMULATION=1` | bake the emulation layer (ES-DE and emulators) into the image |
+| (none) | `STEAMLING_IMAGE_PKG_CACHE=1` | keep a copy of every installed package in the image's `/var/cache/pacman/pkg` (several GB; handy on test devices for rolling a package back offline) |
+| (none) | `STEAMLING_NOEXTRACT=` | keep package documentation in the image (left out by default; the value is pacman's `NoExtract` list) |
 | `--jobs N` | `JOBS=N` | parallel jobs for the kernel build (default: all cores) |
 | `--no-sd-image` | `SD_IMAGE=off` | stop at the finished rootfs (`make rootfs`) |
 | `--no-seed` | `STEAMLING_SEED=off` | compile every package instead of downloading the published ones |

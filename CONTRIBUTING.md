@@ -138,9 +138,11 @@ systemctl restart <the-unit-you-touched>      # if applicable
 journalctl -b -u <the-unit-you-touched>       # check it came up clean
 ```
 
-**Keep a rollback.** The previous package is still in `/var/cache/pacman/pkg/`; reinstall it
-with `pacman -U /var/cache/pacman/pkg/<old-file>` if the new one misbehaves. A reboot back
-into a known-good state beats debugging a wedged session.
+**Keep a rollback.** Images don't carry a copy of every package, so keep the old package
+yourself: copy it out of `build/localrepo/` before you rebuild, or build your test image with
+`STEAMLING_IMAGE_PKG_CACHE=1` so every installed package stays in `/var/cache/pacman/pkg/`
+(anything pacman has updated since is there either way). `pacman -U <old-file>` puts it back if
+the new one misbehaves. A reboot back into a known-good state beats debugging a wedged session.
 
 Notes that will save you an hour:
 
@@ -230,7 +232,7 @@ Concretely:
    0% lost the colour permanently.
 3. Reboot. Expected: the rings come back at the same colour and brightness.
 
-Rollback: `pacman -U /var/cache/pacman/pkg/steamling-decky-<old>.pkg.tar.*`
+Rollback: `pacman -U steamling-decky-<old>.pkg.tar.*` (the package I was on before)
 ```
 
 "It works on my device" without these steps means the PR sits until I can work out how to
