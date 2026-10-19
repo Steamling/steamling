@@ -33,13 +33,31 @@ python3 "$MKBOOTIMG" \
   --os_version 12.0.0 --os_patch_level "$(date '+%Y-%m')" --header_version 0 \
   --cmdline "$cmdline" -o "$tmp/KERNEL"
 
-mount -o remount,rw "$FLASH" 2>/dev/null || true
-if [ -z "$OUT_SUFFIX" ]; then
-  [ -f "$FLASH/KERNEL" ] && cp -f "$FLASH/KERNEL" "$FLASH/KERNEL.bak"
-fi
-cp -f "$tmp/KERNEL" "$FLASH/KERNEL${OUT_SUFFIX}"
 # md5 content always names "KERNEL" (what the ABL verifies after the stage-rename)
-printf '%s  KERNEL\n' "$(md5sum "$FLASH/KERNEL${OUT_SUFFIX}" | awk '{print $1}')" > "$FLASH/KERNEL.md5${OUT_SUFFIX}"
+printf '%s  KERNEL\n' "$(md5sum "$tmp/KERNEL" | awk '{print $1}')" > "$tmp/KERNEL.md5"
+
+# Never write a boot file in place: power lost halfway through a copy over /flash/KERNEL left a
+# device that would not boot. Each file is copied to a .part name, flushed, then renamed over the
+# old one, so the name only ever points at a whole file. The .part names are not .new on purpose:
+# steamling-rollback-repair activates any KERNEL.new it finds, and a half-written one must never
+# look staged. The two renames sit back to back; only a crash between them leaves an old md5.
+put() {  # <src> <dest>
+  rm -f "$2.part"
+  cp "$1" "$2.part"
+  sync "$2.part"
+  mv -f "$2.part" "$2"
+}
+mount -o remount,rw "$FLASH" 2>/dev/null || true
+if [ -z "$OUT_SUFFIX" ] && [ -f "$FLASH/KERNEL" ]; then
+  put "$FLASH/KERNEL" "$FLASH/KERNEL.bak"
+fi
+cp "$tmp/KERNEL" "$FLASH/KERNEL${OUT_SUFFIX}.part"
+cp "$tmp/KERNEL.md5" "$FLASH/KERNEL.md5${OUT_SUFFIX}.part"
+sync "$FLASH/KERNEL${OUT_SUFFIX}.part" "$FLASH/KERNEL.md5${OUT_SUFFIX}.part"
+cmp -s "$tmp/KERNEL" "$FLASH/KERNEL${OUT_SUFFIX}.part" \
+  || { rm -f "$FLASH"/KERNEL*.part; echo "steamling-build-bootimg: copy to $FLASH did not verify — old KERNEL left in place" >&2; exit 1; }
+mv -f "$FLASH/KERNEL${OUT_SUFFIX}.part" "$FLASH/KERNEL${OUT_SUFFIX}"
+mv -f "$FLASH/KERNEL.md5${OUT_SUFFIX}.part" "$FLASH/KERNEL.md5${OUT_SUFFIX}"
 sync
 note="KERNEL.bak kept"; [ -n "$OUT_SUFFIX" ] && note="staged, not activated"
 echo "steamling-build-bootimg: rebuilt $FLASH/KERNEL${OUT_SUFFIX} (kernel $(cat "${SRCROOT}/usr/lib/steamling/kernelrelease" 2>/dev/null || echo '?'); ${note})"
