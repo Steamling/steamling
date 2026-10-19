@@ -2,7 +2,8 @@
 
 This tree is Steamling's combined Qualcomm handheld kernel, built from the one in
 [armada](https://github.com/armada-os/armada) (its packages/kernel directory at armada commit
-`64207e61a3c5`), carried in Steamling's layout so `scripts/build-kernel.sh` builds it like any
+`64207e61a3c5`, plus their iris low-latency decode patches from `ecc0d3e`, numbered `125a`-`125h`
+so they sit where armada's series puts them), carried in Steamling's layout so `scripts/build-kernel.sh` builds it like any
 other tree. The SM8550 family keeps its own ROCKNIX-synced tree in `kernel/sm8550/`.
 
 Each SoC on it has only a `kernel/<soc>/kernel.conf`, which names this tree (`KERNEL_TREE=steamling`),
