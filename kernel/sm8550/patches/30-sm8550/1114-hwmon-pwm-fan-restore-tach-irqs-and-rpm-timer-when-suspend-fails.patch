@@ -1,0 +1,44 @@
+From: David J. Vandenburgh <david@vandenburgh.co>
+Subject: [PATCH] hwmon: (pwm-fan) restore the tach irqs and RPM timer when suspend fails
+
+pwm_fan_suspend() quiesces the tach irqs and the RPM timer before
+powering the fan off. If the power-off fails, the PM core treats the
+device as not suspended and never calls pwm_fan_resume(), so the irqs
+stayed disabled and the timer stopped: the fan's RPM reading froze until
+the next reboot. Undo the quiesce on that path.
+
+---
+--- a/drivers/hwmon/pwm-fan.c
++++ b/drivers/hwmon/pwm-fan.c
+@@ -721,7 +721,7 @@
+ static int pwm_fan_suspend(struct device *dev)
+ {
+ 	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+-	int i;
++	int i, ret;
+ 
+ 	timer_delete_sync(&ctx->rpm_timer);
+ 
+@@ -730,7 +730,21 @@
+ 			disable_irq(ctx->tachs[i].irq);
+ 	}
+ 
+-	return pwm_fan_power_off(ctx, true);
++	ret = pwm_fan_power_off(ctx, true);
++	if (ret) {
++		/*
++		 * A failed suspend is not followed by resume, so put back what
++		 * was quiesced above or the RPM reading stops for good.
++		 */
++		for (i = 0; i < ctx->tach_count; i++) {
++			if (ctx->tachs[i].irq > 0)
++				enable_irq(ctx->tachs[i].irq);
++		}
++		if (ctx->tach_count > 0)
++			mod_timer(&ctx->rpm_timer, jiffies + HZ);
++	}
++
++	return ret;
+ }
+ 
+ static int pwm_fan_resume(struct device *dev)
