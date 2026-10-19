@@ -2,7 +2,7 @@
 # build and upstream's Linux binaries are x86_64-only.
 pkgname=dolphin-emu
 pkgver=2609a
-pkgrel=1.1
+pkgrel=1.2
 pkgdesc="GameCube / Wii emulator (native aarch64 build)"
 arch=('aarch64')
 url="https://dolphin-emu.org"
@@ -10,8 +10,10 @@ license=('GPL-2.0-or-later')
 depends=('bluez-libs' 'bzip2' 'curl' 'enet' 'ffmpeg' 'glslang' 'hidapi' 'libspng' 'libusb'
          'libx11' 'libxi' 'libxrandr' 'lz4' 'lzo' 'pugixml' 'qt6-base' 'qt6-svg' 'sdl3' 'sfml'
          'speexdsp' 'xxhash' 'xz' 'zlib-ng' 'zstd')
-makedepends=('alsa-lib' 'cmake' 'git' 'libevdev' 'libpulse' 'miniupnpc' 'ninja' 'python'
-             'vulkan-headers')
+# dbus: Qt6's DBus component finds libdbus through pkg-config (dbus-1.pc), and the build chroot
+# only has dbus-broker unless something pulls the reference dbus in.
+makedepends=('alsa-lib' 'cmake' 'dbus' 'git' 'libevdev' 'libpulse' 'miniupnpc' 'ninja' 'pkgconf'
+             'python' 'vulkan-headers')
 options=('!lto' '!emptydirs')   # !lto per Arch upstream (miscompiles)
 source=("dolphin::git+https://github.com/dolphin-emu/dolphin.git#tag=${pkgver}")
 sha256sums=('SKIP')
