@@ -120,6 +120,7 @@ environment (for example `make image SSH=1`, `export SSH=1` to make it the defau
 | (none) | `STEAMLING_IMAGE_PKG_CACHE=1` | keep a copy of every installed package in the image's `/var/cache/pacman/pkg` (several GB; handy on test devices for rolling a package back offline) |
 | (none) | `STEAMLING_NOEXTRACT=` | keep package documentation in the image (left out by default; the value is pacman's `NoExtract` list) |
 | `--jobs N` | `JOBS=N` | parallel jobs for the kernel build (default: all cores) |
+| (none) | `STEAMLING_CCACHE=off` | compile packages from scratch instead of reusing the ccache in `build/cache/ccache-pkg` (`STEAMLING_CCACHE_SIZE` sets its limit, 20G by default) |
 | `--no-sd-image` | `SD_IMAGE=off` | stop at the finished rootfs (`make rootfs`) |
 | `--no-seed` | `STEAMLING_SEED=off` | compile every package instead of downloading the published ones |
 | `--no-host-setup` | `STEAMLING_HOST_SETUP=off` | stop when host packages are missing instead of installing them |
@@ -159,12 +160,14 @@ A package whose build needs packages Steamling builds itself (for example `steam
 
 ## Space and time
 
-Plan on roughly **80 GB free** for a full build (build chroot, rootfs, kernel tree with debug info,
+Plan on roughly **100 GB free** for a full build (build chroot, rootfs, kernel tree with debug info,
 caches, and the image). Rough times on a recent 8-core x86_64 PC: kernel 20-40 minutes the first
 time, `make seed` depends on your connection (several GB), `make build` one to three hours under
 qemu, `make sd-image` 10-20 minutes. An aarch64 host is faster for the package and rootfs steps.
 `make kernel` does nothing when `kernel/<soc>/` has not changed since its last build, and with
-ccache installed a small kernel change rebuilds in minutes.
+ccache installed a small kernel change rebuilds in minutes. Packages use their own ccache inside
+the build chroot, so after the first build a version bump or a small patch only recompiles the files
+that changed. It needs up to 20 GB in `build/cache/ccache-pkg`.
 
 ## Upstream mirrors (optional)
 
