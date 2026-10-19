@@ -33,8 +33,8 @@ abl_item_label() {
   state="$(printf '%s\n' "${st}" | sed -n 's/^state=//p')"
   ver="$(printf '%s\n' "${st}" | sed -n 's/^shipped_version=//p')"
   case "${state}" in
-    differs|mixed)  echo "Bootloader: install or update to ${ver}..." ;;
-    uptodate)       echo "Bootloader is up to date (${ver})" ;;
+    differs|mixed)  echo "Bootloader: install or update to OpenABL ${ver}..." ;;
+    uptodate)       echo "Bootloader is up to date (OpenABL ${ver})" ;;
     *)              return 1 ;;
   esac
 }

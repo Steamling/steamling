@@ -101,7 +101,7 @@ source pins, `KERNEL_PKGREL` (1 for a new chip) + `config/ patches/ dts/` -
 populated by `make sync` against the ROCKNIX device dir named in `ROCKNIX_SOC`); the kernel
 package needs no recipe of its own (`packages/soc/linux-steamling/` packages `make kernel` output,
 plus `mkbootimg`; the /flash deploy is bsp-common's and needs nothing per SoC), and a
-`packages/soc/steamling-bootloader-<soc>/` with the ROCKNIX ABL install kit copied to the SD
+`packages/soc/steamling-bootloader-<soc>/` with the OpenABL install kit copied to the SD
 boot FAT. Each SoC gets its own pacman repo tree
 (`build/localrepo/<soc>`, published at `STEAMLING_REPO_URL/<soc>`): the tuned packages
 (mesa, gamescope, fex-emu) share pkgnames across SoCs with different
@@ -120,12 +120,12 @@ On the device the style is `STEAMLING_BOOT_STYLE`, rendered into the BSP's famil
 `BOOTLOADER`; bsp-common's `steamling-boot-deploy` runs that style's /flash deploy for every
 kernel update, rollback and cmdline change. Kernel packages ship no deploy scripts or hooks.
 
-* `qcom-abl` (sm8550): the ROCKNIX ABL boots an Android boot image (`/KERNEL`,
+* `qcom-abl` (sm8550): OpenABL (the ROCKNIX ABL before it) boots an Android boot image (`/KERNEL`,
   mkbootimg, cmdline baked in, all dtbs appended - ABL picks by board id). The BSP
   ships `/usr/lib/steamling/kernel-cmdline`, which build-packages.sh renders from the profile's
   `KERNEL_CMDLINE` into its `./staged`; bsp-common's kernel hook rebuilds /flash/KERNEL on device.
-  The SD boot FAT also carries `rocknix_abl/` (steamling-bootloader-<soc>): ROCKNIX's
-  first-install kit for flashing that ABL from rooted stock Android - inert at boot,
+  The SD boot FAT also carries `rocknix_abl/` (steamling-bootloader-<soc>; ROCKNIX now calls it
+  `openabl/`, ours keeps the old name for existing backups): the first-install kit for flashing that ABL from rooted stock Android - inert at boot,
   Steamling never flashes it itself.
 
 ## The runtime contract (`/usr/lib/steamling/device.conf` -> `boards/<board>.conf`)

@@ -4,7 +4,7 @@ User guides for Steamling. New here? Start with the [project README](../README.m
 
 - [devices.md](devices.md) - every supported handheld, what "untested port" means, and how to
   help test one
-- [install.md](install.md) - flashing the SD card, installing the ROCKNIX bootloader, first boot,
+- [install.md](install.md) - flashing the SD card, installing the bootloader (OpenABL), first boot,
   and updating
 - [known-issues.md](known-issues.md) - what does not work, or not well, yet
 - [steamling-control.md](steamling-control.md) - the in-game control panel: per-game tweaks, fan/CPU

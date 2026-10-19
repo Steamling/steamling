@@ -76,7 +76,7 @@ The image ends up in `build/image/sm8250/` (the folder is named after the chip).
 ## Installing on something other than the RP6
 
 The [install guide](install.md) is written around the Retroid Pocket 6. The idea is the same on
-the others: flash the ROCKNIX bootloader once from Android, then boot from the SD card. The menus
+the others: flash the bootloader (OpenABL) once from Android, then boot from the SD card. The menus
 for running a script as root, and the "device model" you pick in the bootloader menu, differ
 between brands. [armada's install guide](https://armadaos.dev/getting-started/flashing-to-an-sd-card/)
 covers the model-specific bits for every handheld above, and the same steps apply here.

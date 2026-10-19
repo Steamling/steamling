@@ -1,35 +1,48 @@
 # rocknix_abl kit provenance
 
 abl_signed-SM8250.elf is NOT committed here - the PKGBUILD fetches it from the
-official ROCKNIX ABL release, pinned by tag + sha512:
+official OpenABL release, pinned by tag + sha512:
 
-  release:  https://github.com/ROCKNIX/abl/releases/tag/v1.2
-  asset:    rocknix-abl-v1.2.tar.gz
-  tarball sha512: b2d897b4f681f22d416201e332a5c27efc00b0139c3b0806126f8913182285e8
-                  03b8a3726a7c9a1609956049d4b6d054b3529bd0f508d1a86ab9ab3bf79dca01
-  abl_signed-SM8250.elf sha256: the release's own sidecar, re-checked in prepare().
+  release:  https://github.com/OpenHandheldCollective/OpenABL/releases/tag/v1.1
+  asset:    openabl-v1.1.tar.gz (one folder per SoC)
+  tarball sha512: edcff09576e3f7c2e0019f526a42df61ddf8ff9867033bbb1ca5c46a71de36b5
+                  28986df8950c21b5f53e45e3b12a6de9178815b3120f327b49261aae2cc5c2b0
+  (sha256 520cd8fecd26da728259e376561902d9c86b85ad859511066fb1cd4b02b6ab52,
+  the same pin ROCKNIX's openabl package.mk carries)
+  abl_signed-SM8250.elf sha256 (release's own sidecar, re-checked in prepare()):
+                  b006914615b16c19732fed0a4af7d99aa4159cfba74f5c0d40483539b1c2aa60
 
-It is ROCKNIX's patched, test-key-signed build of the Qualcomm ABL (edk2
-LinuxLoader, BSD-3-Clause) for the SM8250 family - the bootloader that scans
-FAT partitions for /KERNEL and boots it (an Android boot image, board
-dtb selected by board id). One elf serves every SM8250 board;
-ROCKNIX keys the artifact by SoC.
+OpenABL is the Open Handheld Collective's build of the Qualcomm ABL (edk2
+LinuxLoader with one patch plus a boot menu, GPL-3.0-or-later; see the
+LICENSES.md it ships, installed under /usr/share/licenses). It boots Boot
+Loader Spec entries, extlinux, EFI loaders and, what Steamling uses, an
+Android boot image at /KERNEL on a FAT partition (board dtb picked from the
+dtbs appended to it). One elf serves every SM8250 board; the release keys it
+by SoC.
+
+It replaces the ROCKNIX ABL (github.com/ROCKNIX/abl, v1.2), whose repo and
+release downloads were removed in October 2026. ROCKNIX switched to OpenABL
+in their distribution repo (71d8932b33 "openabl: introduce package", then
+a5d0dd4d57 "openabl: bump to v1.1"). epoch=1 because OpenABL's 1.1 sorts
+below the ROCKNIX ABL's 1.2.
+
+ROCKNIX renamed the kit folder to openabl/ at the same time. Ours stays
+rocknix_abl/ for now: steamling-update-abl keeps its backups in
+/flash/rocknix_abl and restore_backup_abl.sh reads rocknix_abl/abl_*.img, so
+a rename would strand backups people already made.
 
 The four kit files (README, flash_abl.sh.template, backup_abl.sh,
-restore_backup_abl.sh) are VERBATIM copies from the ROCKNIX distribution repo,
-packages/tools/rocknix-abl/sources/ (GPL-2.0 tree), as pinned by our `make
-sync` snapshot. The PKGBUILD's %DEVICE% -> SM8250 substitution in
-flash_abl.sh reproduces their package.mk. Vendored (4 tiny files, change
+restore_backup_abl.sh) are VERBATIM copies from the ROCKNIX distribution repo's
+old packages/tools/rocknix-abl/sources/ (GPL-2.0 tree). Their openabl/ copies
+are the same commands with the folder renamed. Vendored (4 tiny files, change
 rarely) rather than fetched or synced; diff them against the ROCKNIX tree
 when advancing the sync pin.
 
-Version coupling: the ABL version ROCKNIX pins for the SoC lives in their
-packages/tools/rocknix-abl/package.mk (PKG_VERSION). Ours (_ablver in the
-PKGBUILD) should track it - the ABL defines the boot contract the sm8250
+Version coupling: the ABL version ROCKNIX pins lives in their
+projects/ROCKNIX/packages/tools/openabl/package.mk (PKG_VERSION). Ours (_ablver
+in the PKGBUILD) should track it - the ABL defines the boot contract the
 profile assumes (FAT label, /KERNEL boot image, board-id dtb select), so a
-mismatched pair is the thing to avoid. v1.2 changes vs v1.1.7: new logo, a
-message on an incompatible SoC, stats labels; the qcom-abl boot contract and
-the kit scripts are unchanged (diffed against their tree at this bump).
+mismatched pair is the thing to avoid.
 
 The kit's job is FIRST INSTALL from stock Android: the user copies
 rocknix_abl/ off the SD's boot FAT to Android internal storage, runs

@@ -69,7 +69,7 @@ install_flow() {
   run_busy "Installing Steamling to internal storage — do not power off…" \
       "$INSTALL_CLI" --yes --userdata-gib "$ud" \
     || gui_die "Install failed (details in ${LOG}).<br/><br/>If internal storage was modified, do NOT boot it — relaunch this tool from the SD card, choose <b>Remove, restore Android</b>, fix the cause, then install again."
-  offer_poweroff "<b>Install complete.</b><br/><br/>Power off and remove the SD card, then boot holding <b>Volume&nbsp;-</b> to open the ROCKNIX boot menu and set <b>Switch boot source</b> to <b>Internal</b> — Steamling then boots from internal storage."
+  offer_poweroff "<b>Install complete.</b><br/><br/>Power off and remove the SD card, then boot holding <b>Volume&nbsp;-</b> to open the boot menu and set <b>Boot source</b> to <b>Internal</b> — Steamling then boots from internal storage."
 }
 
 remove_flow() {
@@ -102,7 +102,7 @@ manage_flow() {
 
 internal_boot_flow() {
   # instructions only: the disk under / cannot be repartitioned from here
-  offer_poweroff "<b>Steamling is running from internal storage.</b><br/><br/>Power off, then boot holding <b>Volume&nbsp;-</b> to open the ROCKNIX boot menu:<br/><br/><b>Switch boot source</b> — set it to <b>SD Card</b> to start from the SD card instead.<br/><b>Uninstall CFW</b> — remove Steamling from internal storage and give Android its full partition size back (the resize factory-resets Android).<br/><br/>To boot Android: switch the boot mode to <b>Android</b> to make it the default, or hold <b>Volume&nbsp;+</b> while powering on to boot it once."
+  offer_poweroff "<b>Steamling is running from internal storage.</b><br/><br/>Power off, then boot holding <b>Volume&nbsp;-</b> to open the boot menu:<br/><br/><b>Boot source</b> — set it to <b>SD card</b> to start from the SD card instead.<br/><b>Uninstall CFW</b> — remove Steamling from internal storage and give Android its full partition size back (the resize factory-resets Android).<br/><br/>To boot Android: switch the boot mode to <b>Android</b> to make it the default, or hold <b>Volume&nbsp;+</b> while powering on to boot it once."
 }
 
 src=$(findmnt -no SOURCE / 2>/dev/null || true)

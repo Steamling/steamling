@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # build-sd-image.sh - flashable SD image, laid out the way the device's ABL expects:
-#   p1 fat32 "${SD_BOOT_PARTNAME}": /KERNEL and the ROCKNIX ABL kit
+#   p1 fat32 "${SD_BOOT_PARTNAME}": /KERNEL and the OpenABL kit (rocknix_abl/)
 #   p2 btrfs "${ROOT_LABEL}": subvols @ @home @snapshots @pacman-cache @var-log
 # The kernel mounts root by PARTUUID (no initramfs) and boots the btrfs DEFAULT subvol: the
 # cmdline and fstab must never name one, that is what lets steamling-rollback switch roots.

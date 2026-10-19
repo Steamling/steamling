@@ -1,26 +1,31 @@
-# steamling-bootloader-sm8650 — the ROCKNIX ABL install kit for SM8650 boards.
+# steamling-bootloader-sm8650 — the OpenABL install kit for SM8650 boards.
 # Boot contract (qcom-abl): XBL -> ABL -> /KERNEL (Android boot image) off any FAT partition.
-# The factory ABL boots only Android, so the ROCKNIX ABL must be flashed to abl_a/abl_b ONCE before
-# any SD boots. One elf covers every SM8650 board: ROCKNIX keys it by SoC, not board.
+# The factory ABL boots only Android, so OpenABL must be flashed to abl_a/abl_b ONCE before
+# any SD boots. One elf covers every SM8650 board: the release keys it by SoC, not board.
+# OpenABL (Open Handheld Collective) replaced the ROCKNIX ABL, whose repo and releases are gone;
+# ROCKNIX moved over in October 2026 (README.provenance has the commits). The kit folder keeps its
+# old name, rocknix_abl, so backups and docs from the ROCKNIX ABL days still line up.
 # Nothing here flashes at build or install time; both flashing paths (the kit by hand from rooted
 # Android, steamling-update-abl afterwards) are deliberate user actions.
 pkgname=steamling-bootloader-sm8650
-_ablver=1.2
+_ablver=1.1
+# OpenABL restarted the numbering below the ROCKNIX ABL's 1.2
+epoch=1
 pkgver=${_ablver}
 pkgrel=1
-pkgdesc="SM8650 qcom-abl boot payload: ROCKNIX ABL install kit (rocknix_abl)"
+pkgdesc="SM8650 qcom-abl boot payload: OpenABL install kit (rocknix_abl)"
 arch=('aarch64')
 # !strip: a stripped bootloader is an unbootable one.
 options=('!strip')
 url="https://github.com/dvandenburgh/steamling"
-license=('BSD-3-Clause')   # Qualcomm ABL (edk2 LinuxLoader); kit scripts GPL-2.0
-source=("https://github.com/ROCKNIX/abl/releases/download/v${_ablver}/rocknix-abl-v${_ablver}.tar.gz"
+license=('GPL-3.0-or-later' 'BSD-2-Clause-Patent')   # OpenABL (Abl/ part with a linking exception); kit scripts GPL-2.0
+source=("https://github.com/OpenHandheldCollective/OpenABL/releases/download/v${_ablver}/openabl-v${_ablver}.tar.gz"
         'README'
         'flash_abl.sh.template'
         'backup_abl.sh'
         'restore_backup_abl.sh'
         '95-steamling-abl-kit.hook')
-sha512sums=('b2d897b4f681f22d416201e332a5c27efc00b0139c3b0806126f8913182285e803b8a3726a7c9a1609956049d4b6d054b3529bd0f508d1a86ab9ab3bf79dca01'
+sha512sums=('edcff09576e3f7c2e0019f526a42df61ddf8ff9867033bbb1ca5c46a71de36b528986df8950c21b5f53e45e3b12a6de9178815b3120f327b49261aae2cc5c2b0'
             'SKIP'
             'SKIP'
             'SKIP'
@@ -29,7 +34,7 @@ sha512sums=('b2d897b4f681f22d416201e332a5c27efc00b0139c3b0806126f8913182285e803b
 
 prepare() {
   # the release ships a .sha256 sidecar per elf
-  ( cd "rocknix-abl-v${_ablver}" && sha256sum -c "abl_signed-SM8650.elf.sha256" )
+  ( cd "openabl-v${_ablver}/SM8650" && sha256sum -c "abl_signed-SM8650.elf.sha256" )
   sed 's/%DEVICE%/SM8650/g' flash_abl.sh.template > flash_abl.sh
   # steamling-update-abl reports the shipped version; the elf itself carries none
   echo "${_ablver}" > version
@@ -38,12 +43,17 @@ prepare() {
 package() {
   local kit="${pkgdir}/usr/share/steamling/bootloader/rocknix_abl"
 
-  install -Dm644 "rocknix-abl-v${_ablver}/abl_signed-SM8650.elf" "${kit}/abl_signed-SM8650.elf"
+  install -Dm644 "openabl-v${_ablver}/SM8650/abl_signed-SM8650.elf" "${kit}/abl_signed-SM8650.elf"
   install -Dm644 README                 "${kit}/README"
   install -Dm755 flash_abl.sh           "${kit}/flash_abl.sh"
   install -Dm755 backup_abl.sh          "${kit}/backup_abl.sh"
   install -Dm755 restore_backup_abl.sh  "${kit}/restore_backup_abl.sh"
   install -Dm644 version                "${kit}/version"
+
+  # the GPL wants its text next to the binary; kept out of the kit so the SD copy stays small
+  install -Dm644 "openabl-v${_ablver}/LICENSE"    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 "openabl-v${_ablver}/LICENSES.md" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.md"
+  cp -r "openabl-v${_ablver}/LICENSES" "${pkgdir}/usr/share/licenses/${pkgname}/"
 
   # pacman never touches /flash, so a hook re-copies the kit there on upgrade.
   install -Dm644 "${srcdir}/95-steamling-abl-kit.hook" \

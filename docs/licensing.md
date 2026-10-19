@@ -41,7 +41,7 @@ not and cannot relicense them. The main ones:
 | Linux kernel + patch series | `kernel/`, `packages/soc/linux-steamling/` | GPL-2.0-only |
 | ROCKNIX patches, scripts, BSP material | `kernel/*/patches`, various packages | GPL-2.0 |
 | armada device support, patches and settings | `kernel/steamling/`, `devices/*`, various packages | GPL-2.0-or-later |
-| ROCKNIX ABL (fetched, pinned) | `packages/soc/steamling-bootloader-*` | BSD-3-Clause (Qualcomm edk2 LinuxLoader) |
+| OpenABL (fetched, pinned; replaced the ROCKNIX ABL) | `packages/soc/steamling-bootloader-*` | GPL-3.0-or-later, with a linking exception for its ABL part (Qualcomm's edk2 LinuxLoader underneath; details in its LICENSES.md, installed under /usr/share/licenses) |
 | gamescope + patch set | `packages/soc/gamescope` | BSD-2-Clause (the patch set: GPL-2.0; origins in PATCHES.md) |
 | Mesa | `packages/soc/mesa` | MIT |
 | MangoHud | `packages/shared/mangohud` | MIT |

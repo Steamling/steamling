@@ -17,13 +17,14 @@ Build the image yourself with the [build guide](building/README.md), or grab one
 compressed, but balenaEtcher opens them as they are). Flash it to the microSD card with
 [balenaEtcher](https://etcher.balena.io/), Rufus or `dd`.
 
-## 2. Install the ROCKNIX bootloader
+## 2. Install the bootloader (OpenABL)
 
-The ROCKNIX ABL replaces the stock bootloader with one that can boot Linux from the SD card or
-internal storage. It is **required** on every device.
+OpenABL replaces the stock bootloader with one that can boot Linux from the SD card or internal
+storage. It is **required** on every device. (It used to be called the ROCKNIX ABL. If you already
+flashed that one, it still works, and you can move to OpenABL later from Steamling Tools.)
 
 The flashed SD card carries the install kit in its `rocknix_abl` folder, visible from Android when
-the card is inserted.
+the card is inserted. The folder kept the old name so older backups still line up.
 
 1. Copy the `rocknix_abl` folder from the SD card to the root of Android's internal storage.
 2. Open **Settings → Handheld Settings → Advanced → Run Script as Root** (that's where it is on
@@ -39,8 +40,8 @@ the card is inserted.
 
 1. Hold **Volume −** while powering on to open the ABL menu. Volume keys move through the entries,
    the power key selects.
-2. Set **Boot mode** to **Linux** and **Boot source** to **SD Card**, and **set the device model
-   to Retroid Pocket 6** (a wrong model gives a black screen).
+2. Set **Boot mode** to **Linux** and **Boot source** to **SD card**, and **set Device model
+   to Retroid Pocket 6** (a wrong model gives a black screen). Then pick **Start**.
 3. Insert the flashed microSD and boot.
 
 The first boot into game mode can take a long while, especially from an SD card. Leave it be; it

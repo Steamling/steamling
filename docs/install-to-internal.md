@@ -1,26 +1,26 @@
 # Install Steamling to internal storage (and uninstall)
 
-> **Install the ROCKNIX ABL first** if you have not already: see the [install guide](install.md).
+> **Install OpenABL first** if you have not already: see the [install guide](install.md).
 > Steamling needs it to boot, and it is what makes switching between the internal install and the
 > SD card a menu choice.
 
-## The ROCKNIX boot menu
+## The boot menu
 
 Everything below uses the bootloader menu, so here's how it works first. **Hold Volume −**
-while powering on to open it. **Volume keys move through the entries** (the highlighted one is the
-banner at the top of the screen) and the **power key selects**. The current settings are listed
-under **ABL Settings**:
+while powering on to open it. **Volume keys move through the entries** and the **power key
+selects**. The settings that matter here:
 
 - **Boot mode** - what boots by default: **Linux** or **Android**.
-- **Boot source** - which disk Linux boots from: **Internal**, **SD Card**, or **USB**.
-- **Alternative volume up** - what holding **Volume +** at power-on boots instead, without changing
+- **Boot source** - which disk Linux boots from: **Auto** (internal storage first), **Internal**,
+  **SD card** or **USB**.
+- **Volume up at boot** - what holding **Volume +** at power-on boots instead, without changing
   the default (usually **Android**).
 
-Two entries do the work in this guide: **Switch boot source** and **Uninstall CFW**.
+Two entries do the work in this guide: **Boot source** and **Uninstall CFW**.
 
-Boot-source switching needs the ROCKNIX ABL **v1.1.7 or newer**. If yours is older, update it from
-the running system: **Steamling Tools → Bootloader: install or update to …**, or `steamling-update-abl`
-in a terminal.
+These menus are OpenABL's. If your device still has the older ROCKNIX ABL, the names are a little
+different (**Switch boot source** instead of **Boot source**). To move to OpenABL, use **Steamling
+Tools → Bootloader: install or update to …**, or `steamling-update-abl` in a terminal.
 
 ---
 
@@ -62,11 +62,11 @@ Tools) to clear the half-written install, fix the cause, and install again.
 ### Then point the bootloader at it
 
 Installing does not change what boots - the device still starts from the SD card. Power off, then
-hold **Volume −** to open the boot menu and set **Switch boot source** to **Internal**.
+hold **Volume −** to open the boot menu and set **Boot source** to **Internal**.
 
-![The ROCKNIX boot menu with Switch boot source highlighted](images/abl-switch-boot-source.jpeg)
+![The older ROCKNIX ABL menu with Switch boot source highlighted (OpenABL calls it Boot source)](images/abl-switch-boot-source.jpeg)
 
-Switch it back to **SD Card** whenever you want to boot the SD again; nothing on either disk
+Switch it back to **SD card** whenever you want to boot the SD again; nothing on either disk
 changes.
 
 ---
@@ -77,20 +77,20 @@ changes.
 > Android reformats it on its next boot. Android still boots, but its apps and data are gone -
 > effectively a factory reset. Back up anything you care about first.
 
-### From the ROCKNIX ABL (recommended)
+### From the boot menu (recommended)
 
-This needs the **ROCKNIX ABL** (v1.1.7 or newer, where the entry is named *Uninstall CFW*). On an
-older ABL, use the SD-card path below instead.
+OpenABL has this built in. On a ROCKNIX ABL older than v1.1.7 there is no *Uninstall CFW* entry,
+so use the SD-card path below instead.
 
 Hold **Volume −** at power-on and select **Uninstall CFW**. It deletes the internal Linux install
 and grows Android's partition back to its full size in one step - no SD card, no second boot.
 
-![The ROCKNIX boot menu with Uninstall CFW highlighted](images/abl-uninstall-cfw.jpeg)
+![The older ROCKNIX ABL menu with Uninstall CFW highlighted (same entry in OpenABL)](images/abl-uninstall-cfw.jpeg)
 
 ### From a running Steamling SD
 
-You **can't repartition the disk you're booted from**, so this has to run from the SD. Set **Switch
-boot source** to **SD Card** in the boot menu, boot it, then use **Steamling Tools → Install or
+You **can't repartition the disk you're booted from**, so this has to run from the SD. Set **Boot
+source** to **SD card** in the boot menu, boot it, then use **Steamling Tools → Install or
 remove internal Steamling… → Remove, restore Android**, or a terminal:
 
 ```bash
@@ -106,10 +106,10 @@ run if `/` is on the target device, as a guard.
 ## Put a *new* version on internal (clean reinstall)
 
 ```
-boot menu -> Switch boot source: SD Card, and boot the SD carrying your new build
+boot menu -> Boot source: SD card, and boot the SD carrying your new build
   -> steamling-uninstall-internal      (clears the old install so the installer sees a fresh disk)
   -> steamling-install-internal        (clones the fresh SD onto internal)
-  -> boot menu -> Switch boot source: Internal
+  -> boot menu -> Boot source: Internal
 ```
 
 **Steamling Tools → *Install or remove internal Steamling…* → Reinstall Steamling** does the two middle
@@ -119,14 +119,14 @@ steps in one go.
 
 ## Restoring the stock bootloader
 
-Removing Steamling does not put the original Android bootloader back - the ROCKNIX ABL stays until you
-flash your backup over it. Keeping the ROCKNIX ABL is mostly harmless, but if you're after a *full*
+Removing Steamling does not put the original Android bootloader back - OpenABL stays until you
+flash your backup over it. Keeping OpenABL is mostly harmless, but if you're after a *full*
 return to stock then this is the final step. It needs the `abl_a.img` / `abl_b.img` backup you were
-told to make (and copy off the device) when you first flashed the ROCKNIX ABL.
+told to make (and copy off the device) when you first flashed OpenABL (or the ROCKNIX ABL before it).
 
 Where your backup is, depending on how you flashed:
 
-- **Android's `backup_abl.sh`** (the [install guide](install.md#2-install-the-rocknix-bootloader) steps): it wrote
+- **Android's `backup_abl.sh`** (the [install guide](install.md#2-install-the-bootloader-openabl) steps): it wrote
   `abl_a.img` + `abl_b.img` into `rocknix_abl/` on Android internal storage - gone if you have since
   installed to internal, so use the copy you were told to keep off the device.
 - **`steamling-update-abl` / Steamling Tools**: it saved the bootloader it replaced to
@@ -137,7 +137,7 @@ Where your backup is, depending on how you flashed:
 Then, from Android:
 
 1. **Boot Android.** If Steamling is on internal storage, remove it first (**Uninstall CFW** above) -
-   otherwise Android has no room to come back. Then boot the menu's **Switch boot mode** to
+   otherwise Android has no room to come back. Then set the menu's **Boot mode** to
    **Android**, or hold **Volume +** at power-on.
 2. Put a `rocknix_abl` folder at the root of Android's internal storage if it isn't there any more
    (copy it off a Steamling SD card, same as during install), and **copy your `abl_a.img` and
@@ -151,5 +151,5 @@ Then, from Android:
 > ⚠️ Keep the device plugged in while doing ABL writes: an interrupted or wrong bootloader write
 > leaves a device that needs a PC to recover.
 
-After this, the device can no longer boot Steamling: Steamling needs the ROCKNIX ABL. Flash it again
-([install guide](install.md#2-install-the-rocknix-bootloader)) to bring it back.
+After this, the device can no longer boot Steamling: Steamling needs OpenABL. Flash it again
+([install guide](install.md#2-install-the-bootloader-openabl)) to bring it back.
