@@ -2,7 +2,7 @@
 # Shadows the base's copy by repo order: a newer base scx never reaches devices while published.
 pkgname=scx-scheds
 pkgver=1.1.4
-pkgrel=1
+pkgrel=2
 _commit=e7b3a219617472cf78880ac424714e52c932db61
 _rustver=1.99.0
 pkgdesc='sched_ext schedulers and tools'
@@ -22,10 +22,14 @@ _toolchain() {
   # rustfmt that cannot run (a rustup proxy with no toolchain, a mismatched build) exits at once
   # and the build dies with "Failed to generate skeleton ... Broken pipe". Formatting changes
   # nothing the compiler sees, so a pass-through rustfmt stands in for it.
+  # scx_cargo turns formatting off by naming a rustfmt that doesn't exist ("disable_rustfmt") and
+  # counting on the spawn failing. Under qemu-user the spawn of a missing program "succeeds" and
+  # the child dies straight away, so the same Broken pipe follows: give that name the shim too.
   mkdir -p "${srcdir}/shim"
   printf '#!/bin/sh\ncase "$1" in -V|--version) echo "rustfmt 1.8.0-stable"; exit 0 ;; esac\nexec cat\n' \
     > "${srcdir}/shim/rustfmt"
   chmod 755 "${srcdir}/shim/rustfmt"
+  ln -sf rustfmt "${srcdir}/shim/disable_rustfmt"
   export PATH="${srcdir}/shim:${srcdir}/rust/bin:${PATH}"
   # Crate downloads cached beside the other sources so rebuilds stay offline.
   export CARGO_HOME="${SRCDEST:-${srcdir}}/cargo-home"
