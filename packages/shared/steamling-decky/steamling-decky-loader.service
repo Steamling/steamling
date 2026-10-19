@@ -2,8 +2,11 @@
 Description=Decky Loader (via FEX)
 # ExecStart must stay steamling-decky-run: it supplies the private binfmt_misc namespace the
 # x86_64 loader needs. Rationale in that script.
-After=network-online.target steamling-decky-sync.service
-Wants=network-online.target steamling-decky-sync.service
+# network.target, as upstream Decky's own unit has it: waiting for network-online pulled in
+# NetworkManager-wait-online, which holds the loader (and Steamling Control) for up to a minute
+# whenever a saved Wi-Fi network is out of range. Nothing the loader starts needs the network.
+After=network.target steamling-decky-sync.service
+Wants=steamling-decky-sync.service
 
 [Service]
 Type=simple
