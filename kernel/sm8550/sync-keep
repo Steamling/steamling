@@ -4,6 +4,9 @@
 -patches/20-version/9999-fix-rust-build-error.patch
 -patches/20-version/0011-thermal-adc-tm5-drop-iio-val-int-check.patch
 -patches/20-version/0015-drm-msm-dpu-sm8250-linear-danger-lut.patch
+# ROCKNIX dropped IRQF_NO_SUSPEND from the IPCC irq; 1099 replaces that with a mask for
+# suspend-to-RAM only, so the charger doorbell keeps working in s2idle.
+-patches/30-sm8550/0502-wakeup-qcom-ipcc-remove-IRQF-NO-SUSPEND.patch
 dts/qcom/qcs8550-ayn-common.dtsi
 dts/qcom/qcs8550-retroidpocket-rp6.dts
 # Our DTS edits for these boards (what they are: PATCHES.md, kernel (sm8550) row):
