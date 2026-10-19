@@ -1,7 +1,7 @@
 # Building on a Linux host
 
 Any recent x86_64 or aarch64 Linux works as a build host. You need root (the build uses chroots and
-loop devices), about 80 GB free, and the packages below. On Windows, use [wsl.md](wsl.md), which
+loop devices), about 100 GB free, and the packages below. On Windows, use [wsl.md](wsl.md), which
 builds on this page.
 
 ## 1. Host packages

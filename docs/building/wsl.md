@@ -46,7 +46,7 @@ Then `wsl --shutdown` in PowerShell and reopen Ubuntu. If you still run out, low
 build's parallelism with `JOBS=4`.
 
 The distro's virtual disk lives on `C:` by default and grows as the build fills it; it needs
-**about 80 GB free**. To put it on another drive, run `wsl --shutdown`, then
+**about 100 GB free**. To put it on another drive, run `wsl --shutdown`, then
 `wsl --manage Ubuntu-24.04 --move D:\WSL\Ubuntu` in an administrator PowerShell.
 
 ## 3. Clone inside Linux, not on C:

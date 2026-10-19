@@ -10,7 +10,7 @@ If you already know your way around, [advanced.md](advanced.md) has every option
 
 - **A PC** running Linux, or Windows 10/11 (we'll set up Linux inside it). Any reasonably modern
   64-bit PC works. 16 GB of RAM is comfortable; 8 GB works, just slower.
-- **About 80 GB of free disk space.**
+- **About 100 GB of free disk space.**
 - **An internet connection.** The build downloads a few gigabytes.
 - **Time.** The first build compiles everything from source, and on a normal PC that takes a long
   time: plan on leaving it running overnight, possibly longer. Later builds only redo what
