@@ -1,0 +1,6 @@
+# The Pocket DS's bottom screen has a Goodix touch controller that reports a generic name, so
+# 71-steamling-bottom-touch.rules can't spot it by name. Same reason as there: until the second
+# screen has its own session, its touches would land on the main panel. The top screen's
+# controller is a FocalTech, so matching Goodix on this board only catches the bottom one.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Goodix Capacitive TouchScreen", IMPORT{program}="/usr/lib/steamling/steamling-board-env"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Goodix Capacitive TouchScreen", ENV{STEAMLING_DEVICE}=="pocketds", ENV{LIBINPUT_IGNORE_DEVICE}="1"
