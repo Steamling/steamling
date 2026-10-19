@@ -21,3 +21,25 @@ dts/qcom/qcs8550-retroidpocket-rpnova.dts
 -dts/qcom/qcs8550-ayaneo-pocketsmini.dts
 -patches/30-sm8550/0053-add-hynitron-touchscreen.patch.disabled
 -patches/30-sm8550/0507-wifi-ath12k-skip-11d-scan-on-ayaneo-pocket-s-mini.patch
+# Linux 7.3 (ROCKNIX is still on 7.2): ROCKNIX patches rebased onto it, and the ones 7.3 carries.
+patches/20-version/9998-silence-initramfs-unpack-warn.patch
+-patches/20-version/0016-drm-msm-dp-return-0-from-audio_prepare-when-cable-is-disconnected.patch
+patches/30-sm8550/0001-pcie-update-sm8550-dtsi.patch
+patches/30-sm8550/0036_ASoC--qcom--sc8280xp-Add-support-for-Primary-I2S.patch
+patches/30-sm8550/0051-gpu-panel-add-Pocket-ACE-panel-driver.patch
+patches/30-sm8550/0052-gpu-panel-add-Pocket-DMG-panel-driver.patch
+patches/30-sm8550/0053-gpu-panel-st7703-add-Pocket-DS-lower-panel.patch
+patches/30-sm8550/0056_Xm-Plus-XM91080G-panel.patch
+patches/30-sm8550/0057_Chipone-ICNA35XX-panel.patch
+patches/30-sm8550/0057_DDIC-CH13726A-panel.patch
+patches/30-sm8550/0060-Add-Silergy-SY7758-backlight-driver.patch
+patches/30-sm8550/0062-gpu-drm-panel-add-wt0630-panel.patch
+patches/30-sm8550/0063-gpu-drm-panel-add-wt0600-1k-panel.patch
+patches/30-sm8550/0064-gpu-drm-panel-add-ar16-4inch-panel.patch
+patches/30-sm8550/0104-drm-panel-Add-Retroid-Pocket-6-panel.patch
+patches/30-sm8550/0105-drm-panel-Add-Retroid-Pocket-Nova-panel.patch
+patches/30-sm8550/0121-pmdomain-qcom-rpmhpd-presync-floor-gmu-rails.patch
+patches/30-sm8550/0504-Enable-64-bit-processes-to-use-compat-input-syscalls.patch
+patches/30-sm8550/0508-ROCKNIX-rp6-panel-frame-length-calibration.patch
+patches/30-sm8550/0509-ROCKNIX-thor-panel-frame-length-calibration.patch
+-patches/30-sm8550/v6_20260210_quic_utiwari_crypto_qce_add_runtime_pm_and_interconnect_bandwidth_scaling_support.patch

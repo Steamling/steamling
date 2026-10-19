@@ -2,7 +2,6 @@
 # own version of the fix.
 1001-scsi-ufs-qcom-balance-irq-on-host-reset-error.patch   # in armada
 1006-tty-serial-qcom-geni-mask-non-console-irq-on-suspend.patch   # armada's geni suspend set differs
-1011-serial-qcom-geni-add-force-suspend-resume-to-system-sleep-callbacks.patch   # armada 0534
 1016-scsi-ufs-ufs-qcom-enable-only-lane-clocks-in-lane-clock-apis.patch   # armada 0533
 1017-scsi-ufs-core-fast-abort-unsupported-query-idns.patch   # armada 0535
 1018-scsi-ufs-core-dynamically-disable-timestamp-on-unsupported-devices.patch   # armada 0536

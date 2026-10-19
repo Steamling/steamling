@@ -3,12 +3,31 @@ Subject: [PATCH] drm/panel: icna35xx: add MANGMI Pocket Max panel
 Port the tested ROCKNIX Pocket Max init sequence, vendor modes and
 per-panel shutdown delays onto Armada's Linux 7.2 ICNA35xx driver.
 
+diff --git a/drivers/gpu/drm/panel/panel-chipone-icna35xx.c b/drivers/gpu/drm/panel/panel-chipone-icna35xx.c
+index 949b0726a..16e498e3c 100644
 --- a/drivers/gpu/drm/panel/panel-chipone-icna35xx.c
 +++ b/drivers/gpu/drm/panel/panel-chipone-icna35xx.c
-@@ -55,0 +56,2 @@
+@@ -15,6 +15,7 @@
+ 
+ #include <video/mipi_display.h>
+ 
++#include <drm/drm_of.h>
+ #include <drm/display/drm_dsc.h>
+ #include <drm/display/drm_dsc_helper.h>
+ #include <drm/drm_connector.h>
+@@ -53,6 +54,8 @@ struct panel_desc {
+ 	const u16 *bl_levels;
+ 	unsigned int num_bl_levels;
+ 	unsigned int bl_num_interp;
 +	unsigned int display_off_ms;
 +	unsigned int enter_sleep_ms;
-@@ -249,0 +252,111 @@
+ 
+ 	struct drm_dsc_config dsc;
+ };
+@@ -247,6 +250,117 @@ static int icna3520_init_sequence(struct panel_info *pinfo)
+ 	return dsi_ctx.accum_err;
+ }
+ 
 +static int mangmi_pocket_max_init_sequence(struct panel_info *pinfo)
 +{
 +	struct mipi_dsi_multi_context dsi_ctx = { .dsi = pinfo->dsi };
@@ -120,7 +139,13 @@ per-panel shutdown delays onto Armada's Linux 7.2 ICNA35xx driver.
 +	return dsi_ctx.accum_err;
 +}
 +
-@@ -303,0 +417,51 @@
+ static const struct drm_display_mode icna3512_modes[] = {
+ 	{
+ 		/* 120Hz */
+@@ -301,6 +415,57 @@ static const struct drm_display_mode icna3520_modes[] = {
+ 	}
+ };
+ 
 +static const struct drm_display_mode mangmi_pocket_max_modes[] = {
 +	{
 +		.clock = (1080 + 156 + 1 + 23) * (1920 + 20 + 1 + 15) * 60 /
@@ -172,13 +197,31 @@ per-panel shutdown delays onto Armada's Linux 7.2 ICNA35xx driver.
 +	},
 +};
 +
-@@ -316,0 +481,2 @@
+ static struct panel_desc icna3512_desc = {
+ 	.modes = icna3512_modes,
+ 	.num_modes = ARRAY_SIZE(icna3512_modes),
+@@ -314,6 +479,8 @@ static struct panel_desc icna3512_desc = {
+ 	.bl_levels = icna35xx_bl_levels,
+ 	.num_bl_levels = ARRAY_SIZE(icna35xx_bl_levels),
+ 	.bl_num_interp = 32,
 +	.display_off_ms = 50,
 +	.enter_sleep_ms = 120,
-@@ -341,0 +508,2 @@
+ 	.dsc = {
+ 		.dsc_version_major = 0x1,
+ 		.dsc_version_minor = 0x1,
+@@ -339,6 +506,8 @@ static struct panel_desc icna3520_desc = {
+ 	.bl_levels = icna35xx_bl_levels,
+ 	.num_bl_levels = ARRAY_SIZE(icna35xx_bl_levels),
+ 	.bl_num_interp = 32,
 +	.display_off_ms = 50,
 +	.enter_sleep_ms = 120,
-@@ -353,0 +522,27 @@
+ 	.dsc = {
+ 		.dsc_version_major = 0x1,
+ 		.dsc_version_minor = 0x1,
+@@ -351,6 +520,33 @@ static struct panel_desc icna3520_desc = {
+ 	},
+ };
+ 
 +static struct panel_desc mangmi_pocket_max_desc = {
 +	.modes = mangmi_pocket_max_modes,
 +	.num_modes = ARRAY_SIZE(mangmi_pocket_max_modes),
@@ -206,16 +249,43 @@ per-panel shutdown delays onto Armada's Linux 7.2 ICNA35xx driver.
 +	},
 +};
 +
-@@ -397 +592 @@
+ static void icna35xx_reset(struct panel_info *pinfo)
+ {
+ 	gpiod_set_value_cansleep(pinfo->reset_gpio, 0);
+@@ -394,9 +590,9 @@ static int icna35xx_disable(struct drm_panel *panel)
+ 	pinfo->dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
+ 
+ 	mipi_dsi_dcs_set_display_off_multi(&dsi_ctx);
 -	mipi_dsi_msleep(&dsi_ctx, 50);
 +	mipi_dsi_msleep(&dsi_ctx, pinfo->desc->display_off_ms);
-@@ -399 +594 @@
+ 	mipi_dsi_dcs_enter_sleep_mode_multi(&dsi_ctx);
 -	mipi_dsi_msleep(&dsi_ctx, 120);
 +	mipi_dsi_msleep(&dsi_ctx, pinfo->desc->enter_sleep_ms);
-@@ -605,0 +801,2 @@
+ 
+ 	return dsi_ctx.accum_err;
+ }
+@@ -563,7 +759,7 @@ static int icna35xx_probe(struct mipi_dsi_device *dsi)
+ 	pinfo->dsi = dsi;
+ 	mipi_dsi_set_drvdata(dsi, pinfo);
+ 
+-	ret = of_drm_get_panel_orientation(dev->of_node, &pinfo->orientation);
++	ret = drm_of_get_panel_orientation(dev->of_node, &pinfo->orientation);
+ 	if (ret < 0) {
+ 		dev_err(dev, "%pOF: failed to get orientation %d\n", dev->of_node, ret);
+ 		return ret;
+@@ -603,6 +799,8 @@ static int icna35xx_probe(struct mipi_dsi_device *dsi)
+ static const struct of_device_id icna35xx_of_match[] = {
+ 	{ .compatible = "chipone,icna3512", .data = &icna3512_desc },
+ 	{ .compatible = "chipone,icna3520", .data = &icna3520_desc },
 +	{ .compatible = "mangmi,pocket-max-panel",
 +	  .data = &mangmi_pocket_max_desc },
-@@ -622 +819 @@
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, icna35xx_of_match);
+@@ -619,4 +817,4 @@ module_mipi_dsi_driver(icna35xx_driver);
+ 
+ MODULE_AUTHOR("Teguh Sobirin <teguh@sobir.in>");
+ MODULE_DESCRIPTION("DRM driver for Chipone ICNA35XX based MIPI DSI panels");
 -MODULE_LICENSE("GPL");
 \ No newline at end of file
 +MODULE_LICENSE("GPL");

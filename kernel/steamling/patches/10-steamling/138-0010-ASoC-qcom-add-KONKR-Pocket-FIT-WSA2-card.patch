@@ -4,9 +4,11 @@ Subject: [PATCH] ASoC: qcom: add KONKR Pocket FIT WSA2 sound card
 The KONKR Pocket FIT shares the Pocket S2 WSA2-only speaker wiring.
 Give it a board-specific compatible backed by the accepted channel mapping.
 
+diff --git a/Documentation/devicetree/bindings/sound/qcom,sm8250.yaml b/Documentation/devicetree/bindings/sound/qcom,sm8250.yaml
+index 1536fcd96..3896f092f 100644
 --- a/Documentation/devicetree/bindings/sound/qcom,sm8250.yaml
 +++ b/Documentation/devicetree/bindings/sound/qcom,sm8250.yaml
-@@ -32,6 +32,7 @@ properties:
+@@ -34,6 +34,7 @@ properties:
            - const: qcom,sm8450-sndcard
        - enum:
            - ayaneo,pocket-s2-sndcard
@@ -14,25 +16,31 @@ Give it a board-specific compatible backed by the accepted channel mapping.
            - fairphone,fp4-sndcard
            - fairphone,fp5-sndcard
            - qcom,apq8096-sndcard
+diff --git a/sound/soc/qcom/sc8280xp.c b/sound/soc/qcom/sc8280xp.c
+index 38ce41508..192d92817 100644
 --- a/sound/soc/qcom/sc8280xp.c
 +++ b/sound/soc/qcom/sc8280xp.c
-@@ -238,7 +238,9 @@
- 		return dev_err_probe(dev, PTR_ERR(data->i2s_clk), "unable to get i2s clock\n");
+@@ -483,6 +483,15 @@ static struct qcom_snd_soc_common ayaneo_ps2_priv_data = {
+ 	.wcd_jack = true,
+ };
  
- 	data->wsa2_only = of_device_is_compatible(dev->of_node,
--						  "ayaneo,pocket-s2-sndcard");
-+						  "ayaneo,pocket-s2-sndcard") ||
-+			  of_device_is_compatible(dev->of_node,
-+						  "konkr,pocket-fit-sndcard");
- 	card->driver_name = of_device_get_match_data(dev);
- 	sc8280xp_add_be_ops(card);
- 	return devm_snd_soc_register_card(dev, card);
-@@ -246,7 +248,8 @@
++/* The KONKR Pocket FIT wires its speakers to WSA2 only, like the Pocket S2. */
++static struct qcom_snd_soc_common konkr_pf_priv_data = {
++	.driver_name = "sm8650",
++	.dapm_widgets = sc8280xp_dapm_widgets,
++	.num_dapm_widgets = ARRAY_SIZE(sc8280xp_dapm_widgets),
++	.snd_prepare = ayaneo_ps2_snd_prepare,
++	.wcd_jack = true,
++};
++
+ static const struct qcom_snd_soc_common eliza_priv_data = {
+ 	.driver_name = "eliza",
+ 	.dapm_widgets = sc8280xp_dapm_widgets,
+@@ -605,6 +614,7 @@ static const struct qcom_snd_soc_common sm8750_priv_data = {
  
  static const struct of_device_id snd_sc8280xp_dt_match[] = {
- 	{.compatible = "ayaneo,pocket-s2-sndcard", "ayaneo-ps2"},
-+	{.compatible = "konkr,pocket-fit-sndcard", "sm8650"},
- 	{.compatible = "qcom,eliza-sndcard", "eliza"},
- 	{.compatible = "qcom,kaanapali-sndcard", "kaanapali"},
- 	{.compatible = "qcom,qcm6490-idp-sndcard", "qcm6490"},
- 	{.compatible = "qcom,qcs615-sndcard", "qcs615"},
+ 	{ .compatible = "ayaneo,pocket-s2-sndcard", .data = &ayaneo_ps2_priv_data },
++	{ .compatible = "konkr,pocket-fit-sndcard", .data = &konkr_pf_priv_data },
+ 	{ .compatible = "qcom,eliza-sndcard", .data = &eliza_priv_data },
+ 	{ .compatible = "qcom,hawi-sndcard", .data = &hawi_priv_data },
+ 	{ .compatible = "qcom,kaanapali-sndcard", .data = &kaanapali_priv_data },

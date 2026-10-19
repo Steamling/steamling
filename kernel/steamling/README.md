@@ -13,12 +13,12 @@ repeats the source pin and lists the dtb name prefixes its boot image ships
 ## What's here and where it came from
 
 - `patches/10-steamling/` - armada's `patches/series`, in order (the `NNN-` prefix keeps the
-  series order under the build's sort). Two changes for 7.2.11: `0048` has its context
-  refreshed (7.2.11 picked up `0048a` upstream), and `0048a` is dropped because it is in
-  7.2.11. Every other patch is verbatim. armada's `PATCHES.md` records each patch's origin.
+  series order under the build's sort), rebased by hand onto Linux 7.3: the patches 7.3 already
+  carries are gone and a few are adjusted to 7.3's code (the kernel (steamling) row of
+  [PATCHES.md](../../PATCHES.md) lists them). armada's `PATCHES.md` records each patch's origin.
 - `dts/qcom/` - armada's board device trees with armada's `dts/*.patch` deltas already applied.
 - `kernel/steamling/config/linux.aarch64.conf` - arm64 `defconfig` plus armada's
-  `armada-kernel.config.overrides`, resolved against this tree at 7.2.11. build-kernel.sh then
+  `armada-kernel.config.overrides`, resolved at 7.2.11; olddefconfig carries it to 7.3. build-kernel.sh then
   applies Steamling's usual deltas (sched_ext, BTF, binder, HZ 1000 and the rest) on top.
 - `common-skip` - the `kernel/common` patches armada already carries.
 - `config-assert` - what must be built in, since Steamling boots without an initramfs.

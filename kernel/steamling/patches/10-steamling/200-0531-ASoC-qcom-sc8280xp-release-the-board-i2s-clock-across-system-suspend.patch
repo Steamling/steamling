@@ -15,17 +15,19 @@ Release the clock in the card's suspend_post, once the streams and the
 components are suspended, and take it back in resume_pre. A PCM opened
 or closed between the two only updates the count.
 ---
+diff --git a/sound/soc/qcom/sc8280xp.c b/sound/soc/qcom/sc8280xp.c
+index 97e5bc949..4c993b82f 100644
 --- a/sound/soc/qcom/sc8280xp.c
 +++ b/sound/soc/qcom/sc8280xp.c
-@@ -25,6 +25,7 @@
- 	struct snd_soc_jack dp_jack[8];
+@@ -84,6 +84,7 @@ struct sc8280xp_snd_data {
+ 	const struct qcom_snd_soc_common *priv;
  	struct clk *i2s_clk;
  	int mi2s_clk_count;
 +	bool mi2s_clk_suspended;
  	bool jack_setup;
- 	bool wsa2_only;
  };
-@@ -91,7 +92,7 @@
+ 
+@@ -237,7 +238,7 @@ static int sc8280xp_snd_startup(struct snd_pcm_substream *substream)
  	switch (cpu_dai->id) {
  	case PRIMARY_MI2S_RX...QUATERNARY_MI2S_TX:
  	case QUINARY_MI2S_RX...QUINARY_MI2S_TX:
@@ -34,7 +36,7 @@ or closed between the two only updates the count.
  			ret = clk_prepare_enable(pdata->i2s_clk);
  			if (ret) {
  				pdata->mi2s_clk_count--;
-@@ -121,7 +122,7 @@
+@@ -267,7 +268,7 @@ static void sc8280xp_snd_shutdown(struct snd_pcm_substream *substream)
  	switch (cpu_dai->id) {
  	case PRIMARY_MI2S_RX...QUATERNARY_MI2S_TX:
  	case QUINARY_MI2S_RX...QUINARY_MI2S_TX:
@@ -43,7 +45,7 @@ or closed between the two only updates the count.
  			clk_disable_unprepare(pdata->i2s_clk);
  		break;
  	default:
-@@ -234,6 +235,36 @@
+@@ -455,6 +456,36 @@ static void sc8280xp_add_be_ops(struct snd_soc_card *card)
  	}
  }
  
@@ -80,7 +82,7 @@ or closed between the two only updates the count.
  static int sc8280xp_platform_probe(struct platform_device *pdev)
  {
  	struct snd_soc_card *card;
-@@ -257,6 +288,9 @@
+@@ -490,6 +521,9 @@ static int sc8280xp_platform_probe(struct platform_device *pdev)
  	if (ret)
  		return ret;
  

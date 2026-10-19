@@ -18,6 +18,7 @@
 #include "pmk8550.dtsi"
 
 /delete-node/ &camera_mem;
+/delete-node/ &ipa;
 /delete-node/ &ipa_fw_mem;
 /delete-node/ &ipa_gsi_mem;
 /delete-node/ &rmtfs_mem;

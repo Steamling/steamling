@@ -33,3 +33,13 @@
 # CPU: every board on the tree has eight cores. 512 also makes arm64 select CPUMASK_OFFSTACK,
 # which allocates every cpumask_var_t on the heap; at 8 they are one word on the stack.
 --set-val NR_CPUS 8
+
+# 7.3: the Qualcomm RNG moved from crypto (CRYPTO_DEV_QCOM_RNG, on before) to hw_random.
+--enable HW_RANDOM_QCOM
+# 7.3 also turns on, by default, clock, interconnect and pin controllers for Qualcomm SoCs no
+# handheld uses (Glymur, Hawi, Maili, Nord, Shikra).
+--disable CLK_GLYMUR_CAMCC --disable CLK_GLYMUR_EVACC --disable CLK_GLYMUR_GCC
+--disable CLK_HAWI_GCC --disable CLK_HAWI_VIDEOCC --disable CLK_MAILI_VIDEOCC
+--disable CLK_NORD_DISPCC --disable CLK_NORD_GCC --disable CLK_NORD_GPUCC
+--disable CLK_SHIKRA_AUDIOCORECC --disable CLK_SHIKRA_GCC
+--disable INTERCONNECT_QCOM_MAILI --disable PINCTRL_MAILI

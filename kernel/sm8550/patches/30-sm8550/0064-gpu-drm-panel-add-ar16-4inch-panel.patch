@@ -19,10 +19,10 @@ Signed-off-by: danyi <mydanyi@users.noreply.github.com>
  create mode 100644 drivers/gpu/drm/panel/panel-ar16-4inch.c
 
 diff --git a/drivers/gpu/drm/panel/Kconfig b/drivers/gpu/drm/panel/Kconfig
-index 2365617..5d27a91 100644
+index 3ee84cfb6..b8d495858 100644
 --- a/drivers/gpu/drm/panel/Kconfig
 +++ b/drivers/gpu/drm/panel/Kconfig
-@@ -1312,6 +1312,20 @@ config DRM_PANEL_AYANEO_WT0600_1K
+@@ -1481,6 +1481,20 @@ config DRM_PANEL_AYANEO_WT0600_1K
  
  	  To compile this driver as a module, choose M here.
  
@@ -44,10 +44,10 @@ index 2365617..5d27a91 100644
  	tristate "Xinpeng XPP055C272 panel driver"
  	depends on OF
 diff --git a/drivers/gpu/drm/panel/Makefile b/drivers/gpu/drm/panel/Makefile
-index 729a511..b005c4e 100644
+index 125752160..6d0979950 100644
 --- a/drivers/gpu/drm/panel/Makefile
 +++ b/drivers/gpu/drm/panel/Makefile
-@@ -129,4 +129,5 @@ obj-$(CONFIG_DRM_PANEL_VISIONOX_R66451) += panel-visionox-r66451.o
+@@ -143,4 +143,5 @@ obj-$(CONFIG_DRM_PANEL_VISIONOX_R66451) += panel-visionox-r66451.o
  obj-$(CONFIG_DRM_PANEL_WIDECHIPS_WS2401) += panel-widechips-ws2401.o
  obj-$(CONFIG_DRM_PANEL_AYANEO_WT0600_2K) += panel-wt0600-2k.o
  obj-$(CONFIG_DRM_PANEL_AYANEO_WT0600_1K) += panel-wt0600-1k.o
@@ -55,10 +55,10 @@ index 729a511..b005c4e 100644
  obj-$(CONFIG_DRM_PANEL_XINPENG_XPP055C272) += panel-xinpeng-xpp055c272.o
 diff --git a/drivers/gpu/drm/panel/panel-ar16-4inch.c b/drivers/gpu/drm/panel/panel-ar16-4inch.c
 new file mode 100644
-index 0000000..141da42
+index 000000000..4701a0bf5
 --- /dev/null
 +++ b/drivers/gpu/drm/panel/panel-ar16-4inch.c
-@@ -0,0 +1,401 @@
+@@ -0,0 +1,402 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * DRM driver for the AYANEO Pocket S Mini AR16 panel.
@@ -75,6 +75,7 @@ index 0000000..141da42
 +#include <linux/of.h>
 +#include <linux/regulator/consumer.h>
 +
++#include <drm/drm_of.h>
 +#include <drm/drm_mipi_dsi.h>
 +#include <drm/drm_modes.h>
 +#include <drm/drm_panel.h>
@@ -403,7 +404,7 @@ index 0000000..141da42
 +		return dev_err_probe(dev, PTR_ERR(ctx->reset_gpio),
 +				     "failed to get reset GPIO\n");
 +
-+	ret = of_drm_get_panel_orientation(dev->of_node, &ctx->orientation);
++	ret = drm_of_get_panel_orientation(dev->of_node, &ctx->orientation);
 +	if (ret < 0 && ret != -ENODEV)
 +		return dev_err_probe(dev, ret, "failed to get orientation\n");
 +
@@ -460,5 +461,3 @@ index 0000000..141da42
 +MODULE_AUTHOR("ROCKNIX contributors");
 +MODULE_DESCRIPTION("DRM driver for AYANEO Pocket S Mini AR16 panel");
 +MODULE_LICENSE("GPL");
--- 
-2.53.0.windows.3

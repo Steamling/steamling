@@ -16,6 +16,7 @@
 /delete-node/ &aop_image_mem;
 /delete-node/ &aop_config_mem;
 /delete-node/ &camera_mem;
+/delete-node/ &ipa;
 /delete-node/ &ipa_fw_mem;
 /delete-node/ &ipa_gsi_mem;
 /delete-node/ &mpss_dsm_mem;
@@ -1368,7 +1369,7 @@
 	status = "okay";
 };
 
-&pcieport0 {
+&pcie0_port0 {
 	wake-gpios = <&tlmm 96 GPIO_ACTIVE_LOW>;
 	reset-gpios = <&tlmm 94 GPIO_ACTIVE_LOW>;
 
