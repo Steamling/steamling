@@ -1,0 +1,51 @@
+From: David J. Vandenburgh <david@vandenburgh.co>
+Subject: [PATCH] tty: serial: qcom-geni: unmask the irq when suspend fails
+
+1006 masks a non-console port's irq at the top of suspend and unmasks it
+in resume. If uart_suspend_port() or pm_runtime_force_suspend() fails,
+the PM core never calls resume for that device, so the irq stayed masked
+and the port went deaf until reboot (on the RP6 that is the gamepad MCU).
+
+Put the port back and unmask the irq on both failure paths. The port is
+resumed first: with uport->suspended still set the ISR returns IRQ_NONE
+and the unmasked line would storm, which is what 1006 is there to stop.
+
+---
+diff --git a/drivers/tty/serial/qcom_geni_serial.c b/drivers/tty/serial/qcom_geni_serial.c
+index 11d6163ae..1d7084223 100644
+--- a/drivers/tty/serial/qcom_geni_serial.c
++++ b/drivers/tty/serial/qcom_geni_serial.c
+@@ -2120,7 +2120,7 @@ static int qcom_geni_serial_suspend(struct device *dev)
+ 
+ 	ret = uart_suspend_port(private_data->drv, uport);
+ 	if (ret)
+-		return ret;
++		goto err_unmask;
+ 
+ 	/*
+ 	 * When no_console_suspend is set the console must remain active
+@@ -2129,7 +2129,23 @@ static int qcom_geni_serial_suspend(struct device *dev)
+ 	if (!console_suspend_enabled && uart_console(uport))
+ 		return 0;
+ 
+-	return pm_runtime_force_suspend(dev);
++	ret = pm_runtime_force_suspend(dev);
++	if (ret) {
++		uart_resume_port(private_data->drv, uport);
++		goto err_unmask;
++	}
++
++	return 0;
++
++err_unmask:
++	/*
++	 * The PM core does not call resume for a device whose suspend failed,
++	 * so the irq masked above has to come back here or the port stays
++	 * deaf until reboot.
++	 */
++	if (!uart_console(uport))
++		enable_irq(uport->irq);
++	return ret;
+ }
+ 
+ static int qcom_geni_serial_resume(struct device *dev)
