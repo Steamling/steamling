@@ -323,7 +323,10 @@ stage() {
   mkdir -p "${KBUILD}/out/dtbs"
   cp "${KSRC}/arch/arm64/boot/Image" "${KBUILD}/out/Image"
   stage_dtbs
-  kmake INSTALL_MOD_PATH="${KBUILD}/out/modroot" modules_install >/dev/null
+  # INSTALL_MOD_STRIP=1 is strip --strip-debug, as Arch's own kernel installs them: the DWARF that
+  # DEBUG_INFO (needed for BTF) puts in every module is most of /usr/lib/modules otherwise. The
+  # modules' .BTF sections are not debug info and stay (scx_lavd needs only the kernel's own).
+  kmake INSTALL_MOD_PATH="${KBUILD}/out/modroot" INSTALL_MOD_STRIP=1 modules_install >/dev/null
   rm -f "${KBUILD}/out/modroot"/lib/modules/*/build "${KBUILD}/out/modroot"/lib/modules/*/source
   kmake -s kernelrelease > "${KBUILD}/out/kernelrelease"
   ok "kernel $(cat "${KBUILD}/out/kernelrelease") staged ($(ls "${KBUILD}/out/dtbs" | wc -l | tr -d ' ') dtbs)"
