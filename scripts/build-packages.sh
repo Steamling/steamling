@@ -26,7 +26,8 @@ TARBALL="${CACHE_DIR}/${ALARM_TARBALL}"
 REPO_DB="steamling.db.tar.gz"
 SHARED_REPO_DB="steamling-shared.db.tar.gz"
 
-cleanup() { chroot_umount "${BROOT}" 2>/dev/null || true
+cleanup() { mountpoint -q "${BROOT}/build/ccache" && umount "${BROOT}/build/ccache" 2>/dev/null || true
+            chroot_umount "${BROOT}" 2>/dev/null || true
             mountpoint -q "${BROOT}/localrepo" && umount "${BROOT}/localrepo" 2>/dev/null || true
             mountpoint -q "${BROOT}/localrepo-shared" && umount "${BROOT}/localrepo-shared" 2>/dev/null || true; }
 trap cleanup EXIT
@@ -158,11 +159,29 @@ setup_chroot() {
   printf 'builder ALL=(ALL) NOPASSWD: ALL\n' > "${BROOT}/etc/sudoers.d/builder"
   chmod 0440 "${BROOT}/etc/sudoers.d/builder"
 
+  # ccache: every build starts from a fresh srcdir, so without it a pkgrel bump or a one-line
+  # patch recompiles all of mesa or Cemu, under qemu on an x86 host. The cache lives outside the
+  # chroot (PKG_CCACHE_DIR, bind-mounted in main) so a chroot rebuilt for a new base keeps it;
+  # ccache's own compiler check drops entries a new gcc would compile differently. A PKGBUILD
+  # that misbehaves under it opts out with options=('!ccache').
+  local buildenv='!ccache'
+  if [ "${STEAMLING_CCACHE}" != off ]; then
+    if [ ! -x "${BROOT}/usr/bin/ccache" ]; then
+      chroot_mount "${BROOT}"
+      chroot "${BROOT}" pacman -S --noconfirm --needed ccache \
+        || warn "could not install ccache in the build chroot; building without it"
+      chroot_umount "${BROOT}"
+    fi
+    [ -x "${BROOT}/usr/bin/ccache" ] && buildenv=ccache
+  fi
+
   # ALARM's makepkg.conf packs with single-threaded xz and leaves MAKEFLAGS unset: under qemu the
   # xz pass outlasts most compiles (fex-rootfs carries a 1.1 GB squashfs) and make-based packages
   # build on one core. makepkg's zstd command is already multi-threaded (-T0).
   install -d "${BROOT}/etc/makepkg.conf.d"
   printf '%s\n' "PKGEXT='.pkg.tar.zst'" 'MAKEFLAGS="-j$(nproc)"' \
+    "BUILDENV=(!distcc color ${buildenv} check !sign)" \
+    "export CCACHE_DIR=/build/ccache CCACHE_MAXSIZE=${STEAMLING_CCACHE_SIZE} CCACHE_COMPRESS=1" \
     > "${BROOT}/etc/makepkg.conf.d/steamling.conf"
 
   # Local [steamling] repo so a package can depend on another locally-built one. Points at
@@ -340,6 +359,10 @@ main() {
   mkdir -p "${BROOT}/localrepo" "${BROOT}/localrepo-shared"
   mount --bind "${LOCALREPO}" "${BROOT}/localrepo"
   mount --bind "${LOCALREPO_SHARED}" "${BROOT}/localrepo-shared"
+  mkdir -p "${PKG_CCACHE_DIR}" "${BROOT}/build/ccache"
+  mount --bind "${PKG_CCACHE_DIR}" "${BROOT}/build/ccache"
+  chroot "${BROOT}" chown builder:builder /build/ccache
+  [ ! -x "${BROOT}/usr/bin/ccache" ] || chroot "${BROOT}" env CCACHE_DIR=/build/ccache ccache --zero-stats >/dev/null 2>&1 || true
   # Initialize both dbs so the repos are valid even on the first/partial run
   # (one full re-add; per-package registration during the run adds only new artifacts).
   local rmount rdb
@@ -444,6 +467,11 @@ main() {
     [ "${#gone[@]}" -gt 0 ] && warn "  no artifact in localrepo (build-image errors at install, not silent): ${gone[*]}"
   fi
 
+  if [ -x "${BROOT}/usr/bin/ccache" ] && [ "${built}" -gt 0 ]; then
+    log "ccache this run: $(chroot "${BROOT}" env CCACHE_DIR=/build/ccache ccache --show-stats 2>/dev/null \
+      | grep -m1 -iE '^ *(cacheable calls|hits):' | sed 's/^ *//')"
+  fi
+  umount "${BROOT}/build/ccache"
   umount "${BROOT}/localrepo"
   umount "${BROOT}/localrepo-shared"
   chroot_umount "${BROOT}"
