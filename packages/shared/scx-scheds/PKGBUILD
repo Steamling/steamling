@@ -2,7 +2,7 @@
 # Shadows the base's copy by repo order: a newer base scx never reaches devices while published.
 pkgname=scx-scheds
 pkgver=1.1.4
-pkgrel=2
+pkgrel=3
 _commit=e7b3a219617472cf78880ac424714e52c932db61
 _rustver=1.99.0
 pkgdesc='sched_ext schedulers and tools'
@@ -13,9 +13,13 @@ depends=('bash' 'bpf' 'libgcc' 'glibc' 'jq' 'libseccomp' 'libbpf' 'libelf' 'prot
 makedepends=('clang' 'git' 'llvm' 'llvm-libs' 'python')
 options=('!lto' '!debug')
 source=("scx::git+https://github.com/sched-ext/scx.git#commit=${_commit}"
-        "https://static.rust-lang.org/dist/rust-${_rustver}-aarch64-unknown-linux-gnu.tar.xz")
+        "https://static.rust-lang.org/dist/rust-${_rustver}-aarch64-unknown-linux-gnu.tar.xz"
+        '0006-scx_lavd-cap-the-load-balancing-band-by-the-other-domains-share.patch'
+        '0007-scx_lavd-use-setters-for-the-remaining-slice-and-dsq_vtime-writes.patch')
 sha256sums=('SKIP'
-            '5a30ce742be0835d9b23fc862db5cbbbc71464e1c9b1fca22917e10e4ba32a92')
+            '5a30ce742be0835d9b23fc862db5cbbbc71464e1c9b1fca22917e10e4ba32a92'
+            'SKIP'
+            'SKIP')
 
 _toolchain() {
   # libbpf-cargo and bindgen pipe every generated skeleton and binding through rustfmt. A

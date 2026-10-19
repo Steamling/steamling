@@ -1,0 +1,104 @@
+From 46765dc8a215b5069348d89f2f1c42a93da98287 Mon Sep 17 00:00:00 2001
+From: Changwoo Min <changwoo@igalia.com>
+Date: Wed, 30 Sep 2026 17:28:49 +0900
+Subject: [PATCH 1/2] scx_lavd: cap the load-balancing band by the other
+ domains' share
+
+classify_cpdom() marks a domain a stealer or a stealee when its load
+leaves a band around its fair share, and the band is a fraction of that
+fair share. On a heterogeneous system the band of a large domain can be
+wider than any imbalance it can have. On a 2+6 big.LITTLE handheld whose
+big cluster holds 92% of the capacity, the 12.5% band puts the big
+cluster's stealee threshold at 104% of the total load, so it never counts
+as overloaded however idle the LITTLE cluster is.
+
+Cap each domain's band at the other active domains' share, the total
+load minus its own fair share: a domain can never carry more than that
+above its fair share. A domain smaller than the rest of the system, a
+lone active domain, and a homogeneous machine keep the band they had.
+
+On the handheld with the big cluster oversubscribed and the LITTLE cores
+70% busy, the big cluster is now classified overloaded in every balancing
+interval, cross-domain migration rises from 0.9% to 2.2% of schedules,
+and together with the non-SMT fix the threads' wakeup latency is lower
+than with main or with that fix alone.
+
+Signed-off-by: Changwoo Min <changwoo@igalia.com>
+---
+ scheds/rust/scx_lavd/src/bpf/balance.bpf.c | 32 +++++++++++++++-------
+ 1 file changed, 22 insertions(+), 10 deletions(-)
+
+diff --git a/scheds/rust/scx_lavd/src/bpf/balance.bpf.c b/scheds/rust/scx_lavd/src/bpf/balance.bpf.c
+index 828bc444..e8a9ce9c 100644
+--- a/scheds/rust/scx_lavd/src/bpf/balance.bpf.c
++++ b/scheds/rust/scx_lavd/src/bpf/balance.bpf.c
+@@ -21,7 +21,7 @@ extern const volatile u8	mig_delta_pct;
+ extern const volatile u8	no_fast_lb;
+ extern const volatile u64	lb_low_util_wall;
+ 
+-u64 __attribute__ ((noinline)) calc_mig_delta(u64 avg_load_invr, int nz_qlen,
++u64 __attribute__ ((noinline)) calc_mig_delta(u64 base_share_invr, int nz_qlen,
+ 					      u64 mig_delta_factor)
+ {
+ 	/*
+@@ -31,12 +31,12 @@ u64 __attribute__ ((noinline)) calc_mig_delta(u64 avg_load_invr, int nz_qlen,
+ 	 * shift-based heuristic.
+ 	 */
+ 	if (mig_delta_factor > 0)
+-		return avg_load_invr * mig_delta_factor / LAVD_SCALE;
++		return base_share_invr * mig_delta_factor / LAVD_SCALE;
+ 	if (nz_qlen >= sys_stat.nr_active_cpdoms)
+-		return avg_load_invr >> LAVD_CPDOM_MIG_SHIFT_OL;
++		return base_share_invr >> LAVD_CPDOM_MIG_SHIFT_OL;
+ 	if (nz_qlen == 0)
+-		return avg_load_invr >> LAVD_CPDOM_MIG_SHIFT_UL;
+-	return avg_load_invr >> LAVD_CPDOM_MIG_SHIFT;
++		return base_share_invr >> LAVD_CPDOM_MIG_SHIFT_UL;
++	return base_share_invr >> LAVD_CPDOM_MIG_SHIFT;
+ }
+ 
+ /*
+@@ -49,8 +49,8 @@ int __attribute__((noinline))
+ classify_cpdom(struct cpdom_ctx *cpdomc, u64 total_load_invr,
+ 	       u64 total_cap_sum, int nz_qlen, u64 mig_delta_factor)
+ {
++	u64 fair_share_invr = 0, other_share_invr, base_share_invr;
+ 	u64 x_mig_delta = 0;
+-	u64 fair_share_invr = 0;
+ 	u64 stealer_threshold = 0;
+ 	u64 stealee_threshold = 0;
+ 
+@@ -63,14 +63,26 @@ classify_cpdom(struct cpdom_ctx *cpdomc, u64 total_load_invr,
+ 		stealer_threshold = avg - x_mig_delta;
+ 		stealee_threshold = avg + x_mig_delta;
+ 	} else if (cpdomc->nr_active_cpus && total_cap_sum > 0) {
++		/*
++		 * Size the band by the domain's fair share, but no wider than
++		 * the share of all the other active domains. A domain can never
++		 * carry more than that above its own fair share. A wider band,
++		 * as a big cluster holding most of the capacity would get, sets
++		 * its stealee threshold above the most load the domain can
++		 * ever carry, so it is never marked overloaded however idle the
++		 * others are. A lone active domain has no other share to cap by
++		 * and keeps its band.
++		 */
+ 		fair_share_invr = total_load_invr *
+ 			     cpdomc->cap_sum_active_cpus /
+ 			     total_cap_sum;
++		other_share_invr = total_load_invr - fair_share_invr;
++		base_share_invr = other_share_invr?
++					min(fair_share_invr, other_share_invr) :
++					fair_share_invr;
+ 
+-		x_mig_delta = calc_mig_delta(
+-				fair_share_invr, nz_qlen,
+-				mig_delta_factor);
+-
++		x_mig_delta = calc_mig_delta(base_share_invr, nz_qlen,
++					     mig_delta_factor);
+ 		stealer_threshold = fair_share_invr - x_mig_delta;
+ 		stealee_threshold = fair_share_invr + x_mig_delta;
+ 	}
+-- 
+2.34.1
+

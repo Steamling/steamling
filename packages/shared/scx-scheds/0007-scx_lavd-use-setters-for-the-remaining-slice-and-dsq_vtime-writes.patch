@@ -1,0 +1,64 @@
+From b9da99a02613b6956efd5294262bee4041c51293 Mon Sep 17 00:00:00 2001
+From: Arsenova <7z0423arsenova@proton.me>
+Date: Sat, 17 Oct 2026 18:35:32 +0000
+Subject: [PATCH 2/2] scx_lavd: Use setters for the remaining slice and
+ dsq_vtime writes
+
+On v7.2 kernels, loading scx_lavd floods the kernel log with "Writing
+directly to p->scx.slice/dsq_vtime is deprecated". The verifier warns for
+every direct store to these fields it checks.
+
+Three direct writes survived the setter conversion. lavd_enqueue() sets
+p->scx.dsq_vtime on the SCX_ENQ_REENQ path, and ask_cpu_yield_after()
+sets the victim's slice with WRITE_ONCE() in two places. Convert them to
+scx_bpf_task_set_dsq_vtime() and scx_bpf_task_set_slice().
+
+The victim comes from __COMPAT_scx_bpf_cpu_curr() under
+bpf_rcu_read_lock(), which satisfies the KF_RCU requirement of
+scx_bpf_task_set_slice(). With sub-schedulers, the setter now refuses a
+victim owned by another scheduler. The return value is ignored, because
+the yield request is best effort, as it was before.
+
+Fixes: 14f12ba2329a ("scx_lavd: replace deprecated ops.cpu_acquire/release with a sched_switch hook")
+Fixes: e1a0b0c424d6 ("scx_lavd: Avoid using IPI on preemption.")
+Fixes: d69abf0bf242 ("scx_lavd: Preempt a slice-boosted task if appropriate.")
+Closes: #3852
+Signed-off-by: Arsenova <7z0423arsenova@proton.me>
+---
+ scheds/rust/scx_lavd/src/bpf/main.bpf.c    | 2 +-
+ scheds/rust/scx_lavd/src/bpf/preempt.bpf.c | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/scheds/rust/scx_lavd/src/bpf/main.bpf.c b/scheds/rust/scx_lavd/src/bpf/main.bpf.c
+index 0826aa59..20f6de5a 100644
+--- a/scheds/rust/scx_lavd/src/bpf/main.bpf.c
++++ b/scheds/rust/scx_lavd/src/bpf/main.bpf.c
+@@ -1008,7 +1008,7 @@ void BPF_STRUCT_OPS(lavd_enqueue, struct task_struct *p, u64 enq_flags)
+ 		 * deadline would over-prioritize it. Re-anchor to the current
+ 		 * clock.
+ 		 */
+-		p->scx.dsq_vtime = calc_when_to_run(p, taskc);
++		scx_bpf_task_set_dsq_vtime(p, calc_when_to_run(p, taskc));
+ 
+ 		dsq_id = get_target_dsq_id(p, cpuc, taskc);
+ 		scx_bpf_dsq_insert_vtime(p, dsq_id, p->scx.slice,
+diff --git a/scheds/rust/scx_lavd/src/bpf/preempt.bpf.c b/scheds/rust/scx_lavd/src/bpf/preempt.bpf.c
+index 49121e66..faf4c5d5 100644
+--- a/scheds/rust/scx_lavd/src/bpf/preempt.bpf.c
++++ b/scheds/rust/scx_lavd/src/bpf/preempt.bpf.c
+@@ -248,10 +248,10 @@ static void ask_cpu_yield_after(struct cpu_ctx *victim_cpuc, u64 new_slice)
+ 			bool ret = __sync_bool_compare_and_swap(
+ 				&victim_cpuc->est_stopping_clk, old, 0);
+ 			if (ret)
+-				WRITE_ONCE(victim_p->scx.slice, new_slice);
++				scx_bpf_task_set_slice(victim_p, new_slice);
+ 		} else {
+ 			if (victim_p->scx.slice > new_slice)
+-				WRITE_ONCE(victim_p->scx.slice, new_slice);
++				scx_bpf_task_set_slice(victim_p, new_slice);
+ 		}
+ 	}
+ 	bpf_rcu_read_unlock();
+-- 
+2.34.1
+
