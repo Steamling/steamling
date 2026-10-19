@@ -119,11 +119,11 @@ check_shared_relations() {  # $1 = packages/shared dir, $2 = allow file
     p="${f%/PKGBUILD}"; p="${p##*/}"
     for e in $(pkg_relations "${f}"); do
       have="${have}${p} ${e}"$'\n'
-      printf '%s' "${rows}" | grep -qxF "${p} ${e}" || echo "${p}: ${e} has no row in ${2##*/}"
+      grep -qxF "${p} ${e}" <<< "${rows}" || echo "${p}: ${e} has no row in ${2##*/}"
     done
   done
   while read -r p e; do
-    printf '%s' "${have}" | grep -qxF "${p} ${e}" || echo "${2##*/}: '${p} :: ${e}' matches no PKGBUILD entry"
+    grep -qxF "${p} ${e}" <<< "${have}" || echo "${2##*/}: '${p} :: ${e}' matches no PKGBUILD entry"
   done < <(printf '%s' "${rows}")
 }
 
@@ -137,7 +137,7 @@ _t="$(mktemp -d)"
 mkdir -p "${_t}/stray"
 printf "pkgname=stray\nreplaces=('gone'\n  # a comment\n  'old<1')\n" > "${_t}/stray/PKGBUILD"
 _out="$(check_shared_relations "${_t}" "${_allow}")"
-if printf '%s\n' "${_out}" | grep -q '^stray: replaces=old<1 has no row'; then
+if grep -q '^stray: replaces=old<1 has no row' <<< "${_out}"; then
   note "shared replaces/conflicts self-test" "ok"
 else note "shared replaces/conflicts self-test" "a shared replaces= with no allow row went unflagged"; fail=1; fi
 rm -rf "${_t}"
@@ -188,7 +188,7 @@ check_contract() {  # $1 = "<key> <kind>" lines, $2.. = consumer files
   local known="$1" k f
   shift
   contract_reads "$@" | while read -r k f; do
-    printf '%s\n' "${known}" | grep -q "^${k} " || echo "${f} reads ${k}, which devices/README.md's key table lacks"
+    grep -q "^${k} " <<< "${known}" || echo "${f} reads ${k}, which devices/README.md's key table lacks"
   done
 }
 
@@ -202,7 +202,7 @@ else note "device.conf keys vs consumers" "${_bad}"; fail=1; fi
 _t="$(mktemp -d)"
 printf '. /usr/lib/steamling/device.conf\necho "${STEAMLING_PANEL_W:-1080} ${STEAMLING_BOGUS:-x}"\n' > "${_t}/stray"
 _out="$(check_contract "${_keys}" "${_t}/stray")"
-if printf '%s\n' "${_out}" | grep -q 'reads STEAMLING_BOGUS, which' && ! printf '%s\n' "${_out}" | grep -q PANEL_W; then
+if grep -q 'reads STEAMLING_BOGUS, which' <<< "${_out}" && ! grep -q PANEL_W <<< "${_out}"; then
   note "device.conf keys self-test" "ok"
 else note "device.conf keys self-test" "a consumer reading an undocumented key went unflagged"; fail=1; fi
 rm -rf "${_t}"
@@ -340,7 +340,7 @@ check_boards() {  # $1 = SoC, $2 = boards dir
     n="${f##*/}"; b="${n%.conf}"
     [ "${n}" = family.conf ] && continue
     # Reachable = a models row, or sourced by another board (variants source their base).
-    printf '%s' "${rows}" | grep -q "^${b}|" ||
+    grep -q "^${b}|" <<< "${rows}" ||
       grep -qsE "^[[:space:]]*\. /usr/lib/steamling/boards/${n//./\\.}([[:space:]]|\$)" \
         $(ls "${boards}"/*.conf | grep -v "/${n}\$") || echo "${n} is in no models row and sourced by no board"
     grep -qx "STEAMLING_DEVICE=${b}" "${f}" || echo "${n} must set STEAMLING_DEVICE=${b} itself"
@@ -420,7 +420,7 @@ _bsp="${STEAMLING_ROOT}/devices/${SOC}/packages/steamling-bsp-${SOC}"
 cp -R "${_bsp}/boards" "${_t}/"
 printf '. /usr/lib/steamling/boards/family.conf\nSTEAMLING_DEVICE=stray\n' > "${_t}/boards/stray.conf"
 _out="$(check_boards "${SOC}" "${_t}/boards")"
-if printf '%s\n' "${_out}" | grep -q '^stray.conf is in no models row'; then
+if grep -q '^stray.conf is in no models row' <<< "${_out}"; then
   note "board check self-test" "ok"
 else note "board check self-test" "a board in no models row went unflagged"; fail=1; fi
 rm -rf "${_t}"

@@ -157,7 +157,7 @@ rclone copy --include 'SNAPSHOT_ID' "${OUT}" "${RCLONE_DEST}"
 cp -f "${OUT}/steamling-base.lock" "${LOCKFILE}"
 sed -i -e "s|^: \"\${STEAMLING_BASE_SNAPSHOT:=.*}\"|: \"\${STEAMLING_BASE_SNAPSHOT:=${ID}}\"|" "${conf}"
 for x in "$@"; do
-  read_pkglist "${EXTRAS_LIST}" | grep -qx "${x}" || printf '%s\n' "${x}" >> "${EXTRAS_LIST}"
+  grep -qx "${x}" <<< "$(read_pkglist "${EXTRAS_LIST}")" || printf '%s\n' "${x}" >> "${EXTRAS_LIST}"
 done
 ok "base ${ID}: +$* published to ${RCLONE_DEST} (additive; ${tree_id} was not rotated)"
 ok "pinned: config/steamling.conf + lockfile; ${EXTRAS_LIST#"${STEAMLING_ROOT}/"} lists the extras (group/comment them, then commit)"

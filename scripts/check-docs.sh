@@ -89,10 +89,10 @@ compare_layout() {  # $1 = README, $2 = documented entries, $3 = entries the tre
   local e at
   at="$1:$(grep -n -m1 '^```' "$1" | cut -d: -f1)"
   for e in $(printf '%s\n' "$3" | sort -u); do
-    printf '%s\n' "$2" | awk '{print $1}' | grep -qxF "${e}" || err "${at}" "layout block lacks '${e}'"
+    grep -qxF "${e}" <<< "$(awk '{print $1}' <<< "$2")" || err "${at}" "layout block lacks '${e}'"
   done
   for e in $(printf '%s\n' "$2" | grep -v ' optional$'); do
-    printf '%s\n' "$3" | grep -qxF "${e}" || err "${at}" "layout block names '${e}', which no SoC has"
+    grep -qxF "${e}" <<< "$3" || err "${at}" "layout block names '${e}', which no SoC has"
   done
 }
 
@@ -132,7 +132,7 @@ _rows="$(awk '/^## Where changes go/{f=1; next} /^## /{f=0} f && /^\| `/' CONTRI
 for _t in $(printf '%s\n' "${FILES}" | grep / | cut -d/ -f1 | sort -u) \
           $(printf '%s\n' "${FILES}" | grep '^packages/[^/]*/' | cut -d/ -f1-2 | sort -u); do
   [ "${_t}" = packages ] && continue
-  printf '%s\n' "${_rows}" | grep -q "^${_t}/" ||
+  grep -q "^${_t}/" <<< "${_rows}" ||
     err "CONTRIBUTING.md:$(grep -n -m1 '^## Where changes go' CONTRIBUTING.md | cut -d: -f1)" "\"Where changes go\" has no row for ${_t}/"
 done
 

@@ -184,7 +184,8 @@ chroot_resolv() {
       break
     fi
   done
-  if ! grep -E '^[[:space:]]*nameserver' "${root}/etc/resolv.conf" 2>/dev/null | grep -qv '127\.'; then
+  # no -q on the last grep: it reads to the end, so pipefail can't see a SIGPIPE'd first grep
+  if ! grep -E '^[[:space:]]*nameserver' "${root}/etc/resolv.conf" 2>/dev/null | grep -v '127\.' >/dev/null; then
     warn "no usable upstream resolver found in chroot — falling back to public DNS (1.1.1.1)"
     printf 'nameserver 1.1.1.1\nnameserver 8.8.8.8\n' > "${root}/etc/resolv.conf"
   fi
