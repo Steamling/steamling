@@ -99,6 +99,9 @@ for pb in sorted(glob.glob(os.path.join(ROOT, "packages/*/*/PKGBUILD"))
                  + glob.glob(os.path.join(ROOT, "devices/*/packages/*/PKGBUILD"))):
     if os.path.relpath(pb, ROOT) == "packages/soc/linux-steamling/PKGBUILD":
         runs += [(pb, env) for env in kernel_envs()]
+    elif os.path.relpath(pb, ROOT) == "packages/soc/steamling-bootloader/PKGBUILD":
+        # one recipe per SoC too, named from STEAMLING_SOC
+        runs += [(pb, {"STEAMLING_SOC": env["STEAMLING_SOC"]}) for env in kernel_envs()]
     else:
         runs.append((pb, {}))
 for pb, extra in runs:

@@ -314,6 +314,7 @@ pkg_extra_srcs() {  # $1 = package name
 pkg_name() {  # $1 = package dir
   case "${1%/}" in
     */packages/soc/linux-steamling) printf '%s' "${KERNEL_PKG}" ;;
+    */packages/soc/steamling-bootloader) printf 'steamling-bootloader-%s' "${SOC}" ;;
     *) basename "$1" ;;
   esac
 }

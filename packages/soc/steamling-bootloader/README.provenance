@@ -1,6 +1,6 @@
 # rocknix_abl kit provenance
 
-abl_signed-SM8550.elf is NOT committed here - the PKGBUILD fetches it from the
+abl_signed-<SOC>.elf is NOT committed here - the PKGBUILD fetches it from the
 official OpenABL release, pinned by tag + sha512:
 
   release:  https://github.com/OpenHandheldCollective/OpenABL/releases/tag/v1.1
@@ -9,16 +9,16 @@ official OpenABL release, pinned by tag + sha512:
                   28986df8950c21b5f53e45e3b12a6de9178815b3120f327b49261aae2cc5c2b0
   (sha256 520cd8fecd26da728259e376561902d9c86b85ad859511066fb1cd4b02b6ab52,
   the same pin ROCKNIX's openabl package.mk carries)
-  abl_signed-SM8550.elf sha256 (release's own sidecar, re-checked in prepare()):
-                  cd97748bbd1c5dc994b8a73a05e88955297f4c88384e3ca4028d043fc1b16848
+  Each SoC's elf is checked against the release's own .sha256 sidecar in prepare(), and the
+  tarball's sha512 above pins the elfs and the sidecars together.
 
 OpenABL is the Open Handheld Collective's build of the Qualcomm ABL (edk2
 LinuxLoader with one patch plus a boot menu, GPL-3.0-or-later; see the
 LICENSES.md it ships, installed under /usr/share/licenses). It boots Boot
 Loader Spec entries, extlinux, EFI loaders and, what Steamling uses, an
 Android boot image at /KERNEL on a FAT partition (board dtb picked from the
-dtbs appended to it). One elf serves every SM8550 board; the release keys it
-by SoC.
+dtbs appended to it). One elf serves every board of a SoC; the release keys
+it by SoC. One recipe builds the package for each SoC (STEAMLING_SOC names it).
 
 It replaces the ROCKNIX ABL (github.com/ROCKNIX/abl, v1.2), whose repo and
 release downloads were removed in October 2026. ROCKNIX switched to OpenABL
