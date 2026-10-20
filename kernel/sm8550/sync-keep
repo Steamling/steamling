@@ -25,7 +25,8 @@ dts/qcom/qcs8550-retroidpocket-rpnova.dts
 patches/20-version/9998-silence-initramfs-unpack-warn.patch
 -patches/20-version/0016-drm-msm-dp-return-0-from-audio_prepare-when-cable-is-disconnected.patch
 patches/30-sm8550/0001-pcie-update-sm8550-dtsi.patch
-patches/30-sm8550/0036_ASoC--qcom--sc8280xp-Add-support-for-Primary-I2S.patch
+# 7.3 handles MI2S clocks in the DAI; the board DT gives it the bit clock instead of 0036's card clock.
+-patches/30-sm8550/0036_ASoC--qcom--sc8280xp-Add-support-for-Primary-I2S.patch
 patches/30-sm8550/0051-gpu-panel-add-Pocket-ACE-panel-driver.patch
 patches/30-sm8550/0052-gpu-panel-add-Pocket-DMG-panel-driver.patch
 patches/30-sm8550/0053-gpu-panel-st7703-add-Pocket-DS-lower-panel.patch
