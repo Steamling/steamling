@@ -3,7 +3,7 @@
 # live in devices/<name>/packages/steamling-bsp-<name>, which depends on this package.
 pkgname=steamling-bsp-common
 pkgver=0.1.0
-pkgrel=26.12
+pkgrel=26.13
 pkgdesc="steamling shared board support: sleep.d dispatcher, suspend hooks, power-key policy, session udev rules, wheel sudo, fan/scheduler daemons, ABL updater, power profiles daemon, realtime priority ladder, zram swap and memory sysctls, deck session limits, kernel /flash deploy, volume rocker daemon, journal cap, iwd Wi-Fi backend, panel refresh calibration, controller MCU mode quirks"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -42,11 +42,11 @@ source=('steamling-sleep' 'sdam-debug-pre' 'sdam-debug-post'
         'steamling-cmdline-sync' '91-steamling-cmdline.hook' 'cores.sh'
         'steamling-boot-deploy' 'steamling-build-bootimg' '90-linux-steamling.hook'
         'steamling-volumed' 'steamling-volumed.service' '10-steamling-journal.conf'
-        '20-steamling-wifi-backend.conf'
+        '20-steamling-wifi-backend.conf' '10-steamling-s2idle.conf'
         'steamling-panel-calibration' 'steamling-panel-calibration.service'
         'steamling-gamepad-quirk' 'steamling-gamepad-quirk.service' 'steamling-board-env'
         '99-steamling-usb-autosuspend.rules' '71-steamling-bottom-touch.rules')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   install -Dm755 "${srcdir}/steamling-sleep" \
@@ -138,6 +138,8 @@ package() {
   install -Dm644 "${srcdir}/10-steamling-stop-timeout.conf" \
     "${pkgdir}/usr/lib/systemd/user.conf.d/10-steamling-stop-timeout.conf"
   install -Dm644 "${srcdir}/steamling-coredump.conf" "${pkgdir}/usr/lib/tmpfiles.d/steamling-coredump.conf"
+  # s2idle only, on every SoC (the file says why)
+  install -Dm644 "${srcdir}/10-steamling-s2idle.conf" "${pkgdir}/usr/lib/systemd/sleep.conf.d/10-steamling-s2idle.conf"
   # Memory: zram swap (lz4, idle pages recompressed to zstd), its sysctls, MGLRU thrash guard.
   install -Dm644 "${srcdir}/60-steamling-gaming.conf" "${pkgdir}/usr/lib/sysctl.d/60-steamling-gaming.conf"
   install -Dm644 "${srcdir}/zram-generator.conf" "${pkgdir}/usr/lib/systemd/zram-generator.conf"
