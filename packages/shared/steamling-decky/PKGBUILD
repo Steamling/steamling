@@ -3,7 +3,7 @@
 # The plugin frontend (dist/index.js) is prebuilt and committed — no node at package build time.
 pkgname=steamling-decky
 pkgver=0.1.0
-pkgrel=44.3
+pkgrel=44.4
 pkgdesc="Decky Loader (under FEX, namespaced binfmt) + Steamling Control QAM plugin"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -33,7 +33,7 @@ package() {
 
   local plug="${startdir}/steamling-control" dest="${pkgdir}/usr/share/decky-plugins/SteamlingControl"
   install -d -m755 "${dest}"
-  cp -a "${plug}/plugin.json" "${plug}/package.json" "${plug}/main.py" "${plug}/fex-profiles.json" "${dest}/"
+  cp -a "${plug}/plugin.json" "${plug}/package.json" "${plug}/main.py" "${dest}/"
   cp -a "${plug}/py_modules" "${plug}/dist" "${dest}/"
   rm -f "${dest}/dist"/*.map
   find "${dest}" -name __pycache__ -type d -prune -exec rm -rf {} +

@@ -9,7 +9,6 @@ from .system import atomically_write
 # with it, so the plugin-dir copy is only a fallback for a missing steamling-steam.
 TWEAKS_CONFIG = Path("/etc/steamling/game-tweaks.json")
 FEX_PROFILES_CONFIG = Path("/usr/share/steamling/fex-profiles.json")
-PLUGIN_FEX_PROFILES_CONFIG = Path(__file__).resolve().parent.parent.parent / "fex-profiles.json"
 TURNIP_DIRS = {"arm": Path("/usr/share/steamling/vk-arm"), "x86": Path("/usr/share/steamling/vk-x86")}
 CONTAINER_VK_LIST = Path("/usr/share/fex-emu/vk-x86-container.list")
 
@@ -50,8 +49,9 @@ def mesa_versions():
 
 
 def load_fex_contract():
-    path = FEX_PROFILES_CONFIG if FEX_PROFILES_CONFIG.exists() else PLUGIN_FEX_PROFILES_CONFIG
-    with path.open(encoding="utf-8") as f:
+    # steamling-steam owns the profiles (the package depends on it); steamling-game-launch reads
+    # the same file, so the plugin and the launcher can never disagree.
+    with FEX_PROFILES_CONFIG.open(encoding="utf-8") as f:
         contract = json.load(f)
     profiles = contract.get("profiles")
     if not isinstance(contract.get("defaults"), dict) or not isinstance(profiles, dict) or "default" not in profiles:
