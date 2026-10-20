@@ -23,9 +23,11 @@ sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "gtk+-${pkgver}"
-  patch -p1 < "${srcdir}/001-no-demos.patch"
-  patch -p1 < "${srcdir}/002-gentoo-fix-casts.patch"
-  patch -p1 < "${srcdir}/003-fix-building-with-gcc15.patch"
+  # Every .patch in source=(), in that order: source=() is the one list of patches.
+  local p
+  for p in "${source[@]}"; do
+    case "${p}" in *.patch) patch -p1 < "${srcdir}/${p}" ;; esac
+  done
 }
 
 build() {
