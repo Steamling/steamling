@@ -6,16 +6,20 @@ in resume. If uart_suspend_port() or pm_runtime_force_suspend() fails,
 the PM core never calls resume for that device, so the irq stayed masked
 and the port went deaf until reboot (on the RP6 that is the gamepad MCU).
 
-Put the port back and unmask the irq on both failure paths. The port is
-resumed first: with uport->suspended still set the ISR returns IRQ_NONE
-and the unmasked line would storm, which is what 1006 is there to stop.
+Put the port back and unmask the irq on both suspend failure paths. The
+port is resumed first: with uport->suspended still set the ISR returns
+IRQ_NONE and the unmasked line would storm, which is what 1006 is there
+to stop.
+
+A failed resume unmasks it too, as PortareOS's 7.3 version of this fix
+does: the next suspend masks it again, so a resume that left it masked
+would disable it for good.
 
 ---
 diff --git a/drivers/tty/serial/qcom_geni_serial.c b/drivers/tty/serial/qcom_geni_serial.c
-index 11d6163ae..1d7084223 100644
 --- a/drivers/tty/serial/qcom_geni_serial.c
 +++ b/drivers/tty/serial/qcom_geni_serial.c
-@@ -2120,7 +2120,7 @@ static int qcom_geni_serial_suspend(struct device *dev)
+@@ -2120,7 +2120,7 @@
  
  	ret = uart_suspend_port(private_data->drv, uport);
  	if (ret)
@@ -24,7 +28,7 @@ index 11d6163ae..1d7084223 100644
  
  	/*
  	 * When no_console_suspend is set the console must remain active
-@@ -2129,7 +2129,23 @@ static int qcom_geni_serial_suspend(struct device *dev)
+@@ -2129,7 +2129,23 @@
  	if (!console_suspend_enabled && uart_console(uport))
  		return 0;
  
@@ -49,3 +53,21 @@ index 11d6163ae..1d7084223 100644
  }
  
  static int qcom_geni_serial_resume(struct device *dev)
+@@ -2141,8 +2157,16 @@
+ 
+ 	if (console_suspend_enabled || !uart_console(uport)) {
+ 		ret = pm_runtime_force_resume(dev);
+-		if (ret)
++		if (ret) {
++			/*
++			 * Unmask anyway, as PortareOS does: suspend masked the irq
++			 * once and the next suspend masks it again, so leaving it
++			 * masked here would disable it for good.
++			 */
++			if (!uart_console(uport))
++				enable_irq(uport->irq);
+ 			return ret;
++		}
+ 	}
+ 
+ 	ret = uart_resume_port(private_data->drv, uport);
