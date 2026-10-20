@@ -55,25 +55,11 @@ prepare() {
   cd gamescope
   git submodule update --init --recursive
   # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
-  patch -p1 < "${srcdir}/0004-DRMBackend-Add-GAMESCOPE_FAKE_OUTPUT_MM-env-to-set-c.patch"
-  patch -p1 < "${srcdir}/0006-steamcompmgr-fix-gamepad-cursor-sprite-frozen-via-XTest.patch"
-  patch -p1 < "${srcdir}/0009-steamcompmgr-run-SGSR-when-FSR-is-requested-on-SDR-content.patch"
-  patch -p1 < "${srcdir}/0011-steamcompmgr-skip-identity-colour-LUTs-in-the-composite.patch"
-  patch -p1 < "${srcdir}/0012-drm-synthesize-edid-for-edidless-internal-panels.patch"
-  patch -p1 < "${srcdir}/0013-drm-support-known-display-profiles-for-edidless-panels.patch"
-  patch -p1 < "${srcdir}/0014-drm-compose-gamma22-hdr-without-hardware-color-management.patch"
-  patch -p1 < "${srcdir}/0015-wsi-filter-hdr-formats-by-underlying-support.patch"
-  patch -p1 < "${srcdir}/0016-color-scale-sdr-white-on-gamma22-hdr-output.patch"
-  patch -p1 < "${srcdir}/0017-expose-client-sampleable-formats.patch"
-  patch -p1 < "${srcdir}/0018-color-fall-back-to-app-hdr-metadata-for-tonemapping.patch"
-  patch -p1 < "${srcdir}/0019-color-p3-red-is-wide-gamut.patch"
-  patch -p1 < "${srcdir}/0020-drm-sdr-color-management-through-dpu-output-luts.patch"
-  patch -p1 < "${srcdir}/0021-libliftoff-fix-multiple-primary-plane-stacking.patch"
-  patch -p1 < "${srcdir}/0022-drm-per-plane-color-management-through-msm-plane-color-pipelines.patch"
-  patch -p1 < "${srcdir}/0023-drm-count-the-msm-DPU-output-LUTs-as-plane-colour-management.patch"
-  patch -p1 < "${srcdir}/0024-libliftoff-treat-enodev-as-no-fit.patch"
-  patch -p1 < "${srcdir}/0025-libliftoff-give-planes-the-layer-zpos.patch"
-  patch -p1 < "${srcdir}/0027-steamcompmgr-arm64-virtual-white.patch"
+  # Every .patch in source=(), in that order: source=() is the one list of patches.
+  local p
+  for p in "${source[@]}"; do
+    case "${p}" in *.patch) patch -p1 < "${srcdir}/${p}" ;; esac
+  done
 }
 
 build() {
