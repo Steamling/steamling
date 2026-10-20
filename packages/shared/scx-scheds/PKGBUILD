@@ -47,9 +47,8 @@ prepare() {
   cd scx
   # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
   local p
-  for p in "${srcdir}"/00[0-9][0-9]-*.patch; do
-    [ -e "${p}" ] || continue
-    patch -p1 < "${p}"
+  for p in "${source[@]}"; do
+    case "${p}" in *.patch) patch -p1 < "${srcdir}/${p}" ;; esac
   done
   cargo fetch --locked --target aarch64-unknown-linux-gnu
 }
