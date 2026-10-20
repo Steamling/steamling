@@ -41,7 +41,7 @@ not and cannot relicense them. The main ones:
 | Linux kernel + patch series | `kernel/`, `packages/soc/linux-steamling/` | GPL-2.0-only |
 | ROCKNIX patches, scripts, BSP material | `kernel/*/patches`, various packages | GPL-2.0 |
 | armada device support, patches and settings | `kernel/steamling/`, `devices/*`, various packages | GPL-2.0-or-later |
-| OpenABL (fetched, pinned; replaced the ROCKNIX ABL) | `packages/soc/steamling-bootloader-*` | GPL-3.0-or-later, with a linking exception for its ABL part (Qualcomm's edk2 LinuxLoader underneath; details in its LICENSES.md, installed under /usr/share/licenses) |
+| OpenABL (fetched, pinned; replaced the ROCKNIX ABL) | `packages/soc/steamling-bootloader` | GPL-3.0-or-later, with a linking exception for its ABL part (Qualcomm's edk2 LinuxLoader underneath; details in its LICENSES.md, installed under /usr/share/licenses) |
 | gamescope + patch set | `packages/soc/gamescope` | BSD-2-Clause (the patch set: GPL-2.0; origins in PATCHES.md) |
 | Mesa | `packages/soc/mesa` | MIT |
 | MangoHud | `packages/shared/mangohud` | MIT |
@@ -53,7 +53,7 @@ not and cannot relicense them. The main ones:
 PKGBUILDs in `packages/` fetch pinned upstream sources; the resulting binary packages and
 OS images contain those projects under their own licenses. Provenance for vendored
 binaries is recorded next to them (for example
-`packages/soc/steamling-bootloader-sm8550/README.provenance`) and in [PATCHES.md](../PATCHES.md).
+`packages/soc/steamling-bootloader/README.provenance`) and in [PATCHES.md](../PATCHES.md).
 
 ROCKNIX additionally licenses its distribution branding and artwork under CC BY-NC-SA.
 Steamling does not ship ROCKNIX branding; only their GPL-licensed software, scripts, and

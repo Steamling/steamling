@@ -45,8 +45,8 @@ Bump the BSP pkgrel. No new packages, no new image.
 * A chip's own `arch=any` packages (its BSP, its device meta) go in `devices/<soc>/packages/`.
 * A recipe built per chip goes in `packages/soc/`, gated by its `socs` file. The goal is
   one recipe for every chip: `packages/soc/linux-steamling/` builds every chip's kernel
-  package from its `kernel/<soc>/kernel.conf`; `steamling-bootloader-<soc>` is the remaining
-  one-chip recipe until it is templated.
+  package from its `kernel/<soc>/kernel.conf`, and `packages/soc/steamling-bootloader/` every
+  chip's OpenABL kit.
 * `packages/shared/` only if the bytes are identical for every chip.
 
 ## What a family target must provide
@@ -100,8 +100,8 @@ If the family brings a **new SoC**, also create `kernel/<soc>/` (`kernel.conf` w
 source pins, `KERNEL_PKGREL` (1 for a new chip) + `config/ patches/ dts/` -
 populated by `make sync` against the ROCKNIX device dir named in `ROCKNIX_SOC`); the kernel
 package needs no recipe of its own (`packages/soc/linux-steamling/` packages `make kernel` output,
-plus `mkbootimg`; the /flash deploy is bsp-common's and needs nothing per SoC), and a
-`packages/soc/steamling-bootloader-<soc>/` with the OpenABL install kit copied to the SD
+plus `mkbootimg`; the /flash deploy is bsp-common's and needs nothing per SoC), and
+an OpenABL release with a `<SOC>/` folder for `packages/soc/steamling-bootloader/` to copy to the SD
 boot FAT. Each SoC gets its own pacman repo tree
 (`build/localrepo/<soc>`, published at `STEAMLING_REPO_URL/<soc>`): the tuned packages
 (mesa, gamescope, fex-emu) share pkgnames across SoCs with different
