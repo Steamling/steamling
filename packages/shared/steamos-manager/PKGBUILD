@@ -2,7 +2,7 @@
 # upstream Rust is needed because the locked base carries no rust/cargo.
 pkgname=steamos-manager
 pkgver=26.4.1.r12.g8e2883d
-pkgrel=2
+pkgrel=3
 _commit=8e2883d0d7e2fc3994e822ca9853c03561ca6eec
 _rustver=1.99.0
 pkgdesc="SteamOS Manager daemon (Steam's system-integration D-Bus service)"
@@ -21,10 +21,11 @@ source=("steamos-manager::git+https://gitlab.steamos.cloud/holo/steamos-manager.
         '0005-ds_inhibit-Default-to-disabled.patch'
         '0006-screenreader-Make-speech-dispatcher-an-optional-defa.patch'
         '0007-remote-Keep-configured-remotes-exported-across-owner.patch'
+        '0008-power-Add-a-power_supply-battery-charge-limit-method.patch'
         'platform.toml' 'steamling-remotes.toml' '10-steamling.conf')
 sha256sums=('SKIP'
             '5a30ce742be0835d9b23fc862db5cbbbc71464e1c9b1fca22917e10e4ba32a92'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
             'SKIP' 'SKIP' 'SKIP')
 
 _toolchain() {
@@ -41,7 +42,7 @@ prepare() {
   cd steamos-manager
   # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
   local p
-  for p in "${srcdir}"/000[1-7]-*.patch; do
+  for p in "${srcdir}"/000[1-8]-*.patch; do
     patch -p1 < "${p}"
   done
   cargo fetch --locked
