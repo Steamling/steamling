@@ -417,7 +417,10 @@
 		touchscreen-size-x = <1080>;
 		touchscreen-size-y = <1920>;
 		touchscreen-inverted-y;
-        };
+
+		/* read the touch report a register at a time, as Retroid's DT does */
+		no-regmap-bulk-read;
+	};
 };
 
 /*
