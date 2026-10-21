@@ -22,8 +22,10 @@ Steamling on it yet.
 
 * **sm8550** (qcom-abl): Retroid Pocket 6 (+TOP-DPAD), Retroid Pocket Nova, AYN Odin 2 / Mini /
   Portal, AYN Thor, AYANEO Pocket ACE / DMG / DS / EVO / S 1K / S 2K. Kernel: `kernel/sm8550/`
-  (ROCKNIX-synced). The RP6 device tree includes the shared AYN SM8550 dtsi, so its sound card
-  is named `AYN-Odin2` and it loads the AYN Odin 2 DSP and amp firmware.
+  (ROCKNIX-synced). The RP6 device tree includes the shared AYN SM8550 dtsi but names its sound
+  card `SM8550-RetroidPocket-I2S`, as Retroid does, for Retroid's UCM with the built-in mics; it
+  loads the RP6's own DSP and amp firmware and the Odin 2 audio topology. The Nova includes the
+  RP6 tree.
 * **sm8250** (qcom-abl): Retroid Pocket 5, Retroid Pocket Flip 2, Retroid Pocket Mini / Mini V2,
   AYN Thor Lite, MANGMI Air Y Pro, MANGMI Pocket Max, AYANEO Pocket MICRO 2; the RP5 and Flip 2
   also as Visionox-panel revisions (their own dtb and board conf). Kernel: `kernel/steamling/`.
