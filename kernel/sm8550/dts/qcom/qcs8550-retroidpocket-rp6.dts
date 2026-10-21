@@ -454,10 +454,16 @@
 	status = "okay";
 };
 
+/*
+ * On the Retroid boards the left amp plays I2S channel 1 and the right amp channel 0, the
+ * other way round from the AYN boards (Retroid's own DT, RP6 and Nova).
+ */
 &spk_amp_l {
 	firmware-name = "qcom/sm8550/retroidpocket/rp6/aw883xx_acf.bin";
+	awinic,audio-channel = <1>;
 };
 
 &spk_amp_r {
 	firmware-name = "qcom/sm8550/retroidpocket/rp6/aw883xx_acf.bin";
+	awinic,audio-channel = <0>;
 };
