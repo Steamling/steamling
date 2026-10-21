@@ -168,8 +168,14 @@ setup_chroot() {
   if [ "${STEAMLING_CCACHE}" != off ]; then
     if [ ! -x "${BROOT}/usr/bin/ccache" ]; then
       chroot_mount "${BROOT}"
-      chroot "${BROOT}" pacman -S --noconfirm --needed ccache \
-        || warn "could not install ccache in the build chroot; building without it"
+      # A pinned base only installs what its snapshot holds, and a snapshot only holds what some
+      # build installed. Ask first so a missing ccache is one line, not a pacman error.
+      if chroot "${BROOT}" pacman -Sp ccache >/dev/null 2>&1; then
+        chroot "${BROOT}" pacman -S --noconfirm --needed ccache \
+          || warn "could not install ccache in the build chroot; building without it"
+      else
+        log "ccache: not in base ${STEAMLING_BASE_SNAPSHOT:-live}; building without it (a snapshot taken after a live-base build carries it)"
+      fi
       chroot_umount "${BROOT}"
     fi
     [ -x "${BROOT}/usr/bin/ccache" ] && buildenv=ccache
