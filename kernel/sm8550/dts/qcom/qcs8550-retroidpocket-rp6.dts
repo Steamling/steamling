@@ -420,6 +420,27 @@
         };
 };
 
+/*
+ * The RP6 touch controller sits on gpio14 (reset) and gpio15 (irq). The pin states come from
+ * the AYN dtsi, where they name the Odin 2's gpio24/25, so without these the touch pins were
+ * never configured and the Odin 2 pins got pulled instead. Retroid's own DT uses 14/15.
+ */
+&ts_p_rst_default {
+	pins = "gpio14";
+};
+
+&ts_p_rst_sleep {
+	pins = "gpio14";
+};
+
+&ts_p_int_default {
+	pins = "gpio15";
+};
+
+&ts_p_int_sleep {
+	pins = "gpio15";
+};
+
 &pmk8550_pwm {
 	status = "okay";
 };
