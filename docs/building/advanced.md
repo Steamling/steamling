@@ -167,7 +167,9 @@ qemu, `make sd-image` 10-20 minutes. An aarch64 host is faster for the package a
 `make kernel` does nothing when `kernel/<soc>/` has not changed since its last build, and with
 ccache installed a small kernel change rebuilds in minutes. Packages use their own ccache inside
 the build chroot, so after the first build a version bump or a small patch only recompiles the files
-that changed. It needs up to 20 GB in `build/cache/ccache-pkg`.
+that changed. It needs up to 20 GB in `build/cache/ccache-pkg`. ccache has to be in the package
+base the build uses: the current frozen base doesn't carry it, so for now the build says so and
+compiles without it. A base snapshot taken after a live-base build includes it.
 
 ## Upstream mirrors (optional)
 
