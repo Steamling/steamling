@@ -1,0 +1,119 @@
+From aa289ea5977d8b21b92b0f246f0e8f0c225d180f Mon Sep 17 00:00:00 2001
+From: Vitali Vinahradski <vitali@vinahradski.de>
+Date: Fri, 16 Oct 2026 22:14:54 +0200
+Subject: [PATCH] rendervulkan: join present wait thread on shutdown
+
+When using --backend sdl, present_wait_thread_func was detached and could
+race with backend destruction during exit, crashing in CalcNextWakeupTime
+when dereferencing a null s_pBackend.
+
+Manage the thread with a std::jthread and shut it down cleanly before
+destroying the backend in steamcompmgr_exit.
+
+Fixes #2402
+---
+ src/rendervulkan.cpp | 35 ++++++++++++++++++++++++++++-------
+ src/rendervulkan.hpp |  1 +
+ src/steamcompmgr.cpp |  2 ++
+ 3 files changed, 31 insertions(+), 7 deletions(-)
+
+diff --git a/src/rendervulkan.cpp b/src/rendervulkan.cpp
+index c204220..89e9494 100644
+--- a/src/rendervulkan.cpp
++++ b/src/rendervulkan.cpp
+@@ -3049,23 +3049,36 @@ bool acquire_next_image( void )
+ 
+ static std::atomic<uint64_t> g_currentPresentWaitId = {0u};
+ static std::mutex present_wait_lock;
++static std::jthread g_presentWaitThread;
++static constexpr uint64_t k_uPresentWaitShutdownId = ~0ull;
+ 
+ extern void mangoapp_output_update( uint64_t vblanktime );
+-static void present_wait_thread_func( void )
++static void present_wait_thread_func( std::stop_token stopToken )
+ {
++	pthread_setname_np( pthread_self(), "gamescope-prsnt" );
+ 	uint64_t present_wait_id = 0;
+ 
+-	while (true)
++	std::stop_callback stopCallback( stopToken, []
+ 	{
+-		g_currentPresentWaitId.wait(present_wait_id);
++		std::unique_lock lock( present_wait_lock );
++		g_currentPresentWaitId = k_uPresentWaitShutdownId;
++		g_currentPresentWaitId.notify_all();
++	} );
++
++	while ( !stopToken.stop_requested() )
++	{
++		g_currentPresentWaitId.wait( present_wait_id );
+ 
+ 		// Lock to make sure swapchain destruction is waited on and that
+ 		// it's for this swapchain.
+ 		{
+-			std::unique_lock lock(present_wait_lock);
++			std::unique_lock lock( present_wait_lock );
+ 			present_wait_id = g_currentPresentWaitId.load();
+ 
+-			if (present_wait_id != 0)
++			if ( stopToken.stop_requested() )
++				break;
++
++			if ( present_wait_id != 0 )
+ 			{
+ 				g_device.vk.WaitForPresentKHR( g_device.device(), g_output.swapChain, present_wait_id, 1'000'000'000lu );
+ 				uint64_t vblanktime = get_time_in_nanos();
+@@ -3076,6 +3089,15 @@ static void present_wait_thread_func( void )
+ 	}
+ }
+ 
++void vulkan_present_wait_shutdown( void )
++{
++	if ( !g_presentWaitThread.joinable() )
++		return;
++
++	g_presentWaitThread.request_stop();
++	g_presentWaitThread.join();
++}
++
+ void vulkan_update_swapchain_hdr_metadata( VulkanOutput_t *pOutput )
+ {
+ 	if (!g_output.swapchainHDRMetadata)
+@@ -3734,8 +3756,7 @@ bool vulkan_init( VkInstance instance, VkSurfaceKHR surface )
+ 
+ 	if ( GetBackend()->UsesVulkanSwapchain() )
+ 	{
+-		std::thread present_wait_thread( present_wait_thread_func );
+-		present_wait_thread.detach();
++		g_presentWaitThread = std::jthread( present_wait_thread_func );
+ 	}
+ 
+ 	s_bInitted = true;
+diff --git a/src/rendervulkan.hpp b/src/rendervulkan.hpp
+index 033fa66..0636ad0 100644
+--- a/src/rendervulkan.hpp
++++ b/src/rendervulkan.hpp
+@@ -476,6 +476,7 @@ gamescope::Rc<CVulkanTexture> vulkan_acquire_capture_texture(uint32_t width, uin
+ uint32_t vulkan_get_rgb10_capture_format( void );
+ 
+ void vulkan_present_to_window( void );
++void vulkan_present_wait_shutdown( void );
+ 
+ void vulkan_garbage_collect( void );
+ bool vulkan_remake_swapchain( void );
+diff --git a/src/steamcompmgr.cpp b/src/steamcompmgr.cpp
+index 9d82f9a..397a112 100644
+--- a/src/steamcompmgr.cpp
++++ b/src/steamcompmgr.cpp
+@@ -7821,6 +7821,8 @@ steamcompmgr_exit(void)
+ 
+ 	g_VirtualConnectorFocuses.clear();
+ 
++	vulkan_present_wait_shutdown();
++
+     gamescope::IBackend::Set( nullptr );
+ 
+     wlserver_lock();
+-- 
+2.34.1
+

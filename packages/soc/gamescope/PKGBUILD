@@ -6,7 +6,7 @@
 pkgname=gamescope
 epoch=1
 pkgver=3.16.31.rocknix.20261017.610568b
-pkgrel=1.1
+pkgrel=1.2
 _commit=610568b61c0476f0fa1314c4b9d430d3e3fd832e
 install=gamescope.install
 pkgdesc="SteamOS session compositing WM — patched (for msm handhelds)"
@@ -47,9 +47,11 @@ source=("gamescope::git+https://github.com/ValveSoftware/gamescope.git#commit=${
         '0024-libliftoff-treat-enodev-as-no-fit.patch'
         '0025-libliftoff-give-planes-the-layer-zpos.patch'
         # Steam's colour-temperature slider on the ARM64 client (armada 0018)
-        '0027-steamcompmgr-arm64-virtual-white.patch')
+        '0027-steamcompmgr-arm64-virtual-white.patch'
+        # clean shutdown of the present wait thread (Valve, newer than our pin)
+        '0028-rendervulkan-join-present-wait-thread-on-shutdown.patch')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd gamescope
