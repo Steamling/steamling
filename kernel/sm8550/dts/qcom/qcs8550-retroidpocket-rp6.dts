@@ -424,6 +424,32 @@
 };
 
 /*
+ * Retroid's name for the RP6 and Nova card, with their two digital mics (DMIC3 and DMIC7 on the
+ * WCD9385) routed as in Retroid's own DT. The UCM under this name (RetroidPocket/SM8550) has the
+ * internal and headset mics the Odin 2 UCM lacks; the DSP topology is the Odin 2 one under this
+ * name (steamling-firmware-sm8550).
+ */
+/ {
+	sound {
+		model = "SM8550-RetroidPocket-I2S";
+		widgets =
+				"Microphone", "Digital Mic2",
+				"Microphone", "Digital Mic6";
+		audio-routing =
+				"IN1_HPHL", "HPHL_OUT",
+				"IN2_HPHR", "HPHR_OUT",
+				"AMIC2", "MIC BIAS2",
+				"DMIC3", "Digital Mic2",
+				"DMIC3", "MIC BIAS3",
+				"DMIC7", "Digital Mic6",
+				"DMIC7", "MIC BIAS4",
+				"TX SWR_INPUT1", "ADC2_OUTPUT",
+				"TX SWR_INPUT6", "DMIC3_OUTPUT",
+				"TX SWR_INPUT10", "DMIC7_OUTPUT";
+	};
+};
+
+/*
  * The RP6 touch controller sits on gpio14 (reset) and gpio15 (irq). The pin states come from
  * the AYN dtsi, where they name the Odin 2's gpio24/25, so without these the touch pins were
  * never configured and the Odin 2 pins got pulled instead. Retroid's own DT uses 14/15.
