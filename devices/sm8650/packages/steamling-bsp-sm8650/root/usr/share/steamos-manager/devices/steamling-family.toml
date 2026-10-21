@@ -23,3 +23,8 @@ friendly_name = "Snapdragon 8 Gen 3 handheld"
 # Leaves the slot for steamling-perfd, which only allows schedutil.
 [cpu_scaling]
 driver = "none"
+
+# qcom_battmgr raises end thresholds below 55 to 55.
+[battery_charge_limit]
+suggested_minimum_limit = 55
+method = "power_supply"
