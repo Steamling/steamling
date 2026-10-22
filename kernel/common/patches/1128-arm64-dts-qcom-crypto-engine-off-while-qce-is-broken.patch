@@ -1,0 +1,84 @@
+From: PortareOS <hello@portare.org>
+Subject: [PATCH] arm64: dts: qcom: sm8250/sm8550/sm8650/sm8750: crypto engine off
+
+7.3 made CRYPTO_DEV_QCE depend on BROKEN, so the driver drops out of
+the build, but crypto@1dfa000 stayed enabled. fw_devlink then holds
+sync_state for its interconnect suppliers, aggre2_noc and mc_virt,
+which keep their boot votes: EBI1 at INT_MAX, in the sleep set too.
+PortareOS measured it on 7.3 SM8550 nightlies: every suspend reported
+cxsd, aosd and ddr 0 and drained 48-173 mA, against 13-30 mA on 7.2.11.
+
+Disable the node. PortareOS does it in the AYN board dtsi; Steamling
+does it in the SoC dtsi, so every board on all four SoCs gets it.
+---
+--- a/arch/arm64/boot/dts/qcom/sm8250.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8250.dtsi
+@@ -2636,6 +2636,14 @@ crypto: crypto@1dfa000 {
+ 				 <&apps_smmu 0x596 0x0011>;
+ 			interconnects = <&aggre2_noc MASTER_CRYPTO_CORE_0 0 &mc_virt SLAVE_EBI_CH0 0>;
+ 			interconnect-names = "memory";
++
++			/*
++			 * CRYPTO_DEV_QCE depends on BROKEN since 7.3, so nothing binds
++			 * this node, and its interconnect suppliers never reach
++			 * sync_state: they keep their boot votes, EBI1 at INT_MAX in
++			 * the sleep set too, and DDR and CX stop collapsing in suspend.
++			 */
++			status = "disabled";
+ 		};
+ 
+ 		tcsr_mutex: hwlock@1f40000 {
+diff --git a/arch/arm64/boot/dts/qcom/sm8550.dtsi b/arch/arm64/boot/dts/qcom/sm8550.dtsi
+--- a/arch/arm64/boot/dts/qcom/sm8550.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8550.dtsi
+@@ -2721,6 +2721,14 @@ crypto: crypto@1dfa000 {
+ 			interconnects = <&aggre2_noc MASTER_CRYPTO QCOM_ICC_TAG_ALWAYS
+ 					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>;
+ 			interconnect-names = "memory";
++
++			/*
++			 * CRYPTO_DEV_QCE depends on BROKEN since 7.3, so nothing binds
++			 * this node, and its interconnect suppliers never reach
++			 * sync_state: they keep their boot votes, EBI1 at INT_MAX in
++			 * the sleep set too, and DDR and CX stop collapsing in suspend.
++			 */
++			status = "disabled";
+ 		};
+ 
+ 		ufs_mem_phy: phy@1d80000 {
+diff --git a/arch/arm64/boot/dts/qcom/sm8650.dtsi b/arch/arm64/boot/dts/qcom/sm8650.dtsi
+--- a/arch/arm64/boot/dts/qcom/sm8650.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8650.dtsi
+@@ -4174,6 +4174,14 @@ crypto: crypto@1dfa000 {
+ 
+ 			iommus = <&apps_smmu 0x480 0>,
+ 				 <&apps_smmu 0x481 0>;
++
++			/*
++			 * CRYPTO_DEV_QCE depends on BROKEN since 7.3, so nothing binds
++			 * this node, and its interconnect suppliers never reach
++			 * sync_state: they keep their boot votes, EBI1 at INT_MAX in
++			 * the sleep set too, and DDR and CX stop collapsing in suspend.
++			 */
++			status = "disabled";
+ 		};
+ 
+ 		tcsr_mutex: hwlock@1f40000 {
+diff --git a/arch/arm64/boot/dts/qcom/sm8750.dtsi b/arch/arm64/boot/dts/qcom/sm8750.dtsi
+--- a/arch/arm64/boot/dts/qcom/sm8750.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8750.dtsi
+@@ -2172,6 +2172,14 @@ crypto: crypto@1dfa000 {
+ 
+ 			iommus = <&apps_smmu 0x480 0>,
+ 				 <&apps_smmu 0x481 0>;
++
++			/*
++			 * CRYPTO_DEV_QCE depends on BROKEN since 7.3, so nothing binds
++			 * this node, and its interconnect suppliers never reach
++			 * sync_state: they keep their boot votes, EBI1 at INT_MAX in
++			 * the sleep set too, and DDR and CX stop collapsing in suspend.
++			 */
++			status = "disabled";
+ 		};
+ 
+ 		tcsr_mutex: hwlock@1f40000 {
