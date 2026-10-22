@@ -1,0 +1,69 @@
+From: David J. Vandenburgh <david@vandenburgh.co>
+Date: Thu, 22 Oct 2026 14:15:00 -0400
+Subject: [PATCH] power: Read an end threshold of 100 back as no limit
+
+set_max_charge_level writes 100 when Steam turns the limit off, since
+an end threshold has no off value. get_max_charge_level still returned
+that 100, so MaxChargeLevel reported a 100% limit instead of -1 right
+after Steam turned it off. Report it as no limit, like the write side
+treats it.
+---
+--- a/steamos-manager/src/power.rs
++++ b/steamos-manager/src/power.rs
+@@ -726,7 +726,13 @@
+ 
+ pub(crate) async fn get_max_charge_level() -> Result<i32> {
+     let path = find_battery_charge_path().await?;
+-    parse_max_charge_level(read_to_string(path).await)
++    let level = parse_max_charge_level(read_to_string(&path).await)?;
++    // set_max_charge_level writes 100 for no limit, so read 100 back as no limit
++    if level >= 100 && path.ends_with(SB_LIMIT_PATH) {
++        Ok(0)
++    } else {
++        Ok(level)
++    }
+ }
+ 
+ pub(crate) async fn set_max_charge_level(limit: i32) -> Result<oneshot::Receiver<SysfsWritten>> {
+@@ -1511,6 +1517,41 @@
+         assert_eq!(get_max_charge_level().await.unwrap(), 80);
+     }
+ 
++    #[tokio::test]
++    async fn power_supply_no_limit_round_trips() {
++        let handle = testing::start();
++
++        let config = DeviceConfig {
++            battery_charge_limit: Some(BatteryChargeLimitConfig {
++                suggested_minimum_limit: 55,
++                method: BatteryChargeLimitMethod::PowerSupply,
++            }),
++            ..DeviceConfig::default()
++        };
++        handle.test.set_device_config(config).await;
++
++        let battery = path("devices/battery");
++        create_dir_all(&battery).await.expect("create_dir_all");
++        write(battery.join("type"), "Battery\n")
++            .await
++            .expect("write");
++        write(battery.join(SB_LIMIT_PATH), "100\n")
++            .await
++            .expect("write");
++        let class = path(POWER_SUPPLY_PATHS[0]);
++        create_dir_all(&class).await.expect("create_dir_all");
++        tokio::fs::symlink(&battery, class.join("battery"))
++            .await
++            .expect("symlink");
++
++        assert_eq!(get_max_charge_level().await.unwrap(), 0);
++
++        write(battery.join(SB_LIMIT_PATH), "80\n")
++            .await
++            .expect("write");
++        assert_eq!(get_max_charge_level().await.unwrap(), 80);
++    }
++
+     #[tokio::test]
+     async fn read_max_charge_level_acpi_sb_legacy_path() {
+         let handle = testing::start();

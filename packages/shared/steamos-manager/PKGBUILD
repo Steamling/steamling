@@ -22,10 +22,11 @@ source=("steamos-manager::git+https://gitlab.steamos.cloud/holo/steamos-manager.
         '0006-screenreader-Make-speech-dispatcher-an-optional-defa.patch'
         '0007-remote-Keep-configured-remotes-exported-across-owner.patch'
         '0008-power-Add-a-power_supply-battery-charge-limit-method.patch'
+        '0009-power-Read-an-end-threshold-of-100-back-as-no-limit.patch'
         'platform.toml' 'steamling-remotes.toml' '10-steamling.conf')
 sha256sums=('SKIP'
             '5a30ce742be0835d9b23fc862db5cbbbc71464e1c9b1fca22917e10e4ba32a92'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
             'SKIP' 'SKIP' 'SKIP')
 
 _toolchain() {
@@ -42,7 +43,7 @@ prepare() {
   cd steamos-manager
   # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
   local p
-  for p in "${srcdir}"/000[1-8]-*.patch; do
+  for p in "${srcdir}"/000[1-9]-*.patch; do
     patch -p1 < "${p}"
   done
   cargo fetch --locked
