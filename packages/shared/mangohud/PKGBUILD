@@ -4,7 +4,7 @@
 # dir: makepkg strips local source entries to their basename.
 pkgname=mangohud
 pkgver=0.8.4
-pkgrel=1
+pkgrel=2
 pkgdesc="Vulkan/OpenGL FPS/frametime/CPU/GPU overlay + mangoapp for the gamescope Steam session"
 arch=('aarch64')
 url="https://github.com/flightlessmango/MangoHud"
@@ -22,8 +22,9 @@ source=("git+https://github.com/flightlessmango/MangoHud.git#tag=v${pkgver}"
         '0005-RAM-name.patch'
         '0006-mangoapp-pace-redraw-to-frame-messages.patch'
         '0007-msm-hottest-gpu-zone.patch'
-        '0008-gpu_fdinfo-skip-unreadable-fdinfo.patch')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        '0008-gpu_fdinfo-skip-unreadable-fdinfo.patch'
+        '0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues.patch')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd MangoHud
@@ -31,7 +32,8 @@ prepare() {
   for p in 0001-Qualcomm-GPU-support 0002-GPU-devfreq 0003-Battery-name \
            0004-Qualcomm-battery-power-now 0005-RAM-name \
            0006-mangoapp-pace-redraw-to-frame-messages 0007-msm-hottest-gpu-zone \
-           0008-gpu_fdinfo-skip-unreadable-fdinfo; do
+           0008-gpu_fdinfo-skip-unreadable-fdinfo \
+           0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues; do
     echo "  applying ${p}.patch"
     git apply -p1 "${srcdir}/${p}.patch"
   done
