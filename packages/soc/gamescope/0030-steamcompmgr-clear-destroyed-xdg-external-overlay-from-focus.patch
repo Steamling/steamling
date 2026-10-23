@@ -1,0 +1,56 @@
+From 765961a56ad50f04683776bad9aa9116e0d2c123 Mon Sep 17 00:00:00 2001
+From: sashakosti <sashakosti.work@icloud.com>
+Date: Thu, 15 Oct 2026 03:29:00 +0300
+Subject: [PATCH] steamcompmgr: clear destroyed XDG external overlay from
+ connector and global focus
+
+When an XDG-type external overlay client (such as a zwlr_layer_surface_v1
+overlay or HUD) terminates abruptly without orderly cleanup,
+steamcompmgr_check_xdg removes the window from wlserver.xdg_wins and clears
+stale XDG window references across g_VirtualConnectorFocuses, but skips
+externalOverlayWindow. Additionally, steamcompmgr_xdg_determine_and_apply_focus
+does not reset g_steamcompmgr_xdg_focus.overlayWindow or externalOverlayWindow
+to nullptr before rescanning active windows.
+
+As a result, pFocus->externalOverlayWindow and g_steamcompmgr_xdg_focus
+retain dangling pointers to the deallocated window. Subsequent compositor
+paint passes (paint_all -> paint_window) dereference the freed window in
+window_last_done_commit_index, triggering a SIGSEGV crash.
+
+Clear externalOverlayWindow alongside the other focus windows in
+steamcompmgr_check_xdg, and reset overlay pointers in
+steamcompmgr_xdg_determine_and_apply_focus and g_steamcompmgr_xdg_focus
+when XDG windows are marked dirty.
+
+Closes: https://github.com/ValveSoftware/gamescope/issues/2434
+Co-authored-by: Antigravity <antigravity@google.com>
+---
+ src/steamcompmgr.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/steamcompmgr.cpp b/src/steamcompmgr.cpp
+index 397a112..0c2a768 100644
+--- a/src/steamcompmgr.cpp
++++ b/src/steamcompmgr.cpp
+@@ -5045,6 +5045,9 @@ static std::vector< steamcompmgr_win_t* > GetGlobalPossibleFocusWindows()
+ static void
+ steamcompmgr_xdg_determine_and_apply_focus( const std::vector< steamcompmgr_win_t* > &vecPossibleFocusWindows )
+ {
++	g_steamcompmgr_xdg_focus.overlayWindow = nullptr;
++	g_steamcompmgr_xdg_focus.externalOverlayWindow = nullptr;
++
+ 	for ( auto &window : g_steamcompmgr_xdg_wins )
+ 	{
+ 		if (window->isOverlay)
+@@ -9485,6 +9488,8 @@ void steamcompmgr_check_xdg(bool vblank, uint64_t vblank_idx)
+ 				pFocus->inputFocusWindow = nullptr;
+ 			if (pFocus->overlayWindow && pFocus->overlayWindow->type == steamcompmgr_win_type_t::XDG)
+ 				pFocus->overlayWindow = nullptr;
++			if (pFocus->externalOverlayWindow && pFocus->externalOverlayWindow->type == steamcompmgr_win_type_t::XDG)
++				pFocus->externalOverlayWindow = nullptr;
+ 			if (pFocus->notificationWindow && pFocus->notificationWindow->type == steamcompmgr_win_type_t::XDG)
+ 				pFocus->notificationWindow = nullptr;
+ 			if (pFocus->overrideWindow && pFocus->overrideWindow->type == steamcompmgr_win_type_t::XDG)
+-- 
+2.34.1
+

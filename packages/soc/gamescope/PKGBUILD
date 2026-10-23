@@ -6,7 +6,7 @@
 pkgname=gamescope
 epoch=1
 pkgver=3.16.31.rocknix.20261017.610568b
-pkgrel=1.2
+pkgrel=1.3
 _commit=610568b61c0476f0fa1314c4b9d430d3e3fd832e
 install=gamescope.install
 pkgdesc="SteamOS session compositing WM — patched (for msm handhelds)"
@@ -49,9 +49,12 @@ source=("gamescope::git+https://github.com/ValveSoftware/gamescope.git#commit=${
         # Steam's colour-temperature slider on the ARM64 client (armada 0018)
         '0027-steamcompmgr-arm64-virtual-white.patch'
         # clean shutdown of the present wait thread (Valve, newer than our pin)
-        '0028-rendervulkan-join-present-wait-thread-on-shutdown.patch')
+        '0028-rendervulkan-join-present-wait-thread-on-shutdown.patch'
+        # upload ring aligned for Adreno's 64-byte uniform offsets, overlay crash (Valve, newer than our pin)
+        '0029-rendervulkan-align-upload-ring-allocations-to-the-uniform-offset-limit.patch'
+        '0030-steamcompmgr-clear-destroyed-xdg-external-overlay-from-focus.patch')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd gamescope
