@@ -1,6 +1,16 @@
-- Copy the rocknix_abl folder from the SD card to the root of Android Internal Storage
-- Execute as root the backup_abl.sh script from the Internal Storage to backup your current ABL
-- After backup, execute as root the flash_abl.sh script to flash the new ABL
-- Reboot your device holding Vol - key to enter fastboot menu
-- Select "Change boot mode" option using Vol -/+ key, and hit Power button
-- Hit Power button to start
+Installing OpenABL from Android (needs root)
+
+1. Copy this rocknix_abl folder from the SD card to the top level of Android's
+   internal storage.
+2. As root, run backup_abl.sh from that folder. It saves your current
+   bootloader, so you can always go back to it.
+3. Then, as root, run flash_abl.sh to install OpenABL.
+4. Turn the handheld off. Hold Volume Down while turning it on to open the
+   OpenABL menu. Volume Up and Down move, Power selects.
+5. Set these three:
+     Boot mode    -> Linux
+     Boot source  -> SD card (or Auto)
+     Device model -> your handheld (for example Retroid Pocket 6)
+   Don't skip Device model. Without one, OpenABL won't start Steamling and
+   drops you straight back into this menu.
+6. Pick Start.

@@ -15,7 +15,7 @@ _ablver=1.2
 # OpenABL restarted the numbering below the ROCKNIX ABL's 1.2
 epoch=1
 pkgver=${_ablver}
-pkgrel=1
+pkgrel=2
 pkgdesc="${_SOC} qcom-abl boot payload: OpenABL install kit (rocknix_abl)"
 arch=('aarch64')
 # !strip: a stripped bootloader is an unbootable one.
