@@ -4,9 +4,9 @@
 # renderers, the ARM64 recompiler, PGXP. Every dependency is vendored in the tree.
 # Bump = move _commit, pkgver <commit date>.<short sha>.
 pkgname=libretro-swanstation
-pkgver=20261015.e436e9b
+pkgver=20261024.631f0fb
 pkgrel=1
-_commit=e436e9b85374def58d211df7f78880f0f4a917b4
+_commit=631f0fb31b809e0f889d7c551fe695788e39c1d3
 pkgdesc="SwanStation libretro core — PlayStation, Vulkan and OpenGL (SoC-tuned)"
 arch=('aarch64')
 url="https://github.com/libretro/swanstation"
