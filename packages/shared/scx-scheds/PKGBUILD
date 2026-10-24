@@ -2,7 +2,7 @@
 # Shadows the base's copy by repo order: a newer base scx never reaches devices while published.
 pkgname=scx-scheds
 pkgver=1.1.4
-pkgrel=3
+pkgrel=4
 _commit=e7b3a219617472cf78880ac424714e52c932db61
 _rustver=1.99.0
 pkgdesc='sched_ext schedulers and tools'
