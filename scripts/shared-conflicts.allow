@@ -8,6 +8,9 @@ steamling-desktop-plasma-mobile :: conflicts=steamling-desktop<0.1.0-27 :: files
 steamling-session :: conflicts=steamling-desktop<0.1.0-27 :: steamos-session-select lived in steamling-desktop before the split
 steamling-base-lock :: replaces=mbedtls :: the base renamed mbedtls to mbedtls3 with no conflicts=, so the old copy must go
 steamling-base-lock :: conflicts=mbedtls :: pairs the replaces= so the swap survives file collisions
+steamling-base-lock :: replaces=gst-plugins-base<1.28.8 :: base 20261023 drops it, and its exact gstreamer pins would block every locked -Syu; versioned so rolling devices keep ALARM's
+steamling-base-lock :: replaces=opencv<5.0.0-10 :: base 20261023 drops it (kquickimageeditor 0.7), and it depends on gst-plugins-base; versioned like it
+steamling-base-lock :: replaces=verdict<1.4.5-3 :: opencv's dep, orphaned with it; versioned like it
 steamling-gamepad-calibration :: replaces=python-pyxel :: retires the GPcal app's runtime
 steamling-gamepad-calibration :: conflicts=python-pyxel :: pairs the replaces=
 es-de :: conflicts=emulationstation-de :: provides the old name, one ES-DE install at a time
