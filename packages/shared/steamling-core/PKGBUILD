@@ -2,7 +2,7 @@
 # layers stay out, or `pacman -Rs <layer>` becomes impossible.
 pkgname=steamling-core
 pkgver=0.1.0
-pkgrel=5
+pkgrel=6
 pkgdesc="steamling mandatory layer: GPU stack, input, storage, base/update tooling"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -10,6 +10,7 @@ license=('GPL-2.0-or-later')
 depends=('mesa'                     # epoch-2 trimmed/tuned freedreno build ([steamling] outranks ALARM)
          'vulkan-freedreno'
          'inputplumber'             # BSP device configs target it
+         'scx-scheds'               # ours from [steamling-shared]: scx_lavd for steamling-lavd.service
          'steamling-sdcard-automount'
          'steamling-snapshots'
          'steamling-base'
