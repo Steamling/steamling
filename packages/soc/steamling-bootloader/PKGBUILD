@@ -11,7 +11,7 @@
 _soc="${STEAMLING_SOC:?set by build-packages.sh}"
 _SOC="${_soc^^}"
 pkgname="steamling-bootloader-${_soc}"
-_ablver=1.1
+_ablver=1.2
 # OpenABL restarted the numbering below the ROCKNIX ABL's 1.2
 epoch=1
 pkgver=${_ablver}
@@ -28,7 +28,8 @@ source=("https://github.com/OpenHandheldCollective/OpenABL/releases/download/v${
         'backup_abl.sh'
         'restore_backup_abl.sh'
         '95-steamling-abl-kit.hook')
-sha512sums=('edcff09576e3f7c2e0019f526a42df61ddf8ff9867033bbb1ca5c46a71de36b528986df8950c21b5f53e45e3b12a6de9178815b3120f327b49261aae2cc5c2b0'
+# the release tarball's sha256 (README.provenance says where it was checked)
+sha256sums=('28cb97d1b387f28ddba28ed57fdc7d8b1c2ac2cdcd26af9c672620d41abddd4f'
             'SKIP'
             'SKIP'
             'SKIP'

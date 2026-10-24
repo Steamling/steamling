@@ -1,16 +1,17 @@
 # rocknix_abl kit provenance
 
 abl_signed-<SOC>.elf is NOT committed here - the PKGBUILD fetches it from the
-official OpenABL release, pinned by tag + sha512:
+official OpenABL release, pinned by tag + sha256:
 
-  release:  https://github.com/OpenHandheldCollective/OpenABL/releases/tag/v1.1
-  asset:    openabl-v1.1.tar.gz (one folder per SoC)
-  tarball sha512: edcff09576e3f7c2e0019f526a42df61ddf8ff9867033bbb1ca5c46a71de36b5
-                  28986df8950c21b5f53e45e3b12a6de9178815b3120f327b49261aae2cc5c2b0
-  (sha256 520cd8fecd26da728259e376561902d9c86b85ad859511066fb1cd4b02b6ab52,
-  the same pin ROCKNIX's openabl package.mk carries)
+  release:  https://github.com/OpenHandheldCollective/OpenABL/releases/tag/v1.2
+  asset:    openabl-v1.2.tar.gz (one folder per SoC)
+  tarball sha256: 28cb97d1b387f28ddba28ed57fdc7d8b1c2ac2cdcd26af9c672620d41abddd4f
+  (the same pin ROCKNIX's openabl package.mk carries, ROCKNIX 73ffb8ee37)
+  v1.1 reset the device while starting an Android boot image: BootLinux checked its
+  stack canary with the MMU off and could read a stale cached value (OpenABL dad6370,
+  issue #29, first in v1.1.1).
   Each SoC's elf is checked against the release's own .sha256 sidecar in prepare(), and the
-  tarball's sha512 above pins the elfs and the sidecars together.
+  tarball's sha256 above pins the elfs and the sidecars together.
 
 OpenABL is the Open Handheld Collective's build of the Qualcomm ABL (edk2
 LinuxLoader with one patch plus a boot menu, GPL-3.0-or-later; see the
