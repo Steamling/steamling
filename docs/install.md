@@ -7,6 +7,13 @@ bootloader's device model differ; that page points to model-specific help.
 Steamling runs from a microSD card. Once it is up you can [move it to internal
 storage](install-to-internal.md) for faster loading.
 
+**New to this? It's easier than it looks.** You don't need to install any other system first, root
+Android, or plug the handheld into a PC. The Retroid Pocket 6 has a tool built into Android's
+settings that runs a script with full permissions (**Settings → Handheld Settings → Advanced → Run
+Script as Root**), and everything the bootloader needs comes on the Steamling card. So the whole
+setup is: flash a card, copy one folder, tap two scripts, pick three options in a menu. About
+15 minutes, done once per handheld.
+
 **You need** a microSD card: 64 GB works but fills up fast once games are installed, so 128 GB or
 larger is recommended.
 
@@ -19,29 +26,31 @@ Build the image yourself with the [build guide](building/README.md) (it comes ou
 Write it to the card **as an image**, with [balenaEtcher](https://etcher.balena.io/), Rufus or `dd`.
 Don't copy the `.img` file onto the card like a normal file: that gives you a card with one big
 file on it, and the bootloader will find nothing to boot. When it's written properly, Android (or
-your PC) sees a small partition on the card with a `KERNEL` file and a `rocknix_abl` folder on it.
+your PC) sees a small partition on the card with a `KERNEL` file and an `openabl` folder on it.
 
 ## 2. Install the bootloader (OpenABL)
 
 The stock bootloader only boots Android. OpenABL replaces it with one that can boot Linux from the
-SD card or internal storage. You do this **once per handheld**, from Android. (It used to be
+SD card or internal storage. You do this **once per handheld**, from Android, with the built-in
+**Run Script as Root** tool; everything it needs is on the Steamling card. (Its predecessor was
 called the ROCKNIX ABL. If you already flashed that one, it still works, but update to OpenABL from
 this card: the old one has different menus.)
 
 Charge the handheld to at least half first. A power cut while the bootloader is being written
 leaves a device that needs a PC to recover.
 
-1. Put the flashed card in and let Android start. Copy the `rocknix_abl` folder from the card to the
-   top level of Android's internal storage. (The folder kept its old name so older backups still
-   line up.)
+1. Put the flashed card in and let Android start. Copy the `openabl` folder from the card to the
+   top level of Android's internal storage. (Cards made before October 2026 call it `rocknix_abl`;
+   either works.)
 2. Open **Settings → Handheld Settings → Advanced → Run Script as Root**. That's where it is on
-   Retroid handhelds; AYN, AYANEO and the others put it elsewhere. Go into the `rocknix_abl` folder
+   Retroid handhelds; AYN, AYANEO and the others put it elsewhere. Go into the `openabl` folder
    you just copied and run `backup_abl.sh`. It saves your stock bootloader as `abl_a.img` and
    `abl_b.img` next to the scripts.
 3. Copy those two backups off the device, to your PC. Installing Steamling to internal storage later
    wipes Android's data, backups included, and they're your only way back to the factory
    bootloader (see [restoring the stock bootloader](install-to-internal.md#restoring-the-stock-bootloader)).
 4. Back in **Run Script as Root**, run `flash_abl.sh`. It writes OpenABL to both bootloader slots.
+   It won't run until step 2 has saved a backup, so you can't skip that by accident.
 
 **Check that it took.** Power off, then hold **Volume −** while powering on. You should get the
 OpenABL menu. Its **Device info** entry shows the bootloader version, which should be **1.2** or
@@ -50,7 +59,7 @@ old ROCKNIX ABL: run `flash_abl.sh` from this card again. OpenABL versions befor
 straight back into the menu just as they started Linux, so make sure yours is current.
 
 Already running OpenABL and have a PC handy? Fastboot works while the OpenABL menu is open, so you
-can also update it from there with the `abl_signed-SM8550.elf` in the card's `rocknix_abl` folder:
+can also update it from there with the `abl_signed-SM8550.elf` in the card's `openabl` folder:
 
 ```sh
 fastboot flash abl_a abl_signed-SM8550.elf
