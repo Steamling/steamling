@@ -1,0 +1,40 @@
+# umtp-responder — the MTP side of USB file transfer: with steamling-mtp's FunctionFS gadget the
+# handheld shows up on a PC as a phone does, no network or drivers needed. Built from source with
+# armada-os/armada's patches (see PATCHES.md); systemd readiness so the unit knows when it's up.
+pkgname=umtp-responder
+_commit=153f76d65608c184a972ad7d0b4ae605e56c0972
+pkgver=1.8.1.r18.153f76d
+pkgrel=1
+pkgdesc="Lightweight USB Media Transfer Protocol (MTP) responder"
+arch=('aarch64')
+url="https://github.com/viveris/uMTP-Responder"
+license=('GPL-3.0-or-later')
+depends=('systemd-libs' 'glibc')
+makedepends=('git')
+source=("uMTP-Responder::git+https://github.com/viveris/uMTP-Responder.git#commit=${_commit}"
+        '0001-portability-use-default-linux-mqueue-depth.patch'
+        '0002-storage-use-configured-gid.patch'
+        '0003-path-harden-object-path-containment.patch'
+        '0004-unicode-support-full-utf8-utf16-conversion.patch'
+        '0005-inotify-synchronize-session-database-lifetime.patch')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  cd uMTP-Responder
+  local p
+  for p in "${source[@]}"; do
+    case "${p}" in *.patch) patch -p1 < "${srcdir}/${p}" ;; esac
+  done
+}
+
+build() {
+  cd uMTP-Responder
+  make SYSTEMD=1
+}
+
+package() {
+  cd uMTP-Responder
+  install -Dm755 umtprd "${pkgdir}/usr/bin/umtprd"
+  install -Dm644 conf/umtprd.conf "${pkgdir}/usr/share/doc/${pkgname}/umtprd.conf.example"
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}

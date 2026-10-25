@@ -28,3 +28,4 @@ libretro-core-info.git      https://github.com/libretro/libretro-core-info.git  
 linux.git:retroid           https://github.com/RetroidPocket/linux.git                      blobless  retroidpocket/*
 retroid-audioreach-topology.git https://github.com/RetroidPocket/audioreach-topology.git    full
 retroid-alsa-ucm-conf.git   https://github.com/RetroidPocket/alsa-ucm-conf.git              full
+umtp-responder.git          https://github.com/viveris/uMTP-Responder.git                   full
