@@ -3,7 +3,7 @@
 # phone (home folder, plus the microSD card when booted from internal storage) until shutdown or
 # "off"; it never persists, since while it's on the port can't host a controller or a hub.
 # status is unprivileged; on/off need root (Steamling Control runs as root).
-# setup/bind/unbind/teardown are steamling-mtp.service's own steps. Adapted from armada-os/armada.
+# setup/bind/unbind/teardown are steamling-mtp.service's own steps.
 set -euo pipefail
 
 UNIT=steamling-mtp.service

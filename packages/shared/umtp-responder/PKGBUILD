@@ -1,6 +1,6 @@
 # umtp-responder — the MTP side of USB file transfer: with steamling-mtp's FunctionFS gadget the
 # handheld shows up on a PC as a phone does, no network or drivers needed. Built from source with
-# armada-os/armada's patches (see PATCHES.md); systemd readiness so the unit knows when it's up.
+# the patches PATCHES.md lists, and systemd readiness so the unit knows when it's up.
 pkgname=umtp-responder
 _commit=153f76d65608c184a972ad7d0b4ae605e56c0972
 pkgver=1.8.1.r18.153f76d
