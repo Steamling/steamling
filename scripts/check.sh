@@ -394,6 +394,16 @@ check_family() {  # $1 = SoC
       for f in patches dts config/linux.aarch64.conf; do
         [ -e "${STEAMLING_ROOT}/kernel/${tree}/${f}" ] || echo "KERNEL_TREE=${tree}: kernel/${tree}/${f} missing"
       done
+      # One tree, one source: every SoC on it repeats the pin, so they must agree.
+      local other v
+      for other in "${STEAMLING_ROOT}"/kernel/*/kernel.conf; do
+        other="$(basename "$(dirname "${other}")")"
+        [ "${other}" != "${soc}" ] && [ "$(kernel_get "${other}" KERNEL_TREE)" = "${tree}" ] || continue
+        for v in KERNEL_VERSION KERNEL_SOURCE_SHA256; do
+          [ "$(kernel_get "${soc}" "${v}")" = "$(kernel_get "${other}" "${v}")" ] \
+            || echo "${v} differs from kernel/${other}/kernel.conf, which builds the same tree (${tree})"
+        done
+      done
     fi
   fi
   [ -f "${dev}/profile.conf" ] || return
