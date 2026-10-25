@@ -1,0 +1,171 @@
+#!/bin/bash
+# steamling-mtp — USB file transfer. "on" makes the USB-C port a media device a PC opens like a
+# phone (home folder, plus the microSD card when booted from internal storage) until shutdown or
+# "off"; it never persists, since while it's on the port can't host a controller or a hub.
+# status is unprivileged; on/off need root (Steamling Control runs as root).
+# setup/bind/unbind/teardown are steamling-mtp.service's own steps. Adapted from armada-os/armada.
+set -euo pipefail
+
+UNIT=steamling-mtp.service
+USER_NAME=deck
+gadget=/sys/kernel/config/usb_gadget/steamling-mtp
+config="${gadget}/configs/c.1"
+function="${gadget}/functions/ffs.mtp"
+ffs=/dev/ffs-mtp
+runtime=/run/steamling-mtp
+role_state="${runtime}/previous-role"
+sd_link="${runtime}/sdcard"
+
+need_root() { [ "$(id -u)" -eq 0 ] || { echo "steamling-mtp: must run as root" >&2; exit 1; }; }
+
+# The microSD card only when it isn't the root filesystem: then it's already the home folder.
+mounted_sd() {
+  local root_src
+  root_src="$(findmnt -n -o SOURCE / 2>/dev/null || true)"
+  case "${root_src}" in /dev/mmcblk*) return 1 ;; esac
+  findmnt -rn -o SOURCE,TARGET 2>/dev/null \
+    | awk '$1 ~ /^\/dev\/mmcblk[0-9]+p[0-9]+$/ && $2 ~ /^\/run\/media\// { print $2; exit }' \
+    | grep .
+}
+
+unbind() {
+  if [ -e "${gadget}/UDC" ] && [ -n "$(cat "${gadget}/UDC")" ]; then
+    printf '\n' > "${gadget}/UDC" || :
+  fi
+  if [ -s "${role_state}" ]; then
+    local role_path previous_role
+    role_path="$(sed -n '1p' "${role_state}" || true)"
+    previous_role="$(sed -n '2p' "${role_state}" || true)"
+    if [ -w "${role_path}" ] && [ -n "${previous_role}" ]; then
+      printf '%s' "${previous_role}" > "${role_path}" || :
+    fi
+    rm -f "${role_state}" || :
+  fi
+}
+
+case "${1:-status}" in
+  status)
+    systemctl is-active --quiet "${UNIT}" && echo "state=on" || echo "state=off"
+    [ -n "$(ls /sys/class/udc 2>/dev/null)" ] && echo "udc=yes" || echo "udc=no"
+    ;;
+  on)
+    need_root
+    if ! systemctl start "${UNIT}"; then
+      systemctl stop "${UNIT}" >/dev/null 2>&1 || :
+      journalctl -u "${UNIT}" -n 5 -o cat --no-pager >&2 || :
+      exit 1
+    fi
+    echo "state=on"
+    ;;
+  off)
+    need_root
+    systemctl stop "${UNIT}"
+    echo "state=off"
+    ;;
+  setup)
+    need_root
+    modprobe libcomposite 2>/dev/null || :
+    modprobe usb_f_fs 2>/dev/null || :
+    mountpoint -q /sys/kernel/config || mount -t configfs configfs /sys/kernel/config
+    if [ -e "${gadget}" ]; then
+      echo "steamling-mtp: a stale gadget is still at ${gadget}" >&2
+      exit 1
+    fi
+    serial="$(systemd-id128 machine-id -a 5f0c1d6e2b8a4d3f9e7a1c4b6d8f0a2e 2>/dev/null || true)"
+    [ -n "${serial}" ] || { echo "steamling-mtp: could not derive a USB serial" >&2; exit 1; }
+    mkdir "${gadget}"
+    printf '0x1d6b' > "${gadget}/idVendor"
+    printf '0x0100' > "${gadget}/idProduct"
+    printf '0x0200' > "${gadget}/bcdUSB"
+    printf '0x0001' > "${gadget}/bcdDevice"
+    mkdir "${gadget}/strings/0x409"
+    printf '%s' "${serial}" > "${gadget}/strings/0x409/serialnumber"
+    printf 'Steamling' > "${gadget}/strings/0x409/manufacturer"
+    printf 'Steamling' > "${gadget}/strings/0x409/product"
+    mkdir "${config}" "${config}/strings/0x409"
+    printf 'MTP' > "${config}/strings/0x409/configuration"
+    printf '0xc0' > "${config}/bmAttributes"
+    printf '2' > "${config}/MaxPower"
+    mkdir "${function}"
+    ln -s "${function}" "${config}/ffs.mtp"
+    install -d -m 0755 "${ffs}"
+    mount -t functionfs -o "rmode=0500,fmode=0600,uid=$(id -u "${USER_NAME}"),gid=$(id -g "${USER_NAME}")" mtp "${ffs}"
+    home="$(getent passwd "${USER_NAME}" | cut -d: -f6)"
+    sd_storage=0
+    # uMTP can't take a quoted path with spaces in it; a link it resolves itself can.
+    if sd_source="$(mounted_sd)" && ln -sfn -- "${sd_source}" "${sd_link}"; then
+      sd_storage=1
+    fi
+    {
+      printf '%s\n' \
+        'loop_on_disconnect 1' \
+        'show_hidden_files 0' \
+        'umask 022' \
+        "storage \"${home}\" \"Home\" \"rw\""
+      [ "${sd_storage}" = 1 ] && printf '%s\n' "storage \"${sd_link}\" \"SD Card\" \"rw,removable\""
+      printf '%s\n' \
+        'manufacturer "Steamling"' \
+        'product "Steamling"' \
+        "serial \"${serial}\"" \
+        'firmware_version "Steamling"' \
+        'mtp_extensions "microsoft.com: 1.0; android.com: 1.0;"' \
+        'interface "MTP"' \
+        'usb_vendor_id 0x1d6b' \
+        'usb_product_id 0x0100' \
+        'usb_class 0x6' \
+        'usb_subclass 0x1' \
+        'usb_protocol 0x1' \
+        'usb_dev_version 0x0001' \
+        'sync_when_close 0x1' \
+        'usb_functionfs_mode 0x1' \
+        "usb_dev_path \"${ffs}/ep0\"" \
+        "usb_epin_path \"${ffs}/ep1\"" \
+        "usb_epout_path \"${ffs}/ep2\"" \
+        "usb_epint_path \"${ffs}/ep3\"" \
+        'usb_max_packet_size 0x200'
+    } > "${runtime}/umtprd.conf"
+    ;;
+  bind)
+    need_root
+    shopt -s nullglob
+    udcs=(/sys/class/udc/*)
+    if [ "${#udcs[@]}" -eq 0 ]; then
+      echo "steamling-mtp: this kernel has no USB device controller (port is host-only)" >&2
+      exit 1
+    fi
+    udc_name="${udcs[0]##*/}"
+    role_path="/sys/class/usb_role/${udc_name}-role-switch/role"
+    if [ ! -e "${role_path}" ]; then
+      role_paths=(/sys/class/usb_role/*/role)
+      role_path="${role_paths[0]:-}"
+    fi
+    # Usually the Type-C stack already picks device mode when a PC is on the other end; forcing it
+    # covers boards where it doesn't. unbind puts the old role back.
+    if [ -n "${role_path}" ] && [ -w "${role_path}" ]; then
+      printf '%s\n%s\n' "${role_path}" "$(cat "${role_path}")" > "${role_state}"
+      printf 'device' > "${role_path}" || :
+    fi
+    printf '%s' "${udc_name}" > "${gadget}/UDC"
+    ;;
+  unbind)
+    need_root
+    unbind
+    ;;
+  teardown)
+    need_root
+    unbind
+    rm -f "${sd_link}" || :
+    mountpoint -q "${ffs}" && { umount "${ffs}" || :; }
+    [ ! -L "${config}/ffs.mtp" ] || rm "${config}/ffs.mtp" || :
+    [ ! -d "${function}" ] || rmdir "${function}" || :
+    [ ! -d "${config}/strings/0x409" ] || rmdir "${config}/strings/0x409" || :
+    [ ! -d "${config}" ] || rmdir "${config}" || :
+    [ ! -d "${gadget}/strings/0x409" ] || rmdir "${gadget}/strings/0x409" || :
+    [ ! -d "${gadget}" ] || rmdir "${gadget}" || :
+    [ ! -d "${ffs}" ] || rmdir "${ffs}" || :
+    ;;
+  *)
+    echo "usage: steamling-mtp {status|on|off}" >&2
+    exit 2
+    ;;
+esac

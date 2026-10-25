@@ -2,12 +2,13 @@
 # which live here rather than in the image overlay so fixes reach fielded SDs on -Syu (#34).
 pkgname=steamling-tools
 pkgver=0.1.0
-pkgrel=20.5
-pkgdesc="Steamling maintenance app: snapshot rollback, base mode switch, internal install, SSH + file sharing toggles, emulation layer, desktop picker, first-boot diagnostics and root expansion"
+pkgrel=20.6
+pkgdesc="Steamling maintenance app: snapshot rollback, base mode switch, internal install, SSH, file sharing and USB file transfer toggles, emulation layer, desktop picker, first-boot diagnostics and root expansion"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
-depends=('steamling-snapshots' 'steamling-base' 'kdialog' 'cloud-guest-utils')  # growpart: steamling-expand-root
+depends=('steamling-snapshots' 'steamling-base' 'kdialog' 'cloud-guest-utils'  # growpart: steamling-expand-root
+         'umtp-responder')  # steamling-mtp
 install=steamling-tools.install
 source=('steamling-tools' 'steamling-tools.desktop' 'steamling-installer-gui'
         'steamling-install-internal' 'steamling-uninstall-internal' '54-steamling-installer.rules'
@@ -15,9 +16,10 @@ source=('steamling-tools' 'steamling-tools.desktop' 'steamling-installer-gui'
         'steamling-ssh' '53-steamling-ssh.rules' '10-steamling-no-root-login.conf'
         'steamling-share' '55-steamling-share.rules' 'smb.conf' 'steamling-smb.service'
         'steamling-layer' '56-steamling-layer.rules'
-        'steamling-diag' 'steamling-diag.service' 'steamling-expand-root' 'steamling-expand-root.service')
+        'steamling-diag' 'steamling-diag.service' 'steamling-expand-root' 'steamling-expand-root.service'
+        'steamling-mtp' 'steamling-mtp.service')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 backup=('etc/ssh/sshd_config.d/10-steamling-no-root-login.conf'
         'etc/samba/smb.conf')
 
@@ -50,6 +52,11 @@ package() {
   install -Dm644 "${srcdir}/smb.conf" "${pkgdir}/etc/samba/smb.conf"
   install -Dm644 "${srcdir}/steamling-smb.service" \
     "${pkgdir}/etc/avahi/services/steamling-smb.service"
+
+  # Started on request only (Steamling Control), never enabled: see the unit.
+  install -Dm755 "${srcdir}/steamling-mtp" "${pkgdir}/usr/bin/steamling-mtp"
+  install -Dm644 "${srcdir}/steamling-mtp.service" \
+    "${pkgdir}/usr/lib/systemd/system/steamling-mtp.service"
 
   install -Dm755 "${srcdir}/steamling-layer" "${pkgdir}/usr/bin/steamling-layer"
   install -Dm644 "${srcdir}/56-steamling-layer.rules" \

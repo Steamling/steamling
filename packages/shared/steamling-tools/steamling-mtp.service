@@ -1,0 +1,26 @@
+# USB file transfer (steamling-mtp). Started on request, never enabled: while it runs the USB-C
+# port is a device, not a host.
+[Unit]
+Description=Steamling USB file transfer (MTP)
+After=local-fs.target systemd-modules-load.service
+RequiresMountsFor=/home/deck
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=deck
+Group=deck
+UMask=0022
+RuntimeDirectory=steamling-mtp
+ExecStartPre=+/usr/bin/steamling-mtp setup
+ExecStart=/usr/bin/umtprd -conf /run/steamling-mtp/umtprd.conf
+ExecStartPost=+/usr/bin/steamling-mtp bind
+ExecStop=+/usr/bin/steamling-mtp unbind
+ExecStopPost=+/usr/bin/steamling-mtp teardown
+Restart=on-failure
+RestartSec=2
+TimeoutStartSec=30
+TimeoutStopSec=30
+NoNewPrivileges=yes
+# No PrivateTmp=, ProtectSystem= or ProtectHome=: their mount namespaces would hide the
+# FunctionFS mount ExecStartPre makes from umtprd.
