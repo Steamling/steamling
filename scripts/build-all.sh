@@ -31,6 +31,9 @@ Build options
   --no-seed             compile every package instead of downloading the published ones
   --no-host-setup       stop when host packages are missing instead of installing them
   --no-status-bar       plain output, no status line at the bottom of the terminal
+  --build-base          first cut your own frozen base and upload it (scripts/own-base.fish, with
+                        the storage in config/local.conf), then build against it; without this,
+                        builds use the base that's already pinned
   -h, --help            this help
 
 Every option has an environment / make variable form, e.g. `make image SSH=1 SD_IMAGE=off`,
@@ -49,7 +52,7 @@ EOF
 }
 
 # --- options: before lib.sh, which reads DEVICE and the SD_* knobs from the environment --------
-as_root=0
+as_root=0 build_base=0
 bad() { printf 'error: %s (./build.sh --help lists the options)\n' "$1" >&2; exit 2; }
 while [ "$#" -gt 0 ]; do
   opt="$1" val="" inline=0
@@ -78,11 +81,19 @@ while [ "$#" -gt 0 ]; do
     --no-seed) export STEAMLING_SEED=off ;;
     --no-host-setup) export STEAMLING_HOST_SETUP=off ;;
     --no-status-bar) export STEAMLING_STATUS_BAR=off ;;
+    --build-base) build_base=1 ;;
     -h|--help) usage; exit 0 ;;
     *) bad "unknown option '${opt}'" ;;
   esac
   shift
 done
+
+# --build-base: own-base.fish cuts the base and runs `make image` itself (twice), and those builds
+# read the options above from the environment, so it takes over from here.
+if [ "${build_base}" = 1 ] && [ "${as_root}" = 0 ]; then
+  command -v fish >/dev/null 2>&1 || bad "--build-base runs scripts/own-base.fish, which needs fish (sudo pacman -S fish)"
+  exec fish "$(dirname "$0")/own-base.fish" --yes
+fi
 
 progress_from_env="${STEAMLING_PROGRESS_FILE:-}"   # set: this is the root half of a running build
 source "$(dirname "$0")/lib.sh"
