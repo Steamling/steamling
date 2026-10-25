@@ -13,6 +13,15 @@ desktops="$(sed -n 's/^DesktopNames=//p' "${entry}" | head -1)"
 desktops="${desktops%;}"
 echo "steamling-desktop: starting ${session}: ${exec_line}" >&2
 
+# Plasma's session Exec goes through plasma-dbus-run-session-if-needed, which starts a private bus
+# when DBUS_SESSION_BUS_ADDRESS is unset. Plasma 6 then can't reach the systemd user manager that
+# starts kwin and the shell, and the screen stays black. pam_systemd normally sets it; when it
+# didn't (the user bus wasn't up yet at session open), point at the user bus ourselves.
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus" ]; then
+  export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus"
+  echo "steamling-desktop: DBUS_SESSION_BUS_ADDRESS was unset, using the user bus" >&2
+fi
+
 # kwin starts XWayland only if /tmp/.X11-unix is sticky, and gamescope leaves it deck:0755.
 mkdir -p /tmp/.X11-unix 2>/dev/null || true
 chmod 1777 /tmp/.X11-unix 2>/dev/null || true
