@@ -168,17 +168,17 @@ EOF
 
   # One unit per call: systemctl enable is all-or-nothing, so in a batch one missing unit would
   # quietly leave every other one off too. What game mode can't run without is fatal: the session
-  # and the root expansion, the network Steam signs in over, the seat gamescope takes the display
-  # from, and the controller. The rest only warn.
+  # and the root expansion, the network Steam signs in over, and the controller. The rest only
+  # warn (seatd included: the session's seat comes from logind, through its PAM login).
   # upower + udisks2 are D-Bus-activatable, but Steam queries them once at startup and never
   # retries. fstrim: root is mounted without discard. No USB gadget on purpose.
   local u
   for u in steamling-session.service steamling-expand-root.service \
-           NetworkManager.service iwd.service seatd.service inputplumber.service; do
+           NetworkManager.service iwd.service inputplumber.service; do
     chroot "${root}" systemctl enable "${u}" >/dev/null \
       || die "could not enable ${u} in the image (is the package that ships it installed?)"
   done
-  for u in systemd-resolved.service bluetooth.service upower.service udisks2.service \
+  for u in seatd.service systemd-resolved.service bluetooth.service upower.service udisks2.service \
            fstrim.timer steamling-lavd.service; do
     chroot "${root}" systemctl enable "${u}" >/dev/null 2>&1 || warn "could not enable ${u} in the image"
   done
