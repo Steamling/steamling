@@ -232,7 +232,14 @@ parted -s "$DEVICE" name "$BOOT_NUM" "$BOOT_GPT_NAME"
 parted -s "$DEVICE" set "$BOOT_NUM" boot on
 parted -a optimal -s "$DEVICE" mkpart primary "$ROOT_FS" "${ROOT_START_MIB}MiB" "${UD_END_MIB}MiB"
 parted -s "$DEVICE" name "$ROOT_NUM" "$ROOT_GPT_NAME"
-partprobe "$DEVICE"; sleep 1
+partprobe "$DEVICE"
+# Wait for udev to make the new nodes: writing to one that isn't there yet (dd below) creates a
+# plain file of that name in /dev and carries on as if it had wiped the partition.
+command -v udevadm >/dev/null 2>&1 && udevadm settle --timeout=10 || true
+for _p in "$UD_PART" "$BOOT_PART" "$ROOT_PART"; do
+  for _i in $(seq 1 20); do [ -b "$_p" ] && break; sleep 0.5; done
+  [ -b "$_p" ] || die "$_p didn't appear after repartitioning"
+done
 
 say "Formatting boot ($BOOT_PART) + root ($ROOT_PART) ..."
 umount_quiet "$BOOT_PART"; umount_quiet "$ROOT_PART"

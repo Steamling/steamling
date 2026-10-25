@@ -14,6 +14,7 @@ DRY_RUN=0 ; ASSUME_YES=0
 
 say()  { echo -e "[\033[1;34msteamling-uninstall\033[0m] $*"; }
 die()  { echo -e "[\033[1;31mERROR\033[0m] $*" >&2; exit 1; }
+warn() { echo -e "[\033[1;33mWARN\033[0m] $*" >&2; }
 run()  { if [ "$DRY_RUN" = 1 ]; then echo "  + $*"; else "$@"; fi; }
 
 while [ $# -gt 0 ]; do
@@ -89,6 +90,12 @@ newnum="$(parted -m -s "$DEVICE" unit MiB print \
 [ -n "$newnum" ] || die "could not locate the recreated userdata partition at ${UD_START}MiB"
 parted -s "$DEVICE" name "$newnum" userdata
 partprobe "$DEVICE" 2>/dev/null || true
-wipefs -a "$(partdev "$newnum")" 2>/dev/null || true
+# The new node can take a moment to appear; wipefs on one that isn't there yet would leave the
+# old, smaller filesystem's signature for Android to mount instead of reformatting.
+command -v udevadm >/dev/null 2>&1 && udevadm settle --timeout=10 || true
+ud="$(partdev "$newnum")"
+for _i in $(seq 1 20); do [ -b "$ud" ] && break; sleep 0.5; done
+wipefs -a "$ud" >/dev/null 2>&1 \
+  || warn "couldn't clear the old filesystem signature on $ud; run 'wipefs -a $ud' before booting Android"
 say "Done: userdata restored as partition #$newnum (${UD_START}–${END}MiB). Power off and boot."
 say "The SD/Android now boots; reinstall a fresh steamling later with steamling-install-internal."
