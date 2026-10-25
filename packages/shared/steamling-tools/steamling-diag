@@ -88,6 +88,41 @@ OUT=/var/log/steamling-diag.txt
   printf '\n## dmesg DRM/msm/gpu (gamescope display acquisition)\n'
   dmesg 2>/dev/null | grep -iE 'msm|drm|adreno|gpu|atomic|a740' | tail -40
 
+  printf '\n## desktop mode: the latest attempt (this boot if it is running now, else the previous boot)\n'
+  # A black desktop usually ends in a held power button, so the evidence is in the previous
+  # boot's persistent journal; this report runs on the next boot and picks it up.
+  deck_uid=$(id -u deck 2>/dev/null || echo 1001)
+  if pgrep -u "$deck_uid" -x kwin_wayland >/dev/null 2>&1 || pgrep -u "$deck_uid" -f startplasma >/dev/null 2>&1; then B=0; else B=-1; fi
+  echo "journal boot: $B   (0 = desktop running right now)"
+  echo "picked desktop: $(cat /home/deck/.config/steamling/desktop-session 2>/dev/null || echo '(default)')"
+  echo "sessions: $(ls /usr/share/wayland-sessions 2>/dev/null | tr '\n' ' ')"
+  for L in /home/deck/steamling-session.log.prev /home/deck/steamling-session.log; do
+    [ -f "$L" ] && grep -q 'steamling-desktop' "$L" 2>/dev/null && { echo "--- $L (a desktop launch) ---"; tail -n 150 "$L"; }
+  done
+  echo "--- session supervisor, boot $B ---"
+  journalctl -b "$B" -u steamling-session --no-pager 2>/dev/null | grep -iE 'desktop|plasma|kwin|display|exiting|fast' | tail -n 30
+  echo "--- deck's journal, boot $B: kwin / plasma / display ---"
+  journalctl -b "$B" _UID="$deck_uid" --no-pager 2>/dev/null \
+    | grep -iE 'kwin|plasma|startplasma|powerdevil|kscreen|drm|egl|gbm|gles|opengl|brightness|backlight|xwayland|wayland|segfault|core dump|abort|failed|error' \
+    | grep -viE 'steamwebhelper|gamescope' | tail -n 250
+  echo "--- user units that failed, boot $B ---"
+  journalctl -b "$B" _UID="$deck_uid" --no-pager 2>/dev/null | grep -E 'Failed with result|Main process exited|code=dumped' | tail -n 30
+  echo "--- crashes ---"
+  coredumpctl --no-pager list 2>/dev/null | tail -n 15 || echo "(coredumpctl n/a)"
+  echo "--- kernel display messages, boot $B ---"
+  journalctl -k -b "$B" --no-pager 2>/dev/null | grep -iE 'msm|dpu|dsi|drm|panel|backlight|a740|adreno' | tail -n 60
+  echo "--- backlight now ---"
+  for b in /sys/class/backlight/*; do
+    [ -e "$b/brightness" ] && echo "$(basename "$b"): brightness=$(cat "$b/brightness") actual=$(cat "$b/actual_brightness" 2>/dev/null) max=$(cat "$b/max_brightness") bl_power=$(cat "$b/bl_power" 2>/dev/null)"
+  done
+  echo "--- kwin output config ---"
+  cat /home/deck/.config/kwinoutputconfig.json 2>/dev/null | head -n 60 || echo "(none)"
+  if [ "$B" = 0 ]; then
+    echo "--- DRM state while the desktop runs (are a CRTC and a plane on?) ---"
+    mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
+    head -n 120 /sys/kernel/debug/dri/0/state 2>/dev/null || echo "(no debugfs DRM state)"
+  fi
+
   printf '\n## board (dt model / panel)\n'
   echo "model: $(tr -d '\0' < /proc/device-tree/model 2>/dev/null)"
   for pn in /sys/firmware/devicetree/base/soc@0/display-subsystem@*/dsi@*/panel@0/compatible; do
