@@ -1,12 +1,12 @@
 # steamling-branding — Steamling artwork: the plymouth boot theme, the Plasma splash, and the
-# desktop wallpaper. The boot theme is the steamling (a baby dragon) peeking over the turning
-# handheld, with no wording; the Plasma splash and wallpaper carry the Steamling logo, the same
-# dragon over the steamling wordmark. The boot theme sits on a black field, as on the SteamOS
-# boot (game mode boots like a Deck); the Plasma splash and wallpaper keep the #202126 desktop
-# field. Everything is drawn from SVG at build time: no rendered PNG is committed.
+# desktop wallpaper. Every image is drawn from one steamling (steamling-figure.svg): the boot
+# theme animates him playing his handheld, with no wording; the Plasma splash and wallpaper carry
+# the Steamling logo, the same figure over the steamling wordmark. The boot theme sits on a black
+# field, as on the SteamOS boot (game mode boots like a Deck); the Plasma splash keeps the
+# #202126 desktop field. Everything is drawn from SVG at build time: no rendered PNG is committed.
 pkgname=steamling-branding
 pkgver=0.1.0
-pkgrel=2.5
+pkgrel=2.6
 pkgdesc="Steamling branding: plymouth boot theme, Plasma splash, wallpaper"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -19,10 +19,10 @@ install='steamling-branding.install'
 # time.
 makedepends=('plymouth' 'librsvg')
 source=('watermark.svg' 'throbber.svg' 'steamling.awk'
-        'steamling-logo.svg' 'wallpaper.svg'
+        'steamling-figure.svg' 'steamling-logo.svg' 'wallpaper.svg'
         'Splash.qml' 'splash-metadata.json' 'wallpaper-metadata.json'
         'steamling-branding-init' 'steamling-branding-init.service')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 _spinner=/usr/share/plymouth/themes/spinner
 
@@ -32,7 +32,7 @@ build() {
   local w="${srcdir}/render" f n
   rm -rf "${w}"
   install -d "${w}"
-  cp -L "${srcdir}"/{watermark.svg,throbber.svg,steamling-logo.svg,wallpaper.svg} "${w}/"
+  cp -L "${srcdir}"/{watermark.svg,throbber.svg,steamling-figure.svg,steamling-logo.svg,wallpaper.svg} "${w}/"
   # two-step redraws its throbber at 30 fps over a fixed 2 s loop: 60 frames, one per redraw.
   # The same script writes logo.svg, the still pose the watermark shows.
   awk -v frames=60 -v out="${w}" -f "${srcdir}/steamling.awk"
@@ -55,7 +55,7 @@ package() {
   cp -a "${_spinner}/." "${theme}/"
   mv "${theme}/spinner.plymouth" "${theme}/steamling.plymouth"
   # the still pose replaces the Arch watermark (sized in logical px, see watermark.svg), and the
-  # boot frames (the handheld turning, the steam rising) replace the spinner's throbber frames
+  # boot frames (the steam rising, the screen glowing) replace the spinner's throbber frames
   install -Dm644 "${srcdir}/render/watermark.png" "${theme}/watermark.png"
   rm -f "${theme}"/throbber-*.png
   install -m644 "${srcdir}"/render/throbber-*.png "${theme}/"
@@ -69,7 +69,7 @@ package() {
   # steamling-steam-splash reads the field and alignment back.
   sed -i -e '/^Name\[[^]]*\]=/d' \
          -e 's|^Name=.*|Name=Steamling|' \
-         -e 's|^Description=.*|Description=Steamling boot splash: a baby dragon peeks over the handheld, puffing steam, while the handheld turns over.|' \
+         -e 's|^Description=.*|Description=Steamling boot splash: the steamling plays his handheld, puffing steam.|' \
          -e "s|^ImageDir=.*|ImageDir=/usr/share/plymouth/themes/steamling|" \
          -e 's|^BackgroundStartColor=.*|BackgroundStartColor=0x000000|' \
          -e 's|^BackgroundEndColor=.*|BackgroundEndColor=0x000000|' \
