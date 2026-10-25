@@ -430,6 +430,31 @@ artifact_current() {  # <artifact file> <package dir> <package name>
   ! { [ "$3" = "${KERNEL_PKG}" ] && [ "${KERNEL_BUILD_DIR}/out/Image" -nt "$1" ]; }
 }
 
+# Which base each built package was linked against, kept beside (not in) the local repos so
+# nothing that syncs a repo picks it up: build/built-base/<repo>/<name-ver-rel-arch> holds the id.
+BUILT_BASE_DIR="${BUILD_DIR}/built-base"
+built_base_file() {  # <repo dir> <artifact file or name-ver-rel-arch>
+  local a="${2##*/}"
+  printf '%s/%s/%s' "${BUILT_BASE_DIR}" "${1##*/}" "${a%.pkg.tar.*}"
+}
+stamp_built_base() {  # <repo dir> <base id> <artifact>...
+  local repo="$1" b="$2" a
+  shift 2
+  mkdir -p "${BUILT_BASE_DIR}/${repo##*/}"
+  for a in "$@"; do printf '%s\n' "${b}" > "$(built_base_file "${repo}" "${a}")"; done
+  _progress_own "${BUILT_BASE_DIR}" "${BUILT_BASE_DIR}/${repo##*/}"
+}
+# A native package built against another base links sonames this one may not have (the protobuf
+# bump that broke scx-scheds), so it counts as stale. arch=any packages carry no binaries. With no
+# record yet, the build chroot's base is the best guess: it's what built the package.
+artifact_on_base() {  # <repo dir> <artifact file>
+  local b want="${STEAMLING_BASE_SNAPSHOT:-live}"
+  case "$2" in *-any.pkg.tar.*) return 0 ;; esac
+  b="$(cat "$(built_base_file "$1" "$2")" 2>/dev/null)" \
+    || b="$(cat "${BUILD_DIR}/pkgbuild-root-${SOC}/.base-snapshot" 2>/dev/null)" || return 0
+  [ -z "${b}" ] || [ "${b}" = "${want}" ]
+}
+
 pending_artifacts() {
   local -A stale=()
   local -a want=()
@@ -441,6 +466,7 @@ pending_artifacts() {
     [ "${STEAMLING_FORCE_REBUILD:-0}" != 1 ] \
       && f="$(artifact_file "${repo}" "${p}-${v}-${a}")" \
       && artifact_current "${f}" "${d}" "${p}" \
+      && artifact_on_base "${repo}" "${f}" \
       || stale[${d}]=1
   done
   for line in "${want[@]}"; do

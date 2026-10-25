@@ -109,10 +109,10 @@ NO_BUILD_MOUNTS = ! findmnt -rno TARGET 2>/dev/null | grep -q '^$(CURDIR)/build/
 
 clean: ## Remove build output: rootfs, image, kernel, package chroots (keeps download cache)
 	@$(NO_BUILD_MOUNTS)
-	@sudo rm -rf build/rootfs build/image build/localrepo build/kernel build/pkgbuild-root*
+	@sudo rm -rf build/rootfs build/image build/localrepo build/built-base build/kernel build/pkgbuild-root*
 	@echo "cleaned build artifacts (download cache kept)"
 
 distclean: ## Remove all build output including caches
 	@$(NO_BUILD_MOUNTS)
-	@sudo rm -rf build/rootfs build/image build/localrepo build/kernel build/pkgbuild-root* build/cache
+	@sudo rm -rf build/rootfs build/image build/localrepo build/built-base build/kernel build/pkgbuild-root* build/cache
 	@echo "removed all build output"

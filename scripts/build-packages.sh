@@ -103,6 +103,19 @@ setup_chroot() {
     fi
     if [ "${have_base}" != "${want_base}" ]; then
       log "build chroot base is '${have_base:-unknown}', want '${want_base}' — recreating"
+      # What this chroot built so far was built against its base: record that before the stamp
+      # goes, so those packages rebuild against the new one instead of being reused.
+      if [ -n "${have_base}" ]; then
+        local r f fs
+        for r in "${LOCALREPO}" "${LOCALREPO_SHARED}"; do
+          fs=()
+          for f in "${r}"/*.pkg.tar.*; do
+            case "${f}" in *.sig|*.part) continue ;; esac
+            [ -f "${f}" ] && [ ! -e "$(built_base_file "${r}" "${f}")" ] && fs+=("${f}")
+          done
+          [ "${#fs[@]}" -eq 0 ] || stamp_built_base "${r}" "${have_base}" "${fs[@]}"
+        done
+      fi
       wipe_chroot
     fi
   fi
@@ -229,19 +242,14 @@ build_one() {
   # STEAMLING_FORCE_REBUILD=1 rebuilds everything. The kernel package also rebuilds whenever
   # `make kernel` produced a newer Image than the packaged one.
   if [ "${force}" -eq 0 ]; then
-    local uptodate=1 nlist=0 p f s
+    local uptodate=1 nlist=0 p f
     while IFS= read -r p; do
       nlist=$((nlist+1))
       # Matched without the extension: seeded and older builds are .xz, new ones .zst.
       f="$(artifact_file "${repo_dir}" "$(basename "${p%.pkg.tar.*}")")" || f=""
-      if [ -z "${f}" ] || [ -n "$(find "${pkgdir}" -newer "${f}" -print -quit)" ]; then
-        uptodate=0; break
-      fi
-      for s in $(pkg_extra_srcs "${name}"); do
-        [ "${s}" -nt "${f}" ] && { uptodate=0; break 2; }
-      done
-      if [ "${name}" = "${KERNEL_PKG}" ] && [ -f "${KERNEL_BUILD_DIR}/out/Image" ] &&
-         [ "${KERNEL_BUILD_DIR}/out/Image" -nt "${f}" ]; then
+      [ -n "${f}" ] && artifact_current "${f}" "${pkgdir}" "${name}" || { uptodate=0; break; }
+      if ! artifact_on_base "${repo_dir}" "${f}"; then
+        log "${name}: built against base $(cat "$(built_base_file "${repo_dir}" "${f}")" 2>/dev/null || echo '?'), this build uses ${STEAMLING_BASE_SNAPSHOT:-live}; rebuilding"
         uptodate=0; break
       fi
     done < <(chroot "${BROOT}" runuser -u builder -- \
@@ -339,6 +347,7 @@ build_one() {
     rm -f "${repo_dir}/${base}"-[0-9]*.pkg.tar.* "${repo_dir}/${base}"-*:*.pkg.tar.* 2>/dev/null || true
   done
   cp "${built_pkgs[@]}" "${repo_dir}/"
+  stamp_built_base "${repo_dir}" "${STEAMLING_BASE_SNAPSHOT:-live}" "${built_pkgs[@]}"
   # Register exactly the artifacts just built (NOT *.pkg.tar.* — re-adding the whole repo
   # for every package spammed 'entry already existed' x N^2). LC_ALL=C: the build chroot
   # has no generated locales, and bsdtar warns on every tar op otherwise.
