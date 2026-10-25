@@ -351,7 +351,7 @@ assemble_bootimg() {
   mkdir -p "${IMAGE_DIR}"
   log "assembling qcom-abl boot image -> ${IMAGE_DIR}/KERNEL"
   # The device rebuilds KERNEL with the same tool after a kernel update (steamling-build-bootimg).
-  "${STEAMLING_ROOT}/packages/shared/steamling-bsp-common/steamling-mkkernel" \
+  bash "${STEAMLING_ROOT}/packages/shared/steamling-bsp-common/steamling-mkkernel" \
     "${KBUILD}/out/Image" "${KBUILD}/out/dtbs" "${KERNEL_CMDLINE}" "${MKBOOTIMG}" \
     "${IMAGE_DIR}/KERNEL" "${1:-}" || die "mkbootimg failed"
   ok "boot image ready -> ${IMAGE_DIR}/KERNEL"
