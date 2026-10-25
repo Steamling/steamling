@@ -97,7 +97,7 @@ if [ "${STEAMLING_PANEL_ROTATE_SHADER:-0}" = "1" ]; then
 fi
 
 # HDR: these OLEDs expose no EDID, so gamescope synthesizes an SDR one unless a panel profile
-# matches the board (the BSP's /usr/share/gamescope/scripts/10-steamling/displays, keyed on
+# matches the board (bsp-common's /usr/share/gamescope/scripts/10-steamling/displays, keyed on
 # GAMESCOPE_INTERNAL_DEVICE_ID = STEAMLING_DEVICE). A board with a profile also sets
 # STEAMLING_PANEL_HDR_NITS, the panel's peak: inverse tone mapping of SDR content targets it,
 # clients are offered the formats gamescope can sample as well as those a plane scans out,

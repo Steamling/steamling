@@ -2,13 +2,13 @@
 # RP6 standard and TOP-DPAD models share rp6.conf) and the input maps are model-gated.
 pkgname=steamling-bsp-sm8550
 pkgver=0.2.0
-pkgrel=22
+pkgrel=23
 pkgdesc="steamling board support: SM8550 family (Retroid Pocket 6, Nova; AYN Odin 2 / Mini / Portal, Thor; AYANEO Pocket ACE / DMG / DS / EVO / S) - board dispatch, input maps, suspend config, audio UCM"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
 # The firmware reaches the fleet through this edge: -Syu never installs a new name alone.
-depends=('steamling-bsp-common>=0.1.0-26.9' 'steamling-firmware-sm8550>=0.1.0-4')  # 26.9: owns the USB and touch rules; 4: every board's firmware set
+depends=('steamling-bsp-common>=0.1.0-26.17' 'steamling-firmware-sm8550>=0.1.0-4')  # 26.17: owns the USB and touch rules and the panel profiles; 4: every board's firmware set
 # One BSP per device (wrong-device guard); replaces= migrates the retired per-device BSPs.
 provides=('steamling-bsp')
 conflicts=('steamling-bsp')
