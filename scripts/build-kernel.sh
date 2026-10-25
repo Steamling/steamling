@@ -239,9 +239,11 @@ configure() {
     --enable HZ_1000 \
     --set-val HZ 1000
 
-  # Per-SoC deltas and assertions live beside kernel.conf, where make sync leaves them alone.
-  local delta="${KERNEL_DIR}/config-delta" assert="${KERNEL_DIR}/config-assert"
-  if [ -f "${delta}" ]; then
+  # Deltas and assertions every SoC shares (kernel/common), then the tree's own, which live beside
+  # its kernel.conf where make sync leaves them alone.
+  local delta assert f
+  for delta in "${STEAMLING_ROOT}/kernel/common/config-delta" "${KERNEL_DIR}/config-delta"; do
+    [ -f "${delta}" ] || continue
     local -a dargs=() words
     local line
     while IFS= read -r line; do
@@ -249,7 +251,7 @@ configure() {
       [ "${#words[@]}" -eq 0 ] || dargs+=("${words[@]}")
     done < "${delta}"
     [ "${#dargs[@]}" -eq 0 ] || "${KSRC}/scripts/config" --file "${KSRC}/.config" "${dargs[@]}"
-  fi
+  done
 
   # olddefconfig auto-accepts defaults for any new symbols (no prompts, no stdin).
   # NB: do NOT pipe `yes` into it — `yes` would take SIGPIPE and, under pipefail,
@@ -273,12 +275,13 @@ configure() {
   grep -q "^CONFIG_BTRFS_FS=y" "${KSRC}/.config" \
     || die "kernel config: CONFIG_BTRFS_FS did not resolve to =y (btrfs root would be unmountable — no initramfs)"
 
-  if [ -f "${assert}" ]; then
+  for assert in "${STEAMLING_ROOT}/kernel/common/config-assert" "${KERNEL_DIR}/config-assert"; do
+    [ -f "${assert}" ] || continue
     for sym in $(sed 's/#.*//' "${assert}"); do
       grep -q "^CONFIG_${sym}=y" "${KSRC}/.config" \
-        || die "kernel config: CONFIG_${sym} did not resolve to =y (listed in kernel/${SOC}/config-assert)"
+        || die "kernel config: CONFIG_${sym} did not resolve to =y (listed in ${assert#"${STEAMLING_ROOT}/"})"
     done
-  fi
+  done
 }
 
 # A tree several SoCs share (KERNEL_TREE) carries every SoC's boards; kernel.conf's

@@ -1,0 +1,10 @@
+# Symbols every board needs built in: there is no initramfs, so the display and storage paths
+# (the SD card, internal UFS) cannot wait for modules. build-kernel.sh fails the build if one is
+# not =y. A tree's own config-assert adds what only its boards need.
+DRM_MSM
+DRM_MSM_MDSS
+DRM_MSM_DPU
+DRM_MSM_DSI
+SCSI_UFS_QCOM
+PHY_QCOM_QMP_UFS
+MMC_SDHCI_MSM

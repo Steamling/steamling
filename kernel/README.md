@@ -16,6 +16,8 @@ that way: a list or a version copied into this file goes stale at the next sync.
 ```
 kernel/
   common/patches/        ours, SoC-neutral, applied to every SoC after its own stack
+  common/config-delta    scripts/config arguments every SoC takes, before its own config-delta
+  common/config-assert   symbols every SoC must build in (=y), on top of its own config-assert
   <soc>/                 one per SoC family (devices/README.md lists them)
     kernel.conf          source pin (version + sha256), package release, ROCKNIX dirs to sync from
     patches/10-mainline/ ROCKNIX generic backports              <- make sync
@@ -53,8 +55,8 @@ picks it by the board's `STEAMLING_BOOT_STYLE`, so a new SoC adds no boot script
 - **ROCKNIX's**: stays where `make sync` puts it; our edits to it are listed in `sync-keep`.
 - **A common patch that doesn't apply or isn't validated on one SoC**: one line in that SoC's
   `common-skip` (file name + `# why`). `make check` fails on a name that no longer exists.
-- **Config**: never edit `config/`; add a `scripts/config` delta (in build-kernel.sh for every
-  SoC, in `config-delta` for one).
+- **Config**: never edit `config/`; add a `scripts/config` delta (in `kernel/common/config-delta`
+  for every SoC, in that tree's `config-delta` for one).
 
 ROCKNIX ships some 1000+ files of its own, so check a new number against the synced dirs.
 
