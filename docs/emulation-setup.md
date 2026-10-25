@@ -34,6 +34,13 @@ download; everything is ready when it finishes, with no restart or logout needed
 The same entry removes the layer again. Your ROMs, BIOS files, saves and emulator settings stay
 where they are, so installing it again later picks up exactly where you left off.
 
+Two other ways in, if you'd rather not go through desktop mode:
+
+- **Bake it into the image** when you build: `./build.sh --emulation`. The handheld then has it
+  from the first boot.
+- **Over SSH**: `sudo steamling-layer install emulation` (and `remove emulation` to take it out
+  again). It's the same thing the Steamling Tools entry runs.
+
 ## Where your files go
 
 Everything lives under `~/Emulation` (created for you on first login):
