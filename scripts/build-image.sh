@@ -296,9 +296,10 @@ bootstrap_steam_seed() {
       umount "${root}/dev/shm" 2>/dev/null || true
       die "steam bake incomplete (no steamui.so / .installed) — the seed is broken. Re-run (STEAMLING_REBOOTSTRAP_STEAM=1 forces a clean rebake)."
     fi
-    # strip per-session cruft AND registry.vdf so the seed shows the OOBE on first boot
-    # — the user configures Wi-Fi there; steamling-steamos-shim's steamos-update keeps the OOBE's
-    # required-update step from dead-ending. Then tar the HOME-agnostic tree.
+    # strip per-session cruft AND registry.vdf (where Steam records setup as done) so the first
+    # boot gets Steam's first-run setup, which build-sd-image.sh's /etc/steamos-oobe-image turns on;
+    # steamling-steamos-shim's steamos-update keeps its required-update step from dead-ending.
+    # Then tar the HOME-agnostic tree.
     chroot "${root}" bash -c "set -e; cd '${home}'
       rm -rf .local/share/Steam/logs .local/share/Steam/appcache/httpcache \
              .local/share/Steam/appcache/cefdata .local/share/Steam/config/htmlcache

@@ -84,6 +84,11 @@ EOF
     rsync -a --chown=root:root --exclude=__pycache__ "${STEAMLING_ROOT}/overlay/" "${root}/"
   fi
 
+  # Steam shows its first-run setup (language, time zone, Wi-Fi) only while this file exists;
+  # without it a fresh image opens on the sign-in screen with no network. steamling-oobe-marker
+  # removes it once setup is done.
+  : > "${root}/etc/steamos-oobe-image"
+
   # PipeWire refuses root and Proton's bwrap wants a normal user. uid 1001 stays: installed
   # devices carry it and the SD idmap keys on it.
   log "creating non-root 'deck' session user (audio + Proton need a normal user)"
