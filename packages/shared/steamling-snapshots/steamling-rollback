@@ -81,7 +81,7 @@ fi
 list_snaps() {
   printf '%-6s %-17s %-4s %-8s %s\n' "ID" "CREATED" "OK" "KERNEL" "TARGETS"
   local info
-  for info in "${SNAPS}"/[0-9][0-9][0-9][0-9]/info.json; do
+  for info in "${SNAPS}"/[0-9][0-9][0-9][0-9]*/info.json; do
     [ -f "${info}" ] || continue
     while IFS=$'\t' read -r id created ok kern targets; do
       printf '%-6s %-17s %-4s %-8s %s\n' "${id}" "$(date -d "${created}" +"%d-%m-%Y %H:%M" 2>/dev/null || echo "${created}")" "${ok}" "${kern}" "${targets}"
@@ -98,7 +98,7 @@ case "${action}" in
 esac
 
 if [ -z "${target}" ]; then
-  target="$(ls "${SNAPS}" | grep -E '^[0-9]{4}$' | sort -n | tail -1 || true)"
+  target="$(ls "${SNAPS}" | grep -E '^[0-9]{4,}$' | sort -n | tail -1 || true)"
   [ -n "${target}" ] || die "no snapshots exist yet (they are created before each update)"
 fi
 src="${SNAPS}/${target}/snapshot"

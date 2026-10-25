@@ -22,7 +22,7 @@ snap_free_mib() { df --output=avail -m "${SNAP_DIR}" 2>/dev/null | tail -1 | tr 
 
 snap_next_id() {  # zero-padded, 0001 upwards
   local last
-  last="$(ls "${SNAP_DIR}" 2>/dev/null | grep -E '^[0-9]{4}$' | sort -n | tail -1)"
+  last="$(ls "${SNAP_DIR}" 2>/dev/null | grep -E '^[0-9]{4,}$' | sort -n | tail -1)"
   printf '%04d' $(( 10#${last:-0} + 1 ))
 }
 

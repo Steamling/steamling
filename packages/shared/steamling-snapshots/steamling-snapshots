@@ -16,7 +16,7 @@ cmd_list() {
   steamling_snap_supported || die "snapshots unsupported here (root is not btrfs — pre-snapshot install; reflash to migrate)"
   printf '%-6s %-17s %-4s %-8s %s\n' "ID" "CREATED" "OK" "KERNEL" "TARGETS"
   local info id created ok kern targets
-  for info in "${SNAP_DIR}"/[0-9][0-9][0-9][0-9]/info.json; do
+  for info in "${SNAP_DIR}"/[0-9][0-9][0-9][0-9]*/info.json; do
     [ -f "${info}" ] || continue
     while IFS=$'\t' read -r id created ok kern targets; do
       printf '%-6s %-17s %-4s %-8s %s\n' "${id}" "$(snap_fmt_date "${created}")" "${ok}" "${kern}" "${targets}"
@@ -43,7 +43,7 @@ cmd_status() {
   fi
   [ -f /run/steamling/reboot-required ] && echo "reboot required : yes (kernel updated)"
   echo "free space      : $(df -h --output=avail / | tail -1 | tr -d ' ') ($(snap_free_mib) MiB; snapshot floor ${STEAMLING_SNAPSHOT_MIN_FREE_MIB} MiB, UI warning ${STEAMLING_SNAPSHOT_WARN_FREE_MIB} MiB)"
-  echo "snapshots       : $(ls "${SNAP_DIR}" 2>/dev/null | grep -Ec '^[0-9]{4}$' || true) kept (retention ${STEAMLING_SNAPSHOT_KEEP})"
+  echo "snapshots       : $(ls "${SNAP_DIR}" 2>/dev/null | grep -Ec '^[0-9]{4,}$' || true) kept (retention ${STEAMLING_SNAPSHOT_KEEP})"
 }
 
 cmd_prune() {
@@ -53,7 +53,7 @@ cmd_prune() {
   [ "$(id -u)" = 0 ] || die "prune needs root"
 
   local ids extra id
-  ids="$(ls "${SNAP_DIR}" 2>/dev/null | grep -E '^[0-9]{4}$' | sort -n || true)"
+  ids="$(ls "${SNAP_DIR}" 2>/dev/null | grep -E '^[0-9]{4,}$' | sort -n || true)"
   extra=$(( $(wc -l <<<"${ids}") - STEAMLING_SNAPSHOT_KEEP ))
   if [ -n "${ids}" ] && [ "${extra}" -gt 0 ]; then
     for id in $(head -n "${extra}" <<<"${ids}"); do
