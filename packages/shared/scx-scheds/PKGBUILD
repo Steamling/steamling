@@ -15,9 +15,11 @@ options=('!lto' '!debug')
 source=("scx::git+https://github.com/sched-ext/scx.git#commit=${_commit}"
         "https://static.rust-lang.org/dist/rust-${_rustver}-aarch64-unknown-linux-gnu.tar.xz"
         '0006-scx_lavd-cap-the-load-balancing-band-by-the-other-domains-share.patch'
-        '0007-scx_lavd-use-setters-for-the-remaining-slice-and-dsq_vtime-writes.patch')
+        '0007-scx_lavd-use-setters-for-the-remaining-slice-and-dsq_vtime-writes.patch'
+        '0008-libbpf-add-128-bit-integer-types-to-linux-types.h.patch')
 sha256sums=('SKIP'
             '5a30ce742be0835d9b23fc862db5cbbbc71464e1c9b1fca22917e10e4ba32a92'
+            'SKIP'
             'SKIP'
             'SKIP')
 
@@ -48,9 +50,17 @@ prepare() {
   # Patch numbers are never reused; dropped ones are listed in PATCHES.md.
   local p
   for p in "${source[@]}"; do
-    case "${p}" in *.patch) patch -p1 < "${srcdir}/${p}" ;; esac
+    case "${p}" in 0008-*) ;; *.patch) patch -p1 < "${srcdir}/${p}" ;; esac   # 0008: below
   done
   cargo fetch --locked --target aarch64-unknown-linux-gnu
+  # 0008 goes into the libbpf that libbpf-sys vendors, not scx: Linux 7.3's arm64 headers use
+  # __u128, which libbpf 1.7's own linux/types.h doesn't define. The crate cache outlives a
+  # build, so only patch a copy that hasn't been patched yet.
+  local lb
+  for lb in "${CARGO_HOME}"/registry/src/*/libbpf-sys-*/libbpf; do
+    grep -q '__u128' "${lb}/include/linux/types.h" \
+      || patch -d "${lb}" -p1 < "${srcdir}/0008-libbpf-add-128-bit-integer-types-to-linux-types.h.patch"
+  done
 }
 
 build() {
