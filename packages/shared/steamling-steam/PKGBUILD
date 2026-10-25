@@ -2,7 +2,7 @@
 # gamescope launcher, and the ARM-Proton compat-tool plumbing.
 pkgname=steamling-steam
 pkgver=0.1.0
-pkgrel=69.6
+pkgrel=69.7
 pkgdesc="Native ARM64 Steam Big Picture (gamescope) for the RP6 — installer + launcher"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -20,14 +20,14 @@ depends=('steamling-steam-full' 'steamling-bsp-common>=0.1.0-24'
          'steamling-steamos-shim' 'xorg-server-xvfb' 'ffmpeg' 'xorg-xprop' 'python')
 install=steamling-steam.install
 source=('steamling-steam-install' 'steamling-steam' 'steamling-steam-splash' 'steamling-steam-sync' 'steam' 'steam.desktop'
-        'steam-256.png' 'steam-512.png' 'registry.vdf'
+        'steam-256.png' 'steam-512.png'
         'steamling-proton-prep' 'steamling-proton-prep.service'
         'steamling-game-launch' 'steamling-steam-env' 'steamling-proton-wrapper' 'fex-profiles.json'
         'steamling-guestos-mount' 'steamling-guestos.service' 'graphics_provider.json'
         'steamling-powerbuttond'
         'steamling-fex-binfmt' 'steamling-fex-binfmt.service' '90-steamling-fex-binfmt.hook')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   install -Dm755 "${srcdir}/steamling-steam-install" "${pkgdir}/usr/bin/steamling-steam-install"
@@ -41,9 +41,6 @@ package() {
   # icon that steam.desktop references.
   install -Dm644 "${srcdir}/steam-256.png"         "${pkgdir}/usr/share/icons/hicolor/256x256/apps/steam.png"
   install -Dm644 "${srcdir}/steam-512.png"         "${pkgdir}/usr/share/icons/hicolor/512x512/apps/steam.png"
-  # Pre-completed OOBE registry seed: the Deck OOBE's "required update" step tries to update
-  # SteamOS, which we are not, and dead-ends with "Updater apply error: 2".
-  install -Dm644 "${srcdir}/registry.vdf"          "${pkgdir}/usr/share/steamling-steam/registry.vdf"
   install -Dm755 "${srcdir}/steamling-proton-prep"           "${pkgdir}/usr/bin/steamling-proton-prep"
   install -Dm644 "${srcdir}/steamling-proton-prep.service"   "${pkgdir}/usr/lib/systemd/user/steamling-proton-prep.service"
   # Named bare in every game's launch options (Steamling Control), so it must stay on PATH under
