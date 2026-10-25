@@ -11,9 +11,9 @@ tapping the icons:
 | Tab | What it does |
 |---|---|
 | 🎮 Games | Fan curve, CPU scheduler and game tweaks, globally or per game |
-| 📚 Library | Add non-Steam games, share your files over the network, format a microSD card for Steam |
+| 📚 Library | Add non-Steam games, share your files over the network, turn SSH on or off, format a microSD card for Steam |
 | 🕹️ Controller | Stick and trigger calibration, stick lights, display refresh calibration |
-| 🔄 Updater | Check for and install system updates, roll back the last update |
+| 🔄 Updater | Check for and install system updates, roll back the last update, see your versions, restart game mode |
 
 Settings save automatically as you change them.
 
@@ -95,6 +95,14 @@ The same toggle is in **Steamling Tools** on the desktop side.
 > [copying files over the network](emulation-setup.md#copying-files-over-the-network) for how to
 > connect.
 
+### Remote access
+
+**Allow SSH logins** lets you log in from another computer's terminal, and shows the exact
+`ssh deck@...` line to type once it's on. It's the same switch as in **Steamling Tools**.
+
+> Every Steamling image ships with the same default password. Change yours first: open Konsole
+> in desktop mode and run `passwd`.
+
 ### SD card
 
 Formats a microSD card so Steam can use it as game storage.
@@ -148,3 +156,11 @@ Every update takes a snapshot first. If one breaks something, press **Roll Back 
 confirm, and **Reboot Now**: the system comes back as it was before the update, and your games,
 saves and settings are untouched. To go back further, or when game mode itself is broken, see
 [snapshots and rollback](snapshots.md).
+
+### About
+
+The bottom of the tab shows your Steamling OS version, the kernel, and whether the bootloader
+on internal storage is the OpenABL this build ships. Handy when you're filing a bug.
+
+**Restart Game Mode** closes Steam and brings game mode back up, for the times Steam or the
+screen gets stuck. Anything unsaved in a running game is lost.

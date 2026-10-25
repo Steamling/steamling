@@ -3,6 +3,7 @@ import asyncio
 from steamling_control import calibration, panel
 from steamling_control.config import build_config
 from steamling_control.configio import apply_config, config_dir, export_config, read_config
+from steamling_control.device import device_info, restart_game_mode, set_ssh, ssh_status
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
 from steamling_control.sdcard import detect_sdcard, format_sdcard
@@ -53,6 +54,18 @@ class Plugin:
 
     async def install_samba(self):
         return await asyncio.to_thread(install_samba)
+
+    async def device_info(self):
+        return await asyncio.to_thread(device_info)
+
+    async def ssh_status(self):
+        return await asyncio.to_thread(ssh_status)
+
+    async def set_ssh(self, on):
+        return await asyncio.to_thread(set_ssh, bool(on))
+
+    async def restart_game_mode(self):
+        return await asyncio.to_thread(restart_game_mode)
 
     # The setters answer with only the fields they change, which is all the frontend reads back:
     # get_config re-reads the whole Steam library, and this Python runs emulated under FEX.

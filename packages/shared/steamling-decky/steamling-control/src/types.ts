@@ -146,6 +146,19 @@ export type ShareStatus = {
   active: boolean;
 };
 
+export type SshStatus = {
+  available: boolean;
+  on: boolean;
+  addresses: string[];
+};
+
+export type DeviceInfo = {
+  osVersion: string;
+  kernel: string;
+  /** "" when there is nothing useful to say (no kit installed). */
+  bootloader: string;
+};
+
 export type PanelStatus = {
   available: boolean;
   saved: boolean;

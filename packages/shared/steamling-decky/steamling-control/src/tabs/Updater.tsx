@@ -1,5 +1,6 @@
 import { ButtonItem, ConfirmModal, Field, PanelSection, PanelSectionRow, showModal } from "@decky/ui";
 import { useEffect, useRef, useState } from "react";
+import { About } from "../components/About";
 import { checkUpdates, rebootSystem, snapshotStatus, startRollback, startUpdate, updateStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { SnapshotStatus, UpdateInfo, UpdateStatus } from "../types";
@@ -214,6 +215,7 @@ export function Updater() {
           />
         </PanelSection>
       ) : null}
+      <About />
     </>
   );
 }

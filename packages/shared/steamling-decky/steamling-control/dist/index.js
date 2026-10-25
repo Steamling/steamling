@@ -43,6 +43,10 @@ const formatSdcard = (label) => call("format_sdcard", label);
 const shareStatus = () => call("share_status");
 const setShare = (on) => call("set_share", on);
 const installSamba = () => call("install_samba");
+const deviceInfo = () => call("device_info");
+const sshStatus = () => call("ssh_status");
+const setSsh = (on) => call("set_ssh", on);
+const restartGameMode = () => call("restart_game_mode");
 const checkUpdates = () => call("check_updates");
 const startUpdate = () => call("start_update");
 const updateStatus = () => call("update_status");
@@ -1203,6 +1207,88 @@ function FileSharing() {
                     } }) }))] }));
 }
 
+// Same warning the Steamling Tools menu shows: every image ships the same default password.
+function SshConfirmModal({ onConfirm, closeModal }) {
+    const [running, setRunning] = SP_REACT.useState(false);
+    const runningRef = SP_REACT.useRef(false);
+    runningRef.current = running;
+    const start = async () => {
+        if (runningRef.current)
+            return;
+        setRunning(true);
+        await onConfirm();
+        closeModal?.();
+    };
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Allow SSH Logins", strDescription: running
+            ? "Starting…"
+            : "Anyone on the same network can then log in with an account password, and Steamling ships a well-known default one. If you have not changed it yet, do that first: open Konsole in desktop mode and run passwd. It stays on, across reboots, until you turn it off here.", strOKButtonText: running ? "Starting…" : "Turn On SSH", bDestructiveWarning: true, bOKDisabled: running, bCancelDisabled: running, bDisableBackgroundDismiss: true, onCancel: () => {
+            if (!runningRef.current)
+                closeModal?.();
+        }, onOK: start }));
+}
+function RemoteAccess() {
+    const [ssh, setSshState] = SP_REACT.useState(null);
+    const [busy, setBusy] = SP_REACT.useState(false);
+    const [status, setStatus] = SP_REACT.useState("");
+    const busyRef = SP_REACT.useRef(false);
+    busyRef.current = busy;
+    const visible = useQamVisible();
+    // Read once per open: nothing else flips it while the menu is up, and each read is a transient unit.
+    SP_REACT.useEffect(() => {
+        if (!visible)
+            return;
+        let cancelled = false;
+        sshStatus()
+            .then((next) => {
+            if (!cancelled && !busyRef.current)
+                setSshState(next);
+        })
+            .catch((error) => {
+            if (!cancelled)
+                setStatus(String(error));
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [visible]);
+    const run = async (on) => {
+        if (busyRef.current)
+            return;
+        setBusy(true);
+        setStatus("");
+        try {
+            setSshState(await setSsh(on));
+        }
+        catch (error) {
+            setStatus(String(error));
+        }
+        finally {
+            setBusy(false);
+        }
+    };
+    if (ssh && !ssh.available)
+        return null;
+    const summary = () => {
+        if (status)
+            return status;
+        if (!ssh)
+            return "Checking…";
+        if (!ssh.on)
+            return "Off - the device does not accept SSH logins";
+        if (ssh.addresses.length === 0)
+            return "On - connect to Wi-Fi to reach it";
+        return `On - ${ssh.addresses.map((a) => `ssh deck@${a}`).join(" or ")}`;
+    };
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: "REMOTE ACCESS", children: [SP_JSX.jsx(DFL.Field, { label: "SSH", description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Allow SSH logins", description: "Log in from another computer's terminal", checked: !!ssh?.on, disabled: busy || !ssh, onChange: (on) => {
+                        if (busyRef.current)
+                            return;
+                        if (on)
+                            DFL.showModal(SP_JSX.jsx(SshConfirmModal, { onConfirm: () => run(true) }));
+                        else
+                            run(false);
+                    } }) })] }));
+}
+
 function cardSummary(card) {
     if (!card)
         return "Checking…";
@@ -1295,7 +1381,33 @@ function SdCard() {
 
 // SD card last: the only destructive action, kept away from the casual toggles
 function Library() {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(AddGameSection, {}), SP_JSX.jsx(FileSharing, {}), SP_JSX.jsx(SdCard, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(AddGameSection, {}), SP_JSX.jsx(FileSharing, {}), SP_JSX.jsx(RemoteAccess, {}), SP_JSX.jsx(SdCard, {})] }));
+}
+
+function About() {
+    const [info, setInfo] = SP_REACT.useState(null);
+    const [error, setError] = SP_REACT.useState("");
+    const visible = useQamVisible();
+    // Once per open: the bootloader check reads both ABL slots, so it is not polled.
+    SP_REACT.useEffect(() => {
+        if (!visible)
+            return;
+        let cancelled = false;
+        deviceInfo()
+            .then((next) => {
+            if (!cancelled)
+                setInfo(next);
+        })
+            .catch((err) => {
+            if (!cancelled)
+                setError(String(err));
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [visible]);
+    const confirmRestart = () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Restart Game Mode", strDescription: "Closes Steam and any running game, then brings game mode back up. Unsaved progress in a running game is lost. Useful when Steam or the screen gets stuck.", strOKButtonText: "Restart", onOK: () => restartGameMode().catch((err) => setError(String(err))) }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: "ABOUT", children: [SP_JSX.jsx(DFL.Field, { label: "Steamling OS", description: info?.osVersion ?? "…" }), SP_JSX.jsx(DFL.Field, { label: "Kernel", description: info?.kernel ?? "…" }), info?.bootloader ? SP_JSX.jsx(DFL.Field, { label: "Bootloader", description: info.bootloader }) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: confirmRestart, children: "Restart Game Mode" }) }), error ? SP_JSX.jsx(DFL.Field, { label: "Error", description: error }) : null] }));
 }
 
 const SHOWN_UPDATES = 8;
@@ -1421,7 +1533,7 @@ function Updater() {
         : updates.length === 0
             ? "System is up to date"
             : `${updates.length} update${updates.length === 1 ? "" : "s"} available`;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "SYSTEM UPDATES", children: [!running ? SP_JSX.jsx(DFL.Field, { label: "Status", description: summary }) : null, !running && updates && updates.length > 0 ? (SP_JSX.jsxs("div", { className: "steamling-note", children: [updates.slice(0, SHOWN_UPDATES).map((update) => (SP_JSX.jsx("div", { children: `${update.name} ${update.current} → ${update.latest}` }, update.name))), updates.length > SHOWN_UPDATES ? SP_JSX.jsx("div", { children: `… and ${updates.length - SHOWN_UPDATES} more` }) : null] })) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: check, children: checking ? "Checking…" : "Check for Updates" }) }), !running && updates && updates.length > 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmStart, children: "Install Updates" }) })) : null, running ? SP_JSX.jsx(DFL.Field, { label: "Updating\u2026", description: "Safe to close this menu. Do not power off." }) : null, finished ? (SP_JSX.jsx(DFL.Field, { label: status.exitCode === 0 ? "Update complete" : `Update failed (code ${status.exitCode})`, description: status.exitCode === 0 ? "Restart to finish applying updates." : "See the log below." })) : null, finished && status.exitCode === 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Restart Now" }) })) : null, (running || (finished && status.exitCode !== 0)) && status?.log ? (SP_JSX.jsx("div", { className: "steamling-note steamling-log", children: status.log })) : null, error ? SP_JSX.jsx(DFL.Field, { label: "Error", description: error }) : null] }), snap?.supported ? (SP_JSX.jsxs(DFL.PanelSection, { title: "ROLLBACK", children: [snap.rolledBack && !rollbackDone ? (SP_JSX.jsx(DFL.Field, { label: "System was rolled back", description: `Restored from snapshot ${snap.rolledBack.fromSnapshot} (${fmtDate(snap.rolledBack.ts)}).${onLastSnapshot ? " Rollback will be available again after the next update." : ""}` })) : null, rollbackDone ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Rolled back", description: "Reboot to finish switching to the restored system." }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Reboot Now" }) })] })) : onLastSnapshot ? null : lastSnapshot ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Last snapshot", description: `${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}` }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmRollback, children: rollingBack ? "Rolling back…" : "Roll Back Last Update" }) })] })) : (SP_JSX.jsx(DFL.Field, { label: "No snapshots yet", description: "A snapshot is taken automatically before every update." })), rollbackError ? SP_JSX.jsx(DFL.Field, { label: "Rollback error", description: rollbackError }) : null, SP_JSX.jsx(DFL.Field, { label: "Storage", description: `${gib(snap.freeBytes)} GB free${snap.lowSpace ? " — LOW: snapshots may be skipped" : ""}` })] })) : null] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "SYSTEM UPDATES", children: [!running ? SP_JSX.jsx(DFL.Field, { label: "Status", description: summary }) : null, !running && updates && updates.length > 0 ? (SP_JSX.jsxs("div", { className: "steamling-note", children: [updates.slice(0, SHOWN_UPDATES).map((update) => (SP_JSX.jsx("div", { children: `${update.name} ${update.current} → ${update.latest}` }, update.name))), updates.length > SHOWN_UPDATES ? SP_JSX.jsx("div", { children: `… and ${updates.length - SHOWN_UPDATES} more` }) : null] })) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: check, children: checking ? "Checking…" : "Check for Updates" }) }), !running && updates && updates.length > 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmStart, children: "Install Updates" }) })) : null, running ? SP_JSX.jsx(DFL.Field, { label: "Updating\u2026", description: "Safe to close this menu. Do not power off." }) : null, finished ? (SP_JSX.jsx(DFL.Field, { label: status.exitCode === 0 ? "Update complete" : `Update failed (code ${status.exitCode})`, description: status.exitCode === 0 ? "Restart to finish applying updates." : "See the log below." })) : null, finished && status.exitCode === 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Restart Now" }) })) : null, (running || (finished && status.exitCode !== 0)) && status?.log ? (SP_JSX.jsx("div", { className: "steamling-note steamling-log", children: status.log })) : null, error ? SP_JSX.jsx(DFL.Field, { label: "Error", description: error }) : null] }), snap?.supported ? (SP_JSX.jsxs(DFL.PanelSection, { title: "ROLLBACK", children: [snap.rolledBack && !rollbackDone ? (SP_JSX.jsx(DFL.Field, { label: "System was rolled back", description: `Restored from snapshot ${snap.rolledBack.fromSnapshot} (${fmtDate(snap.rolledBack.ts)}).${onLastSnapshot ? " Rollback will be available again after the next update." : ""}` })) : null, rollbackDone ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Rolled back", description: "Reboot to finish switching to the restored system." }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Reboot Now" }) })] })) : onLastSnapshot ? null : lastSnapshot ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Last snapshot", description: `${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}` }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmRollback, children: rollingBack ? "Rolling back…" : "Roll Back Last Update" }) })] })) : (SP_JSX.jsx(DFL.Field, { label: "No snapshots yet", description: "A snapshot is taken automatically before every update." })), rollbackError ? SP_JSX.jsx(DFL.Field, { label: "Rollback error", description: rollbackError }) : null, SP_JSX.jsx(DFL.Field, { label: "Storage", description: `${gib(snap.freeBytes)} GB free${snap.lowSpace ? " — LOW: snapshots may be skipped" : ""}` })] })) : null, SP_JSX.jsx(About, {})] }));
 }
 
 // A loader whose API lacks the hook gets the old behaviour (always treated as open) instead of
