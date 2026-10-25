@@ -1,0 +1,28 @@
+#!/bin/bash
+# steamling-mkkernel — assemble the qcom-abl boot image, the KERNEL the bootloader starts:
+# gzip(Image) with every dtb appended, an empty ramdisk unless one is given, and an Android boot
+# header v0 with zero offsets. The one recipe both the build host (scripts/build-kernel.sh) and
+# the device (steamling-build-bootimg) use, so the image a device rebuilds after a kernel update
+# is the image the build made.
+#   steamling-mkkernel <Image> <dtb dir> <cmdline> <mkbootimg.py> <out> [ramdisk]
+set -euo pipefail
+[ "$#" -ge 5 ] || { echo "usage: steamling-mkkernel <Image> <dtb dir> <cmdline> <mkbootimg.py> <out> [ramdisk]" >&2; exit 2; }
+image="$1" dtbs="$2" cmdline="$3" mkbootimg="$4" out="$5" ramdisk="${6:-}"
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+
+gzip -c "$image" > "$tmp/kernel.gz"
+for d in "$dtbs"/*.dtb; do [ -f "$d" ] && cat "$d" >> "$tmp/kernel.gz"; done
+if [ -z "$ramdisk" ]; then
+  # a VALID empty cpio, not an empty file: nothing needs an initramfs (UFS and btrfs are built
+  # in), but the kernel still unpacks it, and an empty file makes it print "Initramfs unpacking
+  # failed"
+  ramdisk="$tmp/ramdisk"
+  if command -v cpio >/dev/null 2>&1; then printf '' | cpio -o -H newc --quiet > "$ramdisk" 2>/dev/null
+  else printf 'dummy' > "$ramdisk"; fi
+fi
+
+python3 "$mkbootimg" \
+  --kernel "$tmp/kernel.gz" --ramdisk "$ramdisk" \
+  --kernel_offset 0x00000000 --ramdisk_offset 0x00000000 --tags_offset 0x00000000 \
+  --os_version 12.0.0 --os_patch_level "$(date '+%Y-%m')" --header_version 0 \
+  --cmdline "$cmdline" -o "$out"

@@ -349,27 +349,11 @@ fetch_mkbootimg() {
 assemble_bootimg() {
   fetch_mkbootimg
   mkdir -p "${IMAGE_DIR}"
-  local kgz="${KBUILD}/out/kernel.gz" ramdisk="${1:-}" d
-  gzip -c "${KBUILD}/out/Image" > "${kgz}"
-  for d in "${KBUILD}"/out/dtbs/*.dtb; do [ -f "${d}" ] && cat "${d}" >> "${kgz}"; done
-  if [ -z "${ramdisk}" ]; then
-    # We don't use an initramfs (UFS/btrfs are built in). Ship a VALID empty cpio
-    # so the kernel unpacks it cleanly instead of printing "Initramfs unpacking
-    # failed" (harmless, but noisy). Falls back to a dummy string if cpio is absent.
-    ramdisk="${KBUILD}/out/ramdisk.empty"
-    if have cpio; then
-      printf '' | cpio -o -H newc --quiet > "${ramdisk}" 2>/dev/null
-    else
-      printf 'dummy' > "${ramdisk}"
-    fi
-  fi
   log "assembling qcom-abl boot image -> ${IMAGE_DIR}/KERNEL"
-  python3 "${MKBOOTIMG}" \
-    --kernel "${kgz}" --ramdisk "${ramdisk}" \
-    --kernel_offset 0x00000000 --ramdisk_offset 0x00000000 --tags_offset 0x00000000 \
-    --os_version 12.0.0 --os_patch_level "$(date '+%Y-%m')" --header_version 0 \
-    --cmdline "${KERNEL_CMDLINE}" \
-    -o "${IMAGE_DIR}/KERNEL" || die "mkbootimg failed"
+  # The device rebuilds KERNEL with the same tool after a kernel update (steamling-build-bootimg).
+  "${STEAMLING_ROOT}/packages/shared/steamling-bsp-common/steamling-mkkernel" \
+    "${KBUILD}/out/Image" "${KBUILD}/out/dtbs" "${KERNEL_CMDLINE}" "${MKBOOTIMG}" \
+    "${IMAGE_DIR}/KERNEL" "${1:-}" || die "mkbootimg failed"
   ok "boot image ready -> ${IMAGE_DIR}/KERNEL"
   log "cmdline: ${KERNEL_CMDLINE}"
 }
