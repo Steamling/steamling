@@ -49,7 +49,12 @@ case "${system}" in
   sega32x)                              run_core picodrive ;;
   saturn)                               run_core yabasanshiro ;;
   dreamcast)                            run_core flycast ;;
-  psx)                                  run_core swanstation ;;
+  psx)
+    # es_systems.xml offers PCSX ReARMed as the alternative; the Steam tile follows ES-DE's pick.
+    case "$(esde_alt_emulator psx)" in
+      *PCSX*) run_core pcsx_rearmed ;;
+      *)      run_core swanstation ;;
+    esac ;;
   tg16|pcengine)                        run_core mednafen_pce_fast ;;
   supergrafx|sgfx)                      run_core mednafen_supergrafx ;;
   neogeo|fbneo)                         run_core fbneo ;;
