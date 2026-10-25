@@ -31,6 +31,14 @@ source "${STEAMLING_ROOT}/config/steamling.conf"
 if [ "${STEAMLING_BASE_SNAPSHOT}" = live ] || [ "${STEAMLING_BASE_LIVE:-}" = 1 ]; then
   STEAMLING_BASE_SNAPSHOT=""
   export STEAMLING_BASE_LIVE=1
+  # A cut base also pins the rootfs tarball to its own dated copy (make snapshot); live starts
+  # from ALARM's latest instead. A tarball you chose yourself is left alone.
+  case "${STEAMLING_ALARM_TARBALL_URL}" in
+    "${STEAMLING_BASE_URL}"/*)
+      ALARM_TARBALL=ArchLinuxARM-aarch64-latest.tar.gz
+      STEAMLING_ALARM_SHA256=""
+      STEAMLING_ALARM_TARBALL_URL="${ALARM_MIRROR}/${ALARM_TARBALL}" ;;
+  esac
 fi
 # STEAMLING_BASE_URL is where a frozen base's pacman repo is hosted (it serves pocknix-base.db),
 # not Arch Linux ARM's tarball. Pointing it there 404s halfway through, so say so up front.
