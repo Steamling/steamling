@@ -1,4 +1,24 @@
 #!/bin/sh
+# Writes OpenABL to both bootloader slots. Run it as root from Android, after backup_abl.sh.
 
-dd if="/sdcard/rocknix_abl/abl_signed-%DEVICE%.elf" of=/dev/block/by-name/abl_a bs=1M
-dd if="/sdcard/rocknix_abl/abl_signed-%DEVICE%.elf" of=/dev/block/by-name/abl_b bs=1M
+kit=$(dirname "$0")
+for d in "$kit" /sdcard/openabl /sdcard/rocknix_abl; do
+  [ -f "$d/abl_signed-%DEVICE%.elf" ] && { kit=$d; break; }
+done
+elf="$kit/abl_signed-%DEVICE%.elf"
+
+[ -s "$elf" ] || { echo "Can't find abl_signed-%DEVICE%.elf next to this script. Nothing was written."; exit 1; }
+# No backup, no way back to the factory bootloader: make that a deliberate choice.
+if [ ! -s "$kit/abl_a.img" ] || [ ! -s "$kit/abl_b.img" ]; then
+  echo "No backup of your stock bootloader in $kit. Run backup_abl.sh first"
+  echo "(or put the abl_a.img and abl_b.img you saved before into this folder). Nothing was written."
+  exit 1
+fi
+
+for slot in a b; do
+  dd if="$elf" of="/dev/block/by-name/abl_$slot" bs=1M \
+    || { echo "Writing abl_$slot FAILED. Don't power off; run restore_backup_abl.sh, or ask for help."; exit 1; }
+done
+sync
+echo "OpenABL is installed. Power off, put the Steamling card in, then hold Volume Down while"
+echo "powering on to open its menu."

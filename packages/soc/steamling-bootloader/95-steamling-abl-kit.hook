@@ -4,7 +4,7 @@
 Operation = Install
 Operation = Upgrade
 Type = Path
-Target = usr/share/steamling/bootloader/rocknix_abl/*
+Target = usr/share/steamling/bootloader/openabl/*
 
 [Action]
 Description = steamling: refreshing the ABL install kit on /flash (no bootloader is written)...

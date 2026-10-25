@@ -1,6 +1,6 @@
 Installing OpenABL from Android (needs root)
 
-1. Copy this rocknix_abl folder from the SD card to the top level of Android's
+1. Copy this openabl folder from the SD card to the top level of Android's
    internal storage.
 2. As root, run backup_abl.sh from that folder. It saves your current
    bootloader, so you can always go back to it.

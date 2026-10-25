@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # build-sd-image.sh - flashable SD image, laid out the way the device's ABL expects:
-#   p1 fat32 "${SD_BOOT_PARTNAME}": /KERNEL and the OpenABL kit (rocknix_abl/)
+#   p1 fat32 "${SD_BOOT_PARTNAME}": /KERNEL and the OpenABL kit (openabl/)
 #   p2 btrfs "${ROOT_LABEL}": subvols @ @home @snapshots @pacman-cache @var-log
 # The kernel mounts root by PARTUUID (no initramfs) and boots the btrfs DEFAULT subvol: the
 # cmdline and fstab must never name one, that is what lets steamling-rollback switch roots.
@@ -47,7 +47,7 @@ ensure_kernel_in_rootfs() {
 # ABL kit at the FAT root: stock Android mounts this FAT, so a factory device is provisioned
 # from the SD alone. Inert at boot.
 copy_abl_kit() {
-  local mnt="$1" kit="${ROOTFS_DIR}/usr/share/steamling/bootloader/rocknix_abl"
+  local mnt="$1" kit="${ROOTFS_DIR}/usr/share/steamling/bootloader/openabl"
   [ -f "${kit}/abl_signed-${SOC^^}.elf" ] \
     || die "${kit#${ROOTFS_DIR}}/abl_signed-${SOC^^}.elf missing from the rootfs — is steamling-bootloader-${SOC} built and installed? (make packages + make build)"
   rsync -a "${kit}" "${mnt}/"

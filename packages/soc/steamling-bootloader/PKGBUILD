@@ -4,8 +4,8 @@
 # The factory ABL boots only Android, so OpenABL must be flashed to abl_a/abl_b ONCE before
 # any SD boots. One elf covers every board of a SoC: the release keys it by SoC, not board.
 # OpenABL (Open Handheld Collective) replaced the ROCKNIX ABL, whose repo and releases are gone;
-# ROCKNIX moved over in October 2026 (README.provenance has the commits). The kit folder keeps its
-# old name, rocknix_abl, so backups and docs from the ROCKNIX ABL days still line up.
+# ROCKNIX moved over in October 2026 (README.provenance has the commits). The kit folder is openabl/,
+# the name ROCKNIX's own kit uses; it was rocknix_abl/ before, and the kit scripts still look there.
 # Nothing here flashes at build or install time; both flashing paths (the kit by hand from rooted
 # Android, steamling-update-abl afterwards) are deliberate user actions.
 _soc="${STEAMLING_SOC:?set by build-packages.sh}"
@@ -15,8 +15,8 @@ _ablver=1.2
 # OpenABL restarted the numbering below the ROCKNIX ABL's 1.2
 epoch=1
 pkgver=${_ablver}
-pkgrel=3
-pkgdesc="${_SOC} qcom-abl boot payload: OpenABL install kit (rocknix_abl)"
+pkgrel=4
+pkgdesc="${_SOC} qcom-abl boot payload: OpenABL install kit"
 arch=('aarch64')
 # !strip: a stripped bootloader is an unbootable one.
 options=('!strip')
@@ -45,7 +45,7 @@ prepare() {
 }
 
 package() {
-  local kit="${pkgdir}/usr/share/steamling/bootloader/rocknix_abl"
+  local kit="${pkgdir}/usr/share/steamling/bootloader/openabl"
 
   install -Dm644 "openabl-v${_ablver}/${_SOC}/abl_signed-${_SOC}.elf" "${kit}/abl_signed-${_SOC}.elf"
   install -Dm644 README                 "${kit}/README"

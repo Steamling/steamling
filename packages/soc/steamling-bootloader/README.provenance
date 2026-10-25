@@ -1,4 +1,4 @@
-# rocknix_abl kit provenance
+# OpenABL kit provenance
 
 abl_signed-<SOC>.elf is NOT committed here - the PKGBUILD fetches it from the
 official OpenABL release, pinned by tag + sha256:
@@ -27,17 +27,19 @@ in their distribution repo (71d8932b33 "openabl: introduce package", then
 a5d0dd4d57 "openabl: bump to v1.1"). epoch=1 because OpenABL's 1.1 sorts
 below the ROCKNIX ABL's 1.2.
 
-ROCKNIX renamed the kit folder to openabl/ at the same time. Ours stays
-rocknix_abl/ for now: steamling-update-abl keeps its backups in
-/flash/rocknix_abl and restore_backup_abl.sh reads rocknix_abl/abl_*.img, so
-a rename would strand backups people already made.
+ROCKNIX renamed the kit folder to openabl/ at the same time, and ours followed
+in October 2026: the old name made the kit look like something to fetch from
+ROCKNIX first. steamling-refresh-abl-kit moves backups a device already keeps
+in /flash/rocknix_abl over to /flash/openabl, and the kit scripts still look in
+/sdcard/rocknix_abl when they aren't run from their own folder.
 
-The four kit files (README, flash_abl.sh.template, backup_abl.sh,
-restore_backup_abl.sh) are VERBATIM copies from the ROCKNIX distribution repo's
-old packages/tools/rocknix-abl/sources/ (GPL-2.0 tree). Their openabl/ copies
-are the same commands with the folder renamed. Vendored (4 tiny files, change
-rarely) rather than fetched or synced; diff them against the ROCKNIX tree
-when advancing the sync pin.
+The three kit scripts started as the ROCKNIX distribution repo's
+packages/tools/openabl/sources/ (GPL-2.0 tree): the same dd commands, with
+checks added. They find their own folder instead of assuming /sdcard/openabl,
+backup_abl.sh never overwrites a backup that's already there, flash_abl.sh
+won't run without one, and all three say what they did. README is ours.
+Vendored (tiny, change rarely) rather than fetched or synced; diff the dd
+lines against the ROCKNIX tree when advancing the sync pin.
 
 Version coupling: the ABL version ROCKNIX pins lives in their
 projects/ROCKNIX/packages/tools/openabl/package.mk (PKG_VERSION). Ours (_ablver
@@ -46,7 +48,7 @@ profile assumes (FAT label, /KERNEL boot image, board-id dtb select), so a
 mismatched pair is the thing to avoid.
 
 The kit's job is FIRST INSTALL from stock Android: the user copies
-rocknix_abl/ off the SD's boot FAT to Android internal storage, runs
+openabl/ off the SD's boot FAT to Android internal storage, runs
 backup_abl.sh (saves the stock abl_a/abl_b next to the scripts - tell users
 to copy those .img backups OFF the device; an install-to-internal later
 wipes userdata and the backup with it), then flash_abl.sh, both as root.
@@ -56,6 +58,6 @@ Once a device runs steamling, ABL UPDATES no longer need Android: steamling-upda
 (steamling-bsp-common, reachable from Steamling Tools) flashes this same elf onto
 abl_a/abl_b from the running system. It is user-run only - no alpm hook, nothing
 at boot or update time, unlike ROCKNIX's updateabl which their bootloader
-update.sh calls on every OS update. Its backup goes to /flash/rocknix_abl with
+update.sh calls on every OS update. Its backup goes to /flash/openabl with
 the kit's own filenames and is never overwritten, so a stock backup made the
 Android way survives and restore_backup_abl.sh keeps working.

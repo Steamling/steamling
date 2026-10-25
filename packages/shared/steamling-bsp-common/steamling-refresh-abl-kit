@@ -7,17 +7,28 @@
 set -euo pipefail
 
 FLASH="${FLASH:-/flash}"
-KIT=/usr/share/steamling/bootloader/rocknix_abl
+KIT=/usr/share/steamling/bootloader/openabl
+DEST="${FLASH}/openabl"
+OLD="${FLASH}/rocknix_abl"   # the kit's name before October 2026
 
 [ -d "${KIT}" ] || { echo "steamling-refresh-abl-kit: no ${KIT} — nothing to do"; exit 0; }
 # build-sd-image.sh populates the FAT itself; /flash is not a mount there.
 mountpoint -q "${FLASH}" || { echo "steamling-refresh-abl-kit: ${FLASH} not mounted — skipping (build chroot?)"; exit 0; }
 
 mount -o remount,rw "${FLASH}" 2>/dev/null || true
-mkdir -p "${FLASH}/rocknix_abl"
+mkdir -p "${DEST}"
+# The stock-bootloader backups from the old folder come along first; one already in the new folder
+# wins. Then the old kit files go. Nothing but the kit's own names is ever deleted.
+if [ -d "${OLD}" ]; then
+  for img in abl_a.img abl_b.img; do
+    [ -f "${OLD}/${img}" ] && [ ! -e "${DEST}/${img}" ] && mv "${OLD}/${img}" "${DEST}/${img}"
+  done
+  rm -f "${OLD}"/abl_signed-*.elf "${OLD}"/{README,flash_abl.sh,backup_abl.sh,restore_backup_abl.sh,version}
+  rmdir "${OLD}" 2>/dev/null || echo "steamling-refresh-abl-kit: left ${OLD} in place (it holds other files)"
+fi
 # Copy, never mirror: the stock-ABL backups live in this same directory and
 # an rsync --delete would destroy them.
-cp -f "${KIT}"/* "${FLASH}/rocknix_abl/"
+cp -f "${KIT}"/* "${DEST}/"
 sync
 
-echo "steamling-refresh-abl-kit: refreshed ${FLASH}/rocknix_abl (v$(cat "${KIT}/version" 2>/dev/null || echo unknown); backups kept)"
+echo "steamling-refresh-abl-kit: refreshed ${DEST} (v$(cat "${KIT}/version" 2>/dev/null || echo unknown); backups kept)"

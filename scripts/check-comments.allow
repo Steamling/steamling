@@ -21,3 +21,4 @@ config/local.conf.example :: dead path :: config/steamling-repo\.asc
 scripts/lib.sh :: dead path :: config/local\.conf
 scripts/own-base.fish :: dead path :: config/local\.conf
 config/steamling.conf :: dead path :: config/local\.conf
+packages/soc/steamling-bootloader/PKGBUILD :: provenance/status :: ROCKNIX's own kit

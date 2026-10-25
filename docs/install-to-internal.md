@@ -127,10 +127,11 @@ told to make (and copy off the device) when you first flashed OpenABL (or the RO
 Where your backup is, depending on how you flashed:
 
 - **Android's `backup_abl.sh`** (the [install guide](install.md#2-install-the-bootloader-openabl) steps): it wrote
-  `abl_a.img` + `abl_b.img` into `rocknix_abl/` on Android internal storage - gone if you have since
+  `abl_a.img` + `abl_b.img` into the kit folder on Android internal storage (`openabl/`, or
+  `rocknix_abl/` on cards made before October 2026) - gone if you have since
   installed to internal, so use the copy you were told to keep off the device.
 - **`steamling-update-abl` / Steamling Tools**: it saved the bootloader it replaced to
-  `/flash/rocknix_abl/` and, when an SD card was mounted, copied it to `steamling-abl-backup/` on that
+  `/flash/openabl/` and, when an SD card was mounted, copied it to `steamling-abl-backup/` on that
   card. Note this is only *stock* if that run was the first time the device's bootloader was ever
   replaced.
 
@@ -139,10 +140,10 @@ Then, from Android:
 1. **Boot Android.** If Steamling is on internal storage, remove it first (**Uninstall CFW** above) -
    otherwise Android has no room to come back. Then set the menu's **Boot mode** to
    **Android**, or hold **Volume +** at power-on.
-2. Put a `rocknix_abl` folder at the root of Android's internal storage if it isn't there any more
+2. Put the `openabl` folder at the root of Android's internal storage if it isn't there any more
    (copy it off a Steamling SD card, same as during install), and **copy your `abl_a.img` and
-   `abl_b.img` backups into it**. The names and the location matter - the script reads exactly
-   `rocknix_abl/abl_a.img` and `rocknix_abl/abl_b.img`.
+   `abl_b.img` backups into it**, next to the scripts. The file names matter: the script looks for
+   exactly `abl_a.img` and `abl_b.img`, and stops without writing anything if either is missing.
 3. Open **Settings → Handheld Settings → Advanced → Run Script as Root** (on Retroid handhelds;
    other brands put it elsewhere), go into that folder,
    and run **`restore_backup_abl.sh`**.

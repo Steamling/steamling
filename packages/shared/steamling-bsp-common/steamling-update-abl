@@ -5,8 +5,8 @@
 # comes from whichever kit steamling-bootloader-<soc> installed.
 set -euo pipefail
 
-KIT="${STEAMLING_ABL_KIT:-/usr/share/steamling/bootloader/rocknix_abl}"
-BACKUP_DIR="${STEAMLING_ABL_BACKUP_DIR:-/flash/rocknix_abl}"
+KIT="${STEAMLING_ABL_KIT:-/usr/share/steamling/bootloader/openabl}"
+BACKUP_DIR="${STEAMLING_ABL_BACKUP_DIR:-/flash/openabl}"
 MIN_BATTERY=30
 
 ASSUME_YES=0; STATUS_ONLY=0
@@ -111,6 +111,12 @@ BACKED_UP=0
 # either way and backups would land shadowed on the root fs.
 if mountpoint -q "$(dirname "${BACKUP_DIR}")"; then
   mkdir -p "${BACKUP_DIR}"
+  # Backups made before the kit was renamed live in rocknix_abl/. Bring them over first, or the
+  # bootloader running now (OpenABL, not stock) would be saved as the "stock" backup.
+  for slot in a b; do
+    old="$(dirname "${BACKUP_DIR}")/rocknix_abl/abl_${slot}.img"
+    [ -f "${old}" ] && [ ! -e "${BACKUP_DIR}/abl_${slot}.img" ] && mv "${old}" "${BACKUP_DIR}/abl_${slot}.img"
+  done
   for slot in a b; do
     dev="ABL_${slot^^}"; img="${BACKUP_DIR}/abl_${slot}.img"
     if [ -f "${img}" ]; then

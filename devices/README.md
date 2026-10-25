@@ -127,8 +127,8 @@ kernel update, rollback and cmdline change. Kernel packages ship no deploy scrip
   mkbootimg, cmdline baked in, all dtbs appended - ABL picks by board id). The BSP
   ships `/usr/lib/steamling/kernel-cmdline`, which build-packages.sh renders from the profile's
   `KERNEL_CMDLINE` into its `./staged`; bsp-common's kernel hook rebuilds /flash/KERNEL on device.
-  The SD boot FAT also carries `rocknix_abl/` (steamling-bootloader-<soc>; ROCKNIX now calls it
-  `openabl/`, ours keeps the old name for existing backups): the first-install kit for flashing that ABL from rooted stock Android - inert at boot,
+  The SD boot FAT also carries `openabl/` (steamling-bootloader-<soc>; `rocknix_abl/` before
+  October 2026): the first-install kit for flashing that ABL from rooted stock Android - inert at boot,
   Steamling never flashes it itself.
 
 ## The runtime contract (`/usr/lib/steamling/device.conf` -> `boards/<board>.conf`)
