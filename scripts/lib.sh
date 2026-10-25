@@ -11,7 +11,18 @@ export STEAMLING_ROOT="$(cd "${_lib_dir}/.." && pwd)"
 
 # Your own settings first (config/local.conf, never committed): steamling.conf only fills in
 # what's still unset, so anything there wins. config/local.conf.example says what goes in it.
-[ -f "${STEAMLING_ROOT}/config/local.conf" ] && source "${STEAMLING_ROOT}/config/local.conf"
+# The command line beats both: a value already set when we get here (build.sh's --device, or
+# DEVICE=... make image) is put back after local.conf, which would otherwise overwrite it.
+if [ -f "${STEAMLING_ROOT}/config/local.conf" ]; then
+  _lc_keep=()
+  while IFS= read -r _lc_name; do
+    [ -n "${!_lc_name+x}" ] && _lc_keep+=("${_lc_name}=${!_lc_name}")
+  done < <(sed -nE 's/^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=.*/\2/p' \
+             "${STEAMLING_ROOT}/config/local.conf")
+  source "${STEAMLING_ROOT}/config/local.conf"
+  for _lc_kv in "${_lc_keep[@]}"; do printf -v "${_lc_kv%%=*}" '%s' "${_lc_kv#*=}"; done
+  unset _lc_keep _lc_name _lc_kv
+fi
 # shellcheck source=../config/steamling.conf
 source "${STEAMLING_ROOT}/config/steamling.conf"
 # STEAMLING_BASE_SNAPSHOT=live builds straight from Arch Linux ARM's own repos, nothing frozen: ":="
