@@ -16,7 +16,9 @@ repeats the source pin and lists the dtb name prefixes its boot image ships
   series order under the build's sort), rebased by hand onto Linux 7.3: the patches 7.3 already
   carries are gone and a few are adjusted to 7.3's code (the kernel (steamling) row of
   [PATCHES.md](../../PATCHES.md) lists them). armada's `PATCHES.md` records each patch's origin.
-- `dts/qcom/` - armada's board device trees with armada's `dts/*.patch` deltas already applied.
+- `dts/qcom/` - armada's board device trees with armada's `dts/*.patch` deltas already applied, for
+  the families on this tree only. SM8550's live in `kernel/sm8550/dts/`; armada's copies of them
+  were dropped here, since nothing on this tree builds them.
 - `kernel/steamling/config/linux.aarch64.conf` - arm64 `defconfig` plus armada's
   `armada-kernel.config.overrides`, resolved at 7.2.11; olddefconfig carries it to 7.3. build-kernel.sh then
   applies Steamling's usual deltas (sched_ext, BTF, binder, HZ 1000 and the rest) on top.
@@ -27,6 +29,6 @@ repeats the source pin and lists the dtb name prefixes its boot image ships
 
 To take a newer armada: refresh `patches/10-steamling/` from their `patches/series` against the
 pinned kernel version (fix or drop what no longer applies), copy their `dts/` with the deltas
-applied, regenerate the config the same way, and recheck `common-skip`. Then bump
+applied (leaving out `qcs8550-*`, which `kernel/sm8550/` carries), regenerate the config the same way, and recheck `common-skip`. Then bump
 `KERNEL_VERSION`/`KERNEL_SOURCE_SHA256`/`KERNEL_PKGREL` in every `kernel/<soc>/kernel.conf`
 that names this tree.
