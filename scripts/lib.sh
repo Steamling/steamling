@@ -9,6 +9,9 @@ set -euo pipefail
 _lib_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export STEAMLING_ROOT="$(cd "${_lib_dir}/.." && pwd)"
 
+# Your own settings first (config/local.conf, never committed): steamling.conf only fills in
+# what's still unset, so anything there wins. config/local.conf.example says what goes in it.
+[ -f "${STEAMLING_ROOT}/config/local.conf" ] && source "${STEAMLING_ROOT}/config/local.conf"
 # shellcheck source=../config/steamling.conf
 source "${STEAMLING_ROOT}/config/steamling.conf"
 
@@ -112,10 +115,11 @@ esac
 # --- package lists ---------------------------------------------------------
 # awk $1, not sed 's/#.*//': sed keeps the whitespace before an inline comment and
 # pacman then can't match the name.
-# A variable as one family's build resolves it (steamling.conf, its profile, the defaults), in a
+# A variable as one family's build resolves it (local.conf, steamling.conf, its profile, the defaults), in a
 # clean environment: everything assigns with ":=", so the selected DEVICE's values would win.
 profile_get() {  # $1 = devices/<soc> dir, $2 = variable name
   env -i STEAMLING_ROOT="${STEAMLING_ROOT}" bash -c "$(declare -f profile_defaults)"'
+    { [ ! -f "${STEAMLING_ROOT}/config/local.conf" ] || . "${STEAMLING_ROOT}/config/local.conf"; } &&
     . "${STEAMLING_ROOT}/config/steamling.conf" && . "$1/profile.conf" && profile_defaults && printf "%s" "${!2:-}"' sh "$1" "$2"
 }
 

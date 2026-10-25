@@ -1,0 +1,55 @@
+# Your own Steamling build settings. Copy this file to config/local.conf and fill it in:
+#
+#   cp config/local.conf.example config/local.conf
+#
+# config/local.conf is never committed (it can hold your Wi-Fi password), and every build reads it
+# before config/steamling.conf, so whatever you set here wins. Leave a line commented out to keep
+# Steamling's default. It's read by bash, so no spaces around the "=".
+#
+# With the storage lines filled in, this runs the whole thing in one go: it cuts your own base,
+# uploads it, and builds an image from it (docs/building/own-base.md explains each step):
+#
+#   scripts/own-base.fish
+#
+# After that, a plain `make image` (or ./build.sh) builds against your base.
+
+# --- Which handheld family to build for ---------------------------------------------------------
+# sm8550 covers the Retroid Pocket 6, Pocket Nova, AYN Odin 2 and the other Snapdragon 8 Gen 2
+# handhelds (docs/devices.md lists them all).
+DEVICE=sm8550
+
+# --- Your base: the frozen Arch Linux ARM packages every build installs ---------------------------
+# Where scripts/own-base.fish uploads it (an rclone remote and path), and the public web address that
+# serves that same path. With Cloudflare R2 the address is your bucket's r2.dev URL or your domain.
+STEAMLING_BASE_RCLONE_REMOTE=r2:steamling/repo/base
+STEAMLING_BASE_URL=https://pub-REPLACE-ME.r2.dev/repo/base
+
+# --- Your package repo: Steamling's own packages, for over-the-air updates ------------------------
+# Fill these in when you turn on updates (docs/building/own-base.md, step 4). Images built with
+# STEAMLING_REPO_URL set update themselves from it instead of needing a reflash.
+STEAMLING_REPO_RCLONE_REMOTE=r2:steamling/repo
+#STEAMLING_REPO_URL=https://pub-REPLACE-ME.r2.dev/repo
+#STEAMLING_REPO_GPG_KEY=you@example.com
+#STEAMLING_REPO_PUBKEY=config/steamling-repo.asc
+
+# --- Where `make publish-image` uploads finished SD images (optional) -----------------------------
+#STEAMLING_IMAGE_RCLONE_REMOTE=r2:steamling/images
+#STEAMLING_IMAGE_URL=https://pub-REPLACE-ME.r2.dev/images
+
+# --- Build speed ----------------------------------------------------------------------------------
+# ccache keeps compiled objects between builds, so rebuilding a package only recompiles what
+# changed. 20G is plenty for every package; the kernel keeps its own cache.
+STEAMLING_CCACHE=on
+STEAMLING_CCACHE_SIZE=20G
+
+# --- First boot of the SD image -------------------------------------------------------------------
+# The default password is "root", which everyone knows: pick your own for images you'll keep.
+#SD_ROOT_PASSWORD=root
+# SSH on from the first boot (handy while testing; turn it off for images you hand to others).
+#SD_SSH=on
+# Join Wi-Fi on first boot. The country code (US, GB, DE...) is needed for 5 GHz networks.
+#SD_WIFI_SSID=MyNetwork
+#SD_WIFI_PSK=MyPassword
+#SD_WIFI_COUNTRY=US
+# The handheld's timezone (a name from /usr/share/zoneinfo). UTC if unset.
+#SD_TIMEZONE=America/New_York
