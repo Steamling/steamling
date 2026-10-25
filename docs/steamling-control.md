@@ -11,7 +11,7 @@ tapping the icons:
 | Tab | What it does |
 |---|---|
 | 🎮 Games | Fan curve, CPU scheduler and game tweaks, globally or per game |
-| 📚 Library | Add non-Steam games, share your files over the network, turn SSH on or off, format a microSD card for Steam |
+| 📚 Library | Add non-Steam games, share your files over the network or a USB cable, turn SSH on or off, format a microSD card for Steam |
 | 🕹️ Controller | Stick and trigger calibration, stick lights, display refresh calibration |
 | 🔄 Updater | Check for and install system updates, roll back the last update, see your versions, restart game mode |
 
@@ -94,6 +94,17 @@ The same toggle is in **Steamling Tools** on the desktop side.
 > turn it off when you are done. See
 > [copying files over the network](emulation-setup.md#copying-files-over-the-network) for how to
 > connect.
+
+### USB file transfer
+
+**Show up on a computer** turns the USB-C port into a media device, the way a phone works: plug
+the handheld into a PC or Mac and open **Steamling** to copy ROMs, BIOS files or screenshots
+over the cable. Your home folder is there, and so is the microSD card when you've installed
+Steamling to internal storage. No network, no drivers on Windows or Linux (a Mac needs an MTP
+app such as OpenMTP).
+
+It stays on until you turn it off or restart. While it's on, controllers, hubs and other USB
+devices plugged into that port won't work.
 
 ### Remote access
 

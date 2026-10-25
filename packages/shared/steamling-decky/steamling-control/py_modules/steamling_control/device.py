@@ -5,6 +5,9 @@ from .system import run_cmd
 
 # The same helpers the Steamling Tools menu uses, so both UIs agree on what "on" means.
 SSH = "/usr/bin/steamling-ssh"
+MTP = "/usr/bin/steamling-mtp"
+UMTPRD = Path("/usr/bin/umtprd")
+UDC_DIR = Path("/sys/class/udc")
 UPDATE_ABL = "/usr/bin/steamling-update-abl"
 SESSION_SELECT = "/usr/bin/steamos-session-select"
 OS_RELEASE = Path("/usr/lib/os-release")
@@ -105,3 +108,28 @@ def restart_game_mode():
         detail = ((proc.stderr if proc else "") or "").strip()[-200:]
         raise RuntimeError(f"Could not restart game mode: {detail or 'no detail'}")
     return True
+
+
+def _has_udc():
+    try:
+        return any(UDC_DIR.iterdir())
+    except OSError:
+        return False
+
+
+def usb_transfer_status():
+    # Hidden on a kernel whose port is host-only: there is nothing to bind the gadget to.
+    if not UMTPRD.exists() or not _has_udc():
+        return {"available": False, "on": False}
+    proc = _host([MTP, "status"], timeout=15)
+    if proc is None or proc.returncode != 0:
+        return {"available": False, "on": False}
+    return {"available": True, "on": _pairs(proc.stdout).get("state") == "on"}
+
+
+def set_usb_transfer(on):
+    proc = _host([MTP, "on" if on else "off"], timeout=60)
+    if proc is None or proc.returncode != 0:
+        detail = ((proc.stderr if proc else "") or "").strip()[-300:]
+        raise RuntimeError(f"Could not turn USB file transfer {'on' if on else 'off'}: {detail or 'no detail'}")
+    return usb_transfer_status()

@@ -88,6 +88,10 @@ Rather than shuttling a microSD card back and forth, you can turn the device int
 share and drag files straight onto it from another computer. It works out of the box in macOS
 Finder, Windows Explorer and Linux file managers - no extra software on either end.
 
+> **Got a USB-C cable handy?** That's often quicker: turn on **USB file transfer** in Steamling
+> Control's Library tab and the device shows up on your computer like a phone does. See
+> [USB file transfer](steamling-control.md#usb-file-transfer).
+
 Turn it on in either place:
 
 - **Game Mode**: Quick Access Menu → **Steamling Control** → **Library** → *Share my home folder*

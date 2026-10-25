@@ -1,5 +1,5 @@
 import { call } from "@decky/api";
-import type { CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, PanelStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, Tweaks, UpdateInfo, UpdateStatus } from "./types";
+import type { CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, PanelStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, Tweaks, UpdateInfo, UpdateStatus, UsbTransferStatus } from "./types";
 
 export const getConfig = () => call<[], Config>("get_config");
 // The setters answer with only what they changed: a full get_config re-reads the whole Steam
@@ -28,6 +28,8 @@ export const installSamba = () => call<[], ShareStatus>("install_samba");
 export const deviceInfo = () => call<[], DeviceInfo>("device_info");
 export const sshStatus = () => call<[], SshStatus>("ssh_status");
 export const setSsh = (on: boolean) => call<[boolean], SshStatus>("set_ssh", on);
+export const usbTransferStatus = () => call<[], UsbTransferStatus>("usb_transfer_status");
+export const setUsbTransfer = (on: boolean) => call<[boolean], UsbTransferStatus>("set_usb_transfer", on);
 export const restartGameMode = () => call<[], boolean>("restart_game_mode");
 export const checkUpdates = () => call<[], UpdateInfo[]>("check_updates");
 export const startUpdate = () => call<[], UpdateStatus>("start_update");

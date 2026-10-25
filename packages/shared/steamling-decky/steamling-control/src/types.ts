@@ -152,6 +152,11 @@ export type SshStatus = {
   addresses: string[];
 };
 
+export type UsbTransferStatus = {
+  available: boolean;
+  on: boolean;
+};
+
 export type DeviceInfo = {
   osVersion: string;
   kernel: string;
