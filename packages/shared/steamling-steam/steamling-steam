@@ -45,8 +45,9 @@ if command -v steamling-gamepad-target >/dev/null 2>&1; then
   steamling-gamepad-target deck-uhid || true
 fi
 
-# Must run BEFORE gamescope: Steam reads compatibilitytools.d only at startup.
-/usr/bin/steamling-proton-prep
+# Must run BEFORE gamescope: Steam reads compatibilitytools.d only at startup. Never fatal under
+# set -e: a Proton-prep hiccup must not keep game mode from starting.
+/usr/bin/steamling-proton-prep || echo "[steamling-steam] Proton prep failed (non-fatal)"
 mark "proton prep done"
 
 # A session switch SIGTERMs gamescope but the Steam client re-parents and survives holding its
