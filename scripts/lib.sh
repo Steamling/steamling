@@ -21,6 +21,14 @@ if [ "${STEAMLING_BASE_SNAPSHOT}" = live ] || [ "${STEAMLING_BASE_LIVE:-}" = 1 ]
   STEAMLING_BASE_SNAPSHOT=""
   export STEAMLING_BASE_LIVE=1
 fi
+# STEAMLING_BASE_URL is where a frozen base's pacman repo is hosted (it serves pocknix-base.db),
+# not Arch Linux ARM's tarball. Pointing it there 404s halfway through, so say so up front.
+case "${STEAMLING_BASE_URL:-}" in
+  *.tar.gz|*.tar.xz|*.tar|*os.archlinuxarm.org*)
+    printf 'error STEAMLING_BASE_URL=%s is not a frozen base. To build from live Arch Linux ARM,\n' "${STEAMLING_BASE_URL}" >&2
+    printf '      remove that line and set STEAMLING_BASE_SNAPSHOT=live in config/local.conf instead.\n' >&2
+    exit 1 ;;
+esac
 
 # --- device profile + per-SoC kernel pins -----------------------------------
 # The device profile (devices/<name>/profile.conf) declares what differs per family: SoC,
