@@ -9,6 +9,9 @@ wireguard-tools      # no openresolv for wg-quick DNS: conflicts with the base's
 # --- file sharing ---
 samba
 
+# --- support ---
+android-tools        # adb and fastboot on the handheld: flashing the bootloader, pulling logs
+
 # --- emulation layer (opt-in: no image installs it, Steamling Tools does) ---
 # Its ALARM deps, the optional emulators' included. Derive changes from an orphan set on a
 # device, not from the snapshot guard: that reads the metas' depends= only.
