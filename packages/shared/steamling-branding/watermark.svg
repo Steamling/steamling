@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Plymouth watermark: the still pose of the boot logo (logo.svg, which steamling.awk writes at
-     build time), with no wording. Rendered at its full on-screen size (532x576 device pixels)
-     and shown at DeviceScale=1: plymouth didn't apply a DeviceScale of 2 on the RP6, which left
-     the logo half size, and drawing it big is sharper than an upscale anyway. The logo box
-     (0,0 266x252 in the viewBox) is shared with throbber.svg so every frame lands exactly on it.
-     The 36 transparent rows below it (72 px on screen) line the two up: see the PKGBUILD. -->
+     build time) with the "steamling" wordmark under it. Rendered at its full on-screen size
+     (532x704 device pixels) and shown at DeviceScale=1: plymouth didn't apply a DeviceScale of 2
+     on the RP6, which left the logo half size, and drawing it big is sharper than an upscale
+     anyway. The box (0,0 266x308 in the viewBox: logo, then wordmark) is shared with throbber.svg
+     so every frame lands exactly on it. The 44 transparent rows below it (88 px on screen) line
+     the two up: see the PKGBUILD. -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="532" height="576" viewBox="0 0 266 288">
+     width="532" height="704" viewBox="0 0 266 352">
   <image x="0" y="1.74" width="266" height="248.52" xlink:href="logo.svg"/>
+  <image x="30" y="262" width="206" height="42.7" xlink:href="steamling-wordmark.svg"/>
 </svg>
