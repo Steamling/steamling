@@ -22,7 +22,7 @@ options=(!lto)
 # release behind them) and a mesa main snapshot. Pinned, not floating, so rebuilds reproduce;
 # refresh the commits deliberately. Their checksums are SKIP: the commit in the URL fixes the
 # tree, and GitLab regenerates the archive, so its compressed bytes are not stable.
-declare -A _commits=(
+declare -gA _commits=(
   ['26.3.0rc2']=b34c71d9ff2f6514a1f947609d00e49be639edf8    # tag mesa-26.3.0-rc2
   ['27.0.0devel']=e7371b0711bb1cd38c39d1c05e5578c445cc6bca  # main, 2026-10-25
 )
