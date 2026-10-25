@@ -59,8 +59,12 @@ switch (uname -m)
         fail "this needs an x86_64 or aarch64 host, not "(uname -m)
 end
 command -q ccache; or echo "note: no ccache on this host, so kernel rebuilds start from scratch (sudo pacman -S ccache)"
-git diff --quiet -- $conf packages/shared/steamling-base-lock
-or fail "$conf or the base lock has uncommitted changes; commit or stash them first"
+# A rerun finds the config already pointing here (the first run did that), so only a fresh run
+# insists on a clean config.
+if not grep -q "STEAMLING_BASE_URL:=$url}" $conf
+    git diff --quiet -- $conf packages/shared/steamling-base-lock
+    or fail "$conf or the base lock has uncommitted changes; commit or stash them first"
+end
 rclone lsf --max-depth 1 $remote >/dev/null 2>&1; or rclone mkdir $remote
 or fail "rclone can't reach $remote (set the remote up with: rclone config)"
 
@@ -74,32 +78,41 @@ if not set -q _flag_yes
     string match -qi y -- $answer; or exit 1
 end
 
-step "pointing $conf at your base, unpinned"
+# Every build names its base outright: config/local.conf may say STEAMLING_BASE_SNAPSHOT=live or
+# hold other storage, and the command line beats it.
+set -l base STEAMLING_BASE_URL=$url STEAMLING_BASE_RCLONE_REMOTE=$remote
+
+step "pointing $conf at your storage"
 sed -i \
     -e "s|^: \"\${STEAMLING_BASE_URL:=.*}\"|: \"\${STEAMLING_BASE_URL:=$url}\"|" \
     -e "s|^: \"\${STEAMLING_BASE_RCLONE_REMOTE:=.*}\"|: \"\${STEAMLING_BASE_RCLONE_REMOTE:=$remote}\"|" \
-    -e "s|^: \"\${STEAMLING_BASE_SNAPSHOT:=.*}\"|: \"\${STEAMLING_BASE_SNAPSHOT:=}\"|" \
-    -e "s|^: \"\${ALARM_TARBALL:=.*}\"|: \"\${ALARM_TARBALL:=ArchLinuxARM-aarch64-latest.tar.gz}\"|" \
-    -e "s|^: \"\${STEAMLING_ALARM_SHA256:=.*}\"|: \"\${STEAMLING_ALARM_SHA256:=}\"|" \
-    -e "s|^: \"\${STEAMLING_ALARM_TARBALL_URL:=.*}\"|: \"\${STEAMLING_ALARM_TARBALL_URL:=\${ALARM_MIRROR}/\${ALARM_TARBALL}}\"|" \
     $conf
-grep -q "STEAMLING_BASE_SNAPSHOT:=}" $conf; or fail "couldn't unpin $conf"
+grep -q "STEAMLING_BASE_URL:=$url}" $conf; or fail "couldn't point $conf at $url"
 
-step "building against live Arch Linux ARM (make image)"
-make image; or fail "the live build failed; fix it and run this again (it picks up where it stopped)"
+if grep -q "STEAMLING_BASE_SNAPSHOT:=$id}" $conf
+    step "base $id is already cut (an earlier run got that far); going on to the check"
+else
+    step "building against live Arch Linux ARM (make image)"
+    env $base STEAMLING_BASE_SNAPSHOT=live make image
+    or fail "the live build failed; fix it and run this again (it picks up where it stopped)"
 
-step "freezing that build as base $id (make snapshot)"
-env STEAMLING_SNAPSHOT_ID=$id make snapshot; or fail "make snapshot failed"
+    step "freezing that build as base $id (make snapshot)"
+    env $base STEAMLING_BASE_SNAPSHOT=live STEAMLING_SNAPSHOT_ID=$id make snapshot
+    or fail "make snapshot failed; fix it and run this again"
+end
 
 step "checking $url serves the new base"
 curl -fsI $url/pocknix-base.db >/dev/null
-or fail "$url/pocknix-base.db isn't reachable. Make the bucket public (or put a domain in front of it), then run: make image"
+or fail "$url/pocknix-base.db isn't reachable. Make the bucket public (or put a domain in front of it), then run this again"
 
 step "building against the frozen base (make image)"
-make image; or fail "the build against the frozen base failed"
+env $base STEAMLING_BASE_SNAPSHOT=$id make image
+or fail "the build against the frozen base failed; fix it and run this again"
 
 echo
 step "done: base $id is live at $url"
 echo "  Next: git add $conf packages/shared/steamling-base-lock/steamling-base.lock"
 echo "        git commit -m \"base: our own snapshot $id\""
 echo "  Devices move onto it with their next update once you publish packages too (docs/building/own-base.md)."
+string match -q live -- (local_conf STEAMLING_BASE_SNAPSHOT)
+and echo "  config/local.conf still says STEAMLING_BASE_SNAPSHOT=live: delete that line, or later builds skip your base."

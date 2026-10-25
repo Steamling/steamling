@@ -77,15 +77,16 @@ A plain `./build.sh` never touches the base; only `--build-base` does. (You can 
 The script:
 
 1. Checks the laptop has what it needs, including qemu for running Arm programs.
-2. Points `config/steamling.conf` at your storage and unpins the base.
+2. Points `config/steamling.conf` at your storage.
 3. Builds everything against live Arch Linux ARM (`make image`).
 4. Freezes exactly what that build installed, uploads it, and pins the config to it
    (`make snapshot`).
 5. Checks your public address serves the new base.
 6. Builds everything again, this time from your frozen base.
 
-If a step fails, fix the cause and run the same command again; finished work isn't redone. When
-it's done, commit what it changed:
+If a step fails, fix the cause and run the same command again; finished work isn't redone. The
+base is labelled with the date, so if you rerun on a later day, pass the first day's label (for
+example `--id 20261025`), or it cuts a fresh base. When it's done, commit what it changed:
 
 ```fish
 git add config/steamling.conf packages/shared/steamling-base-lock/steamling-base.lock
