@@ -81,8 +81,17 @@ case "${1:-status}" in
 EOF
     read -rp "  Type ROLL to continue: " a
     [ "${a}" = "ROLL" ] || { echo "cancelled."; exit 0; }
+    # No [steamling] repo: nothing outranks ALARM, so the -Syu below would swap our gamescope and
+    # mesa for theirs. Hold everything the locked base doesn't carry (ours, and whatever else was
+    # added by hand); listed now, while [pocknix-base] is still the only repo it's measured against.
+    held=""
+    grep -q '^\[steamling\]' "${CONF}" || held="$(pacman -Qqm | tr '\n' ' ')"
     # both conf generators emit the section as header/SigLevel/Server, so the range is stable
     sed -i '/^\[pocknix-base\]$/,/^Server = /d' "${CONF}"
+    if [ -n "${held// /}" ]; then
+      sed -i "/^\[options\]$/a # steamling-base rolling: no [steamling] repo, so these stay as built\nIgnorePkg   = ${held% }" "${CONF}"
+      echo "  holding Steamling's own packages (no [steamling] repo): ${held% }"
+    fi
     cat >> "${CONF}" <<'EOF'
 
 # BLEEDING-EDGE: live Arch Linux ARM (steamling-base rolling). [steamling] stays
