@@ -39,7 +39,7 @@ With Cloudflare R2:
 
 ## 2. Fill in your settings
 
-Your settings live in one file, `config/local.conf`, which git never commits (so a Wi-Fi password in
+Your settings live in one file, `config/local.conf`, which git never commits (so a Wi-Fi password in <!-- docs-check: allow -->
 it stays on your laptop). Every build reads it first, so whatever you put there wins over
 Steamling's defaults. Start from the example:
 
@@ -107,7 +107,7 @@ that, a new version means flashing a new image. Here's how to publish them:
    gpg --export --armor you@example.com > config/steamling-repo.asc
    ```
 
-2. **Point the config at it.** In `config/local.conf`, uncomment and fill in:
+2. **Point the config at it.** In `config/local.conf`, uncomment and fill in: <!-- docs-check: allow -->
 
    ```sh
    STEAMLING_REPO_URL=https://pub-1234.r2.dev/repo

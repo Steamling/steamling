@@ -6,3 +6,4 @@
 config/steamling.conf :: DEVICE:=sm8550 :: by design: the default image target
 scripts/check-comments.py :: SM8550 quirk :: by design: self-test fixture
 packages/shared/steamling-bsp-common/PKGBUILD :: linux-steamling-sm[0-9]{4}<7 :: #126: the kernels that shipped the /flash deploy before it moved here
+config/local.conf.example :: DEVICE=sm8550 :: by design: the example's default target, like steamling.conf's
