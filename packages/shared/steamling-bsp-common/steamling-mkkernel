@@ -11,7 +11,11 @@ image="$1" dtbs="$2" cmdline="$3" mkbootimg="$4" out="$5" ramdisk="${6:-}"
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 
 gzip -c "$image" > "$tmp/kernel.gz"
-for d in "$dtbs"/*.dtb; do [ -f "$d" ] && cat "$d" >> "$tmp/kernel.gz"; done
+n=0
+for d in "$dtbs"/*.dtb; do [ -f "$d" ] && cat "$d" >> "$tmp/kernel.gz" && n=$((n + 1)); done
+# OpenABL lists the device models from these dtbs: with none it has nothing to start, and on a
+# handheld this image would replace the working one. Stop before anything is written.
+[ "$n" -gt 0 ] || { echo "steamling-mkkernel: no .dtb files in $dtbs; not building a KERNEL nothing could boot" >&2; exit 1; }
 if [ -z "$ramdisk" ]; then
   # a VALID empty cpio, not an empty file: nothing needs an initramfs (UFS and btrfs are built
   # in), but the kernel still unpacks it, and an empty file makes it print "Initramfs unpacking
