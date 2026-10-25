@@ -343,7 +343,8 @@ pkg_extra_srcs() {  # $1 = package name
   case "$1" in
     "${DEVICE_BSP_PKG}") echo "${DEVICE_DIR}/profile.conf ${CONFIG_DIR}/steamling.conf ${STEAMLING_ROOT}/scripts/render-bsp.sh" ;;
     "steamling-bootloader-${SOC}") echo "${DEVICE_DIR}/profile.conf ${CONFIG_DIR}/steamling.conf" ;;
-    "${KERNEL_PKG}") echo "${KERNEL_DIR}/kernel.conf" ;;
+    # kernel/<soc>/, not KERNEL_DIR: a SoC on a shared tree keeps its kernel.conf in its own dir.
+    "${KERNEL_PKG}") echo "${STEAMLING_ROOT}/kernel/${SOC}/kernel.conf" ;;
   esac
 }
 
