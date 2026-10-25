@@ -166,17 +166,22 @@ EOF
     [ -z "${SD_WIFI_COUNTRY}" ] && warn "SD_WIFI_COUNTRY unset — world regdom; 5 GHz won't associate"
   fi
 
+  # One unit per call: systemctl enable is all-or-nothing, so in a batch one missing unit would
+  # quietly leave every other one off too. What game mode can't run without is fatal: the session
+  # and the root expansion, the network Steam signs in over, the seat gamescope takes the display
+  # from, and the controller. The rest only warn.
   # upower + udisks2 are D-Bus-activatable, but Steam queries them once at startup and never
   # retries. fstrim: root is mounted without discard. No USB gadget on purpose.
-  chroot "${root}" systemctl enable iwd NetworkManager systemd-resolved seatd inputplumber \
-        bluetooth upower udisks2 fstrim.timer \
-        steamling-lavd.service \
-        >/dev/null 2>&1 || true
-  # Apart, and fatal: systemctl enable is all-or-nothing, so one missing unit in the batch above
-  # would leave these off too, and the image would boot to a console with no Game Mode and an
-  # unexpanded root.
-  chroot "${root}" systemctl enable steamling-session.service steamling-expand-root.service \
-    || die "could not enable steamling-session/steamling-expand-root in the image (is steamling-session installed?)"
+  local u
+  for u in steamling-session.service steamling-expand-root.service \
+           NetworkManager.service iwd.service seatd.service inputplumber.service; do
+    chroot "${root}" systemctl enable "${u}" >/dev/null \
+      || die "could not enable ${u} in the image (is the package that ships it installed?)"
+  done
+  for u in systemd-resolved.service bluetooth.service upower.service udisks2.service \
+           fstrim.timer steamling-lavd.service; do
+    chroot "${root}" systemctl enable "${u}" >/dev/null 2>&1 || warn "could not enable ${u} in the image"
+  done
   # A well-known password is baked in, so sshd ships off. ALARM enables it: disable, not skip.
   if [ "${SD_SSH}" = on ]; then
     warn "SSH is on — this image accepts SSH logins with the baked-in password"
@@ -186,9 +191,10 @@ EOF
       chroot "${root}" systemctl disable "${u}" >/dev/null 2>&1 || true
     done
   fi
-  chroot "${root}" systemctl --global enable pipewire.socket pipewire-pulse.socket wireplumber.service \
-        steamling-proton-prep.service \
-        >/dev/null 2>&1 || true
+  for u in pipewire.socket pipewire-pulse.socket wireplumber.service steamling-proton-prep.service; do
+    chroot "${root}" systemctl --global enable "${u}" >/dev/null 2>&1 \
+      || warn "could not enable the ${u} user unit in the image"
+  done
 }
 
 main() {
