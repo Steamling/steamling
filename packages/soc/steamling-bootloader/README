@@ -5,7 +5,8 @@ Installing OpenABL from Android (needs root)
 2. As root, run backup_abl.sh from that folder. It saves your current
    bootloader, so you can always go back to it.
 3. Then, as root, run flash_abl.sh to install OpenABL.
-4. Turn the handheld off. Hold Volume Down while turning it on to open the
+4. Turn the handheld off, with the Steamling card still in (the device model
+   list comes from the card). Hold Volume Down while turning it on to open the
    OpenABL menu. Volume Up and Down move, Power selects.
 5. Set these three:
      Boot mode    -> Linux
@@ -14,3 +15,7 @@ Installing OpenABL from Android (needs root)
    Don't skip Device model. Without one, OpenABL won't start Steamling and
    drops you straight back into this menu.
 6. Pick Start.
+
+If it comes back to the menu, the top line says why ("Start Linux came back:
+..."), and the Log entry has the details. docs/install.md in the Steamling repo
+has a table of what each message means.
