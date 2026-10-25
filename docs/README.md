@@ -28,4 +28,6 @@ User guides for Steamling. New here? Start with the [project README](../README.m
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to build, test, and submit a change.
 [building/](building/README.md) walks you through a build step by step, on Linux or on Windows
-with WSL2; [building/advanced.md](building/advanced.md) has every option.
+with WSL2; [building/advanced.md](building/advanced.md) has every option, and
+[building/own-base.md](building/own-base.md) covers building from live Arch Linux ARM, hosting
+your own base, and over-the-air updates.
