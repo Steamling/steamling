@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Desktop wallpaper: the Steamling logo centred on the desktop field. The PKGBUILD renders it
-     at 1920x1080 beside steamling-logo.svg. -->
+<!-- Desktop wallpaper: the Steamling logo on a dark field, with a faint blue glow behind him
+     like the light off his handheld's screen. The PKGBUILD renders it at 1920x1080 beside
+     steamling-logo.svg. -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="1920" height="1080" viewBox="0 0 1920 1080">
-  <rect width="1920" height="1080" fill="#202126"/>
-  <image x="769" y="330" width="382" height="422" xlink:href="steamling-logo.svg"/>
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#25272E"/><stop offset="1" stop-color="#17181C"/>
+    </linearGradient>
+    <radialGradient id="screenlight" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7FCBFF" stop-opacity="0.16"/>
+      <stop offset="0.6" stop-color="#7FCBFF" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#7FCBFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#field)"/>
+  <ellipse cx="960" cy="500" rx="520" ry="360" fill="url(#screenlight)"/>
+  <image x="714" y="268" width="492" height="544" xlink:href="steamling-logo.svg"/>
 </svg>
