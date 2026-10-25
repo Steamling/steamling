@@ -37,13 +37,35 @@ With Cloudflare R2:
    R2**, and paste in the token's keys and the account's endpoint.
 4. Check it works: `rclone lsf r2:steamling` should run without an error.
 
-## 2. Cut the base
+## 2. Fill in your settings
 
-From the Steamling folder:
+Your settings live in one file, `config/local.conf`, which git never commits (so a Wi-Fi password in
+it stays on your laptop). Every build reads it first, so whatever you put there wins over
+Steamling's defaults. Start from the example:
 
 ```fish
-scripts/own-base.fish --remote r2:steamling/repo/base --url https://pub-1234.r2.dev/repo/base
+cp config/local.conf.example config/local.conf
 ```
+
+Open it and fill in at least the two base lines, with your bucket's address from step 1:
+
+```sh
+STEAMLING_BASE_RCLONE_REMOTE=r2:steamling/repo/base
+STEAMLING_BASE_URL=https://pub-1234.r2.dev/repo/base
+```
+
+The rest is optional and explained in the file: the package repo for over-the-air updates, ccache,
+and first-boot settings like Wi-Fi, SSH, the timezone and the root password.
+
+## 3. Cut the base and build
+
+From the Steamling folder, one command does the lot:
+
+```fish
+scripts/own-base.fish
+```
+
+(You can also skip `local.conf` and pass `--remote` and `--url` instead.)
 
 The script:
 
@@ -63,7 +85,7 @@ git add config/steamling.conf packages/shared/steamling-base-lock/steamling-base
 git commit -m "base: our own snapshot"
 ```
 
-Every build after that uses your base. To move it forward later, say for a newer Plasma or Mesa,
+Every build after that, `make image` or `./build.sh`, uses your base. To move it forward later, say for a newer Plasma or Mesa,
 run the script again; it labels each base with the date. The previous base is kept next to the new
 one (as `base-prev`), so the last release can still be rebuilt.
 
@@ -73,7 +95,7 @@ and package rebuilds get faster. `android-tools` (adb and fastboot) is on the li
 base always hosts (`config/packages/base-extras.list`), so `sudo pacman -S android-tools` works on a
 handheld for flashing and support.
 
-## 3. Turn on over-the-air updates
+## 4. Turn on over-the-air updates
 
 Your base is ready, but handhelds also need somewhere to fetch Steamling's own packages. Without
 that, a new version means flashing a new image. Here's how to publish them:
@@ -85,16 +107,16 @@ that, a new version means flashing a new image. Here's how to publish them:
    gpg --export --armor you@example.com > config/steamling-repo.asc
    ```
 
-2. **Point the config at it.** In `config/steamling.conf`:
+2. **Point the config at it.** In `config/local.conf`, uncomment and fill in:
 
    ```sh
-   : "${STEAMLING_REPO_URL:=https://pub-1234.r2.dev/repo}"
-   : "${STEAMLING_REPO_GPG_KEY:=you@example.com}"
-   : "${STEAMLING_REPO_PUBKEY:=config/steamling-repo.asc}"
+   STEAMLING_REPO_URL=https://pub-1234.r2.dev/repo
+   STEAMLING_REPO_GPG_KEY=you@example.com
+   STEAMLING_REPO_PUBKEY=config/steamling-repo.asc
    ```
 
-   `STEAMLING_REPO_RCLONE_REMOTE` already defaults to `r2:steamling/repo`; change it if your bucket
-   is called something else.
+   `STEAMLING_REPO_RCLONE_REMOTE` is already set to `r2:steamling/repo`; change it if your bucket is
+   called something else.
 
 3. **Build an image** (`make image`). Images built from now on trust your key and know where to look
    for updates. Handhelds flashed before this don't know about the repo yet, so they need one
@@ -119,7 +141,7 @@ from what's live and swaps in only the packages you name, so a half-finished exp
 build folder can't ship by accident. Handhelds pick updates up through **Steamling Control →
 Updater**, the **Steamling Updater** app in desktop mode, or `sudo pacman -Syu`.
 
-## 4. Build the image
+## 5. Build the image
 
 `make image` (or `./build.sh`, which is the same thing with friendlier output) builds the whole SD
 card image and leaves it at `build/image/steamling-sm8550-sd.img`. Write that file to a microSD card
