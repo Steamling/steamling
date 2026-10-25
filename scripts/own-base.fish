@@ -3,8 +3,10 @@
 # so builds and devices stop borrowing Pocknix's. docs/building/own-base.md explains each step;
 # this runs them.
 #
-#   scripts/own-base.fish --remote <rclone destination> --url <public url> [--id <label>] [--yes]
-#   e.g. scripts/own-base.fish --remote r2:steamling/repo/base --url https://repo.example.com/base
+#   scripts/own-base.fish [--remote <rclone destination>] [--url <public url>] [--id <label>] [--yes]
+# With no --remote/--url it takes STEAMLING_BASE_RCLONE_REMOTE and STEAMLING_BASE_URL from
+# config/local.conf (copy config/local.conf.example to start one), so a filled-in local.conf
+# makes this a single command. The flags win over the file.
 #
 # It points config/steamling.conf at your base and unpins it, builds everything against live Arch
 # Linux ARM, freezes exactly what that build installed with `make snapshot` (which uploads it and
@@ -22,12 +24,24 @@ function fail
 end
 
 argparse 'remote=' 'url=' 'id=' y/yes h/help -- $argv; or exit 2
-if set -q _flag_help; or not set -q _flag_remote; or not set -q _flag_url
-    sed -n '4,7p' (status filename)
-    exit 2
+if set -q _flag_help
+    sed -n '6,9p' (status filename)
+    exit 0
 end
-set -l remote $_flag_remote
-set -l url (string trim --right --chars / -- $_flag_url)
+# config/local.conf is bash, so let bash read it
+function local_conf -a name
+    test -f config/local.conf; or return
+    bash -c 'source config/local.conf >/dev/null 2>&1; printf "%s" "${!1}"' sh $name
+end
+set -l remote (local_conf STEAMLING_BASE_RCLONE_REMOTE)
+set -l url (local_conf STEAMLING_BASE_URL)
+set -q _flag_remote; and set remote $_flag_remote
+set -q _flag_url; and set url $_flag_url
+test -n "$remote"; and test -n "$url"
+or fail "no base storage set: fill in config/local.conf (cp config/local.conf.example config/local.conf), or pass --remote and --url"
+string match -q '*REPLACE-ME*' -- $url
+and fail "config/local.conf still has the example address: put your bucket's public URL in STEAMLING_BASE_URL"
+set url (string trim --right --chars / -- $url)
 set -l id (date -u +%Y%m%d)
 set -q _flag_id; and set id $_flag_id
 set -l conf config/steamling.conf
