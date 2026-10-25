@@ -14,6 +14,13 @@ export STEAMLING_ROOT="$(cd "${_lib_dir}/.." && pwd)"
 [ -f "${STEAMLING_ROOT}/config/local.conf" ] && source "${STEAMLING_ROOT}/config/local.conf"
 # shellcheck source=../config/steamling.conf
 source "${STEAMLING_ROOT}/config/steamling.conf"
+# STEAMLING_BASE_SNAPSHOT=live builds straight from Arch Linux ARM's own repos, nothing frozen: ":="
+# can't take an empty value from local.conf or the environment, so "live" is how you say none.
+# STEAMLING_BASE_LIVE carries the choice through sudo, where an empty value would pin it again.
+if [ "${STEAMLING_BASE_SNAPSHOT}" = live ] || [ "${STEAMLING_BASE_LIVE:-}" = 1 ]; then
+  STEAMLING_BASE_SNAPSHOT=""
+  export STEAMLING_BASE_LIVE=1
+fi
 
 # --- device profile + per-SoC kernel pins -----------------------------------
 # The device profile (devices/<name>/profile.conf) declares what differs per family: SoC,
