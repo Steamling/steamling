@@ -41,7 +41,7 @@ open a terminal and do whatever you like.
 
 | Chip | Handhelds | Status |
 |---|---|---|
-| Snapdragon 8 Gen 2 (SM8550) | Retroid Pocket 6 (and TOP-DPAD) | Reference device, being brought up |
+| Snapdragon 8 Gen 2 (SM8550) | Retroid Pocket 6 (and TOP-DPAD) | Reference device: boots into game mode, desktop mode not working yet |
 | Snapdragon 8 Gen 2 (SM8550) | Retroid Pocket Nova, AYN Odin 2 / Mini / Portal, AYN Thor, AYANEO Pocket ACE / DMG / DS / EVO / S | Untested ports |
 | Snapdragon 865 (SM8250) | Retroid Pocket 5, Flip 2, Mini, Mini V2, AYN Thor Lite, MANGMI Air Y Pro, MANGMI Pocket Max, AYANEO Pocket MICRO 2 | Untested ports |
 | Snapdragon 8 Gen 3 (SM8650) | AYANEO Pocket S2, KONKR Pocket FIT | Untested ports |

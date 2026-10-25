@@ -3,8 +3,9 @@
 Steamling runs on Qualcomm Snapdragon handhelds. One image covers every handheld on the same
 chip, and picks the right settings for yours when it boots.
 
-**Please read this before you flash anything.** Only the Retroid Pocket 6 is a reference device,
-and even that one is still being brought up. Every other handheld below is an **untested port**.
+**Please read this before you flash anything.** Only the Retroid Pocket 6 is a reference device.
+It boots from the SD card into game mode, but it's still early: desktop mode doesn't come up yet
+(see [Known issues](known-issues.md)). Every other handheld below is an **untested port**.
 That means:
 
 - It **builds**: the kernel, device tree and packages for it are all in this repo, and the build
@@ -23,7 +24,7 @@ trying it and telling me what happened. See [Help test a device](#help-test-a-de
 
 | Handheld | Status |
 |---|---|
-| Retroid Pocket 6 (and TOP-DPAD) | Reference device, being brought up |
+| Retroid Pocket 6 (and TOP-DPAD) | Reference device: boots into game mode, desktop mode not working yet |
 | Retroid Pocket Nova | Untested port |
 | AYN Odin 2 | Untested port |
 | AYN Odin 2 Mini | Untested port |

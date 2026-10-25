@@ -15,7 +15,8 @@ BSP's `boards/models` table (`<board> <dt model>` rows). InputPlumber configs ar
 `matches:` on the devicetree model. Since consumers *source* `device.conf`, the dispatcher
 is invisible to them; `/etc/steamling/device.conf` still overrides.
 
-The families. The Retroid Pocket 6 is the reference board: it is the only one tested so far.
+The families. The Retroid Pocket 6 is the reference board: it is the only one tested so far, and
+it boots Steamling from the SD card into game mode.
 Every other board is an **untested port** brought over from
 [armada](https://github.com/armada-os/armada): it builds, and armada boots it, but nobody has run
 Steamling on it yet.

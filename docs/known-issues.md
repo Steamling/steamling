@@ -15,6 +15,12 @@ Open an [issue on GitHub](https://github.com/dvandenburgh/steamling/issues).
   for real play. Honestly, consider this a feature: stop staring at the numbers and enjoy the
   game 😃
 
+## Desktop mode
+
+- **Desktop mode comes up as a black screen on the Retroid Pocket 6.** Leaving game mode for the
+  desktop shows nothing. Hold the power button to restart; the handheld comes back up in game
+  mode. This is being worked on.
+
 ## Hardware
 
 - **Gyro does not work yet.** The motion sensors are not wired up, so games and emulators that
