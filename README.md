@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/steamling-social.png" alt="Steamling: a little red dragon holding a handheld, beside the steamling wordmark" width="760">
+  <img src="docs/images/steamling-social.png" alt="Steamling: a little red dragon absorbed in his handheld, beside the steamling wordmark" width="760">
 </p>
 
 <h3 align="center">A SteamOS-style gaming system for Snapdragon handhelds, built on Arch Linux ARM</h3>
