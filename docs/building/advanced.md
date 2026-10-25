@@ -126,6 +126,7 @@ environment (for example `make image SSH=1`, `export SSH=1` to make it the defau
 | `--no-seed` | `STEAMLING_SEED=off` | compile every package instead of downloading the published ones |
 | `--no-host-setup` | `STEAMLING_HOST_SETUP=off` | stop when host packages are missing instead of installing them |
 | `--no-status-bar` | `STEAMLING_STATUS_BAR=off` | plain output, without the status line at the bottom |
+| (none) | `STEAMLING_BASE_SNAPSHOT=live` | build straight from Arch Linux ARM's own repos and latest tarball instead of the frozen base: nothing to host or upload, but every build gets whatever ALARM has that day (put it in `config/local.conf` to keep it) | <!-- docs-check: allow -->
 | `--build-base` | (none) | cut your own frozen base first, upload it, then build against it ([own-base.md](own-base.md)); without it, builds use the base already pinned |
 
 ### Watching a build
