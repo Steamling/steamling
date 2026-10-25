@@ -1,0 +1,13 @@
+# Takes Steam's first-run setup marker away once setup is done (see steamling-oobe-marker).
+[Unit]
+Description=steamling: retire Steam's first-run setup marker once it's done
+ConditionPathExists=/etc/steamos-oobe-image
+After=local-fs.target home.mount
+Before=steamling-session.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/steamling/steamling-oobe-marker
+
+[Install]
+WantedBy=multi-user.target

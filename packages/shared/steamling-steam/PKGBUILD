@@ -2,7 +2,7 @@
 # gamescope launcher, and the ARM-Proton compat-tool plumbing.
 pkgname=steamling-steam
 pkgver=0.1.0
-pkgrel=69.9
+pkgrel=70
 pkgdesc="Native ARM64 Steam Big Picture (gamescope) for the RP6 — installer + launcher"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -25,9 +25,10 @@ source=('steamling-steam-install' 'steamling-steam' 'steamling-steam-splash' 'st
         'steamling-game-launch' 'steamling-steam-env' 'steamling-proton-wrapper' 'fex-profiles.json'
         'steamling-guestos-mount' 'steamling-guestos.service' 'graphics_provider.json'
         'steamling-powerbuttond'
-        'steamling-fex-binfmt' 'steamling-fex-binfmt.service' '90-steamling-fex-binfmt.hook')
+        'steamling-fex-binfmt' 'steamling-fex-binfmt.service' '90-steamling-fex-binfmt.hook'
+        'steamling-oobe-marker' 'steamling-oobe-marker.service')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   install -Dm755 "${srcdir}/steamling-steam-install" "${pkgdir}/usr/bin/steamling-steam-install"
@@ -60,4 +61,9 @@ package() {
   ln -sf "../steamling-fex-binfmt.service" \
     "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-fex-binfmt.service"
   install -Dm644 "${srcdir}/90-steamling-fex-binfmt.hook"    "${pkgdir}/usr/share/libalpm/hooks/90-steamling-fex-binfmt.hook"
+  # Steam's first-run setup marker: the SD image creates it, this unit retires it once setup is done.
+  install -Dm755 "${srcdir}/steamling-oobe-marker"           "${pkgdir}/usr/lib/steamling/steamling-oobe-marker"
+  install -Dm644 "${srcdir}/steamling-oobe-marker.service"   "${pkgdir}/usr/lib/systemd/system/steamling-oobe-marker.service"
+  ln -sf "../steamling-oobe-marker.service" \
+    "${pkgdir}/usr/lib/systemd/system/multi-user.target.wants/steamling-oobe-marker.service"
 }

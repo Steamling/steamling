@@ -1,0 +1,33 @@
+#!/bin/bash
+# Steam only runs its first-run setup (language, time zone, Wi-Fi) while /etc/steamos-oobe-image
+# exists; without it a fresh install goes straight to the sign-in screen. Steam never deletes the
+# file itself and restarts the device when setup ends, so a file left behind would bring setup back
+# on every boot. The SD image is built with it; this removes it, before Steam starts, once Steam has
+# recorded setup as done.
+set -u
+
+MARKER=/etc/steamos-oobe-image
+[ -e "${MARKER}" ] || exit 0
+
+home="$(getent passwd deck | cut -d: -f6)"
+home="${home:-/home/deck}"
+
+done_reason=""
+for reg in "${home}/.steam/registry.vdf" "${home}/.local/share/Steam/registry.vdf"; do
+  if grep -Eq '"CompletedOOBE(Stage1)?"[[:space:]]+"1"' "${reg}" 2>/dev/null; then
+    done_reason="Steam recorded setup as done in ${reg}"
+    break
+  fi
+done
+# Someone already signed in has been past setup: never hold them in it.
+if [ -z "${done_reason}" ] \
+   && grep -q '"AccountName"' "${home}/.local/share/Steam/config/loginusers.vdf" 2>/dev/null; then
+  done_reason="an account has signed in"
+fi
+
+if [ -n "${done_reason}" ]; then
+  rm -f "${MARKER}"
+  echo "steamling-oobe-marker: ${done_reason}; Steam's first-run setup won't run again"
+else
+  echo "steamling-oobe-marker: first-run setup still to do, Steam will show it"
+fi
