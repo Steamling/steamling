@@ -9,6 +9,9 @@ Open an [issue on GitHub](https://github.com/dvandenburgh/steamling/issues).
   Steam can take a *long* while to get ready, especially when running from an SD card. The
   Steamling logo stays on screen while it does; a short black gap before the logo appears
   is normal. Leave the device alone and it will get there.
+- **Steam can skip its Wi-Fi setup on the first boot.** It may open on the sign-in screen without
+  asking for a network. Tap the Wi-Fi icon at the top of the screen to connect, or put your Wi-Fi in
+  the image when you build it (`--wifi`).
 - **Steam's "Add a Non-Steam Game" dialog does not work.** Use **Steamling Control → Library** to add
   one instead.
 - **MangoHud costs a little performance.** It is fine for dialing in settings, but turn it off

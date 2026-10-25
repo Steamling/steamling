@@ -85,6 +85,11 @@ The menu remembers these settings, so from now on the handheld boots Steamling w
 in. The first boot into game mode can take a long while, especially from an SD card. Leave it be;
 it will come up.
 
+Steam needs the internet to sign in. If you didn't [put your Wi-Fi in the
+image](building/README.md#put-your-wi-fi-in-the-image-recommended), Steam may go straight to its
+sign-in screen without asking for a network first. Tap the **Wi-Fi icon** at the top of the screen,
+pick your network there and connect, then sign in.
+
 ### If it doesn't boot
 
 When Start doesn't work, OpenABL comes back to its menu and says why at the top, as **Start Linux
