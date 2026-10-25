@@ -17,7 +17,8 @@ DEVICE=sm8550
 # The base is everything that comes from Arch Linux ARM rather than from Steamling.
 #   live   Build straight from Arch Linux ARM: its latest rootfs tarball and its own package repos.
 #          Nothing is frozen, uploaded or synced, and every build gets whatever ALARM has that day.
-#          Handhelds built this way stay on live ALARM when they update.
+#          Handhelds built this way stay on live ALARM when they update; our own builds (Mesa,
+#          gamescope...) stay as built until you reflash, so ALARM's can't replace them.
 #   (unset) The frozen snapshot config/steamling.conf pins, so every build gets the same versions.
 STEAMLING_BASE_SNAPSHOT=live
 # The rootfs tarball a build starts from. This is already the default; change it only to use a

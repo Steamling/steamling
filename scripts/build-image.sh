@@ -186,7 +186,21 @@ install_local_packages() {
   # repos, inserted ABOVE [core]: `pacman -S
   # <name>` picks the FIRST repo that carries the name, so steamling must outrank ALARM
   # for our same-name packages (mesa, gamescope, ...). Without it the image is reflash-only.
+  # Live ALARM with no repo of ours: [extra] carries newer same-name packages (mesa, gamescope...)
+  # and the first -Syu would swap our builds for them. They can only change by reflashing anyway,
+  # so hold each one ALARM also has. (Read before the stanzas go: -Sl needs the repo configured.)
+  local held=""
+  if [ -z "${STEAMLING_REPO_URL}" ] && [ -z "${STEAMLING_BASE_SNAPSHOT}" ]; then
+    held="$(LC_ALL=C comm -12 \
+              <(chroot "${root}" pacman -Slq steamling steamling-shared 2>/dev/null | LC_ALL=C sort -u) \
+              <(chroot "${root}" pacman -Slq core extra alarm aur 2>/dev/null | LC_ALL=C sort -u) \
+            | LC_ALL=C comm -12 - <(chroot "${root}" pacman -Qq | LC_ALL=C sort) | tr '\n' ' ')"
+  fi
   sed -i '/^\[steamling\]/,+2d;/^\[steamling-shared\]/,+2d' "${root}/etc/pacman.conf"
+  if [ -n "${held// /}" ]; then
+    sed -i "/^\[options\]$/a IgnorePkg   = ${held% }" "${root}/etc/pacman.conf"
+    log "live base, no package repo: holding our builds of ${held% } against ALARM's"
+  fi
   # Published repos: STEAMLING_REPO_URL is the BASE url. [steamling] is per-SoC
   # (<base>/<soc> — tuned packages share pkgnames across SoCs with different
   # binaries, so those trees must not mix); [steamling-shared] (<base>/shared) is
