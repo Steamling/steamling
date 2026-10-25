@@ -353,6 +353,15 @@ main() {
   prune_fontconfig_compat_links "${ROOTFS_DIR}"
   strip_docs "${ROOTFS_DIR}"
 
+  # A live build has no frozen base to lock to, so mark it rolling (the flag `steamling-base
+  # rolling` sets). Without it steamling-lock-migrate moves the device onto the pinned base at its
+  # first update.
+  if [ -z "${STEAMLING_BASE_SNAPSHOT}" ]; then
+    install -d "${ROOTFS_DIR}/etc/steamling"
+    echo "rolling: built from live Arch Linux ARM on $(date -u +%F). 'steamling-base locked' locks it." \
+      > "${ROOTFS_DIR}/etc/steamling/rolling-mode"
+  fi
+
   # Build stamp for support: which base snapshot this image shipped with, and
   # when. Separate file: /etc/os-release is owned by the filesystem package.
   # (A running device's CURRENT base is steamling-base-lock's version, which
