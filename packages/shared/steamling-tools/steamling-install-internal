@@ -77,7 +77,7 @@ case "$ROOT_SRC" in
   "$DEVICE"*) die "$DEVICE is the disk we booted from — that's the SD, not internal. Aborting." ;;
 esac
 
-partdev() { case "$DEVICE" in *mmcblk*|*nvme*) echo "${DEVICE}p$1" ;; *) echo "${DEVICE}$1" ;; esac; }
+partdev() { case "$DEVICE" in *[0-9]) echo "${DEVICE}p$1" ;; *) echo "${DEVICE}$1" ;; esac; }   # the kernel adds "p" after a trailing digit
 
 existing="$(parted -m -s "$DEVICE" print 2>/dev/null | tail -n +2 | cut -d: -f6 || true)"
 if echo "$existing" | grep -qx -e "$ROOT_GPT_NAME"; then
