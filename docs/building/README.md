@@ -166,3 +166,4 @@ Then follow the [install guide](../install.md) to set up your handheld and boot 
 - [linux-host.md](linux-host.md): setting up a Linux build machine by hand
 - [wsl.md](wsl.md): Windows and WSL2 in depth
 - [troubleshooting.md](troubleshooting.md): common errors and what they mean
+- [own-base.md](own-base.md): hosting your own base and package repo, for over-the-air updates

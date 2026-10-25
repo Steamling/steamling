@@ -1,0 +1,159 @@
+# Your own base, and over-the-air updates
+
+Steamling installs two kinds of packages: the ones we build (the kernel, Mesa, gamescope, our
+tools...) and everything else, which comes from Arch Linux ARM. That second set is the **base**.
+Arch Linux ARM changes every day, so Steamling uses a frozen copy of it, a snapshot, so every build
+and every device gets exactly the same versions.
+
+Until now we've borrowed that snapshot from the Pocknix project. That works, but it isn't ours:
+on 23 October they cut a new one at the same address, and our builds moved onto it overnight while
+our settings still named the old one. This page shows how to make and host your own, so the base
+only moves when you move it.
+
+The same hosting also turns on **over-the-air updates**: once your package repo is published,
+handhelds update with a button press instead of a reflash.
+
+## What you need
+
+- **The machine you already build on.** These steps were written for an x86_64 CachyOS laptop,
+  but any Arch-based Linux works. It needs to be set up for building already (see
+  [Building on a Linux host](linux-host.md)).
+- **Somewhere public to put files.** Anything [rclone](https://rclone.org) can upload to, with a
+  public web address in front of it. Cloudflare R2 is what the scripts default to: its free tier
+  covers 10 GB and doesn't charge for downloads. A base is a few GB; the package repos add a few
+  more.
+- **Time.** The script builds everything twice. On an x86_64 machine every Arm program runs through
+  qemu, so the first build takes hours.
+
+## 1. Set up the storage
+
+With Cloudflare R2:
+
+1. Create a bucket (say `steamling`) in the Cloudflare dashboard and allow public access to it,
+   either with the `r2.dev` address Cloudflare offers or a domain of your own. Note the public
+   address, for example `https://pub-1234.r2.dev`.
+2. Create an R2 API token with read and write access to that bucket.
+3. On the laptop, run `rclone config`, add a remote called `r2` of type **Amazon S3 / Cloudflare
+   R2**, and paste in the token's keys and the account's endpoint.
+4. Check it works: `rclone lsf r2:steamling` should run without an error.
+
+## 2. Cut the base
+
+From the Steamling folder:
+
+```fish
+scripts/own-base.fish --remote r2:steamling/repo/base --url https://pub-1234.r2.dev/repo/base
+```
+
+The script:
+
+1. Checks the laptop has what it needs, including qemu for running Arm programs.
+2. Points `config/steamling.conf` at your storage and unpins the base.
+3. Builds everything against live Arch Linux ARM (`make image`).
+4. Freezes exactly what that build installed, uploads it, and pins the config to it
+   (`make snapshot`).
+5. Checks your public address serves the new base.
+6. Builds everything again, this time from your frozen base.
+
+If a step fails, fix the cause and run the same command again; finished work isn't redone. When
+it's done, commit what it changed:
+
+```fish
+git add config/steamling.conf packages/shared/steamling-base-lock/steamling-base.lock
+git commit -m "base: our own snapshot"
+```
+
+Every build after that uses your base. To move it forward later, say for a newer Plasma or Mesa,
+run the script again; it labels each base with the date. The previous base is kept next to the new
+one (as `base-prev`), so the last release can still be rebuilt.
+
+**ccache and android-tools.** A build against live Arch Linux ARM installs ccache in the package
+build environment, and the snapshot takes everything a build installed, so your base carries ccache
+and package rebuilds get faster. `android-tools` (adb and fastboot) is on the list of extras the
+base always hosts (`config/packages/base-extras.list`), so `sudo pacman -S android-tools` works on a
+handheld for flashing and support.
+
+## 3. Turn on over-the-air updates
+
+Your base is ready, but handhelds also need somewhere to fetch Steamling's own packages. Without
+that, a new version means flashing a new image. Here's how to publish them:
+
+1. **Make a signing key**, so handhelds only accept packages you built:
+
+   ```fish
+   gpg --quick-gen-key "Steamling repo <you@example.com>" ed25519 sign never
+   gpg --export --armor you@example.com > config/steamling-repo.asc
+   ```
+
+2. **Point the config at it.** In `config/steamling.conf`:
+
+   ```sh
+   : "${STEAMLING_REPO_URL:=https://pub-1234.r2.dev/repo}"
+   : "${STEAMLING_REPO_GPG_KEY:=you@example.com}"
+   : "${STEAMLING_REPO_PUBKEY:=config/steamling-repo.asc}"
+   ```
+
+   `STEAMLING_REPO_RCLONE_REMOTE` already defaults to `r2:steamling/repo`; change it if your bucket
+   is called something else.
+
+3. **Build an image** (`make image`). Images built from now on trust your key and know where to look
+   for updates. Handhelds flashed before this don't know about the repo yet, so they need one
+   reflash with the new image.
+
+4. **Publish the packages for the first time.** There's nothing live to compare against yet, so the
+   first upload sends everything you've built, the shared repo once and then each chip family's:
+
+   ```fish
+   env STEAMLING_PUBLISH_FROM=localrepo make publish-shared
+   env STEAMLING_PUBLISH_FROM=localrepo make publish
+   ```
+
+From then on, publish only what you changed. Build it, name the packages, check, upload:
+
+```fish
+make stage PKG="gamescope mangohud"; and make publish
+```
+
+(`make stage-shared` and `make publish-shared` do the same for the shared repo.) Staging starts
+from what's live and swaps in only the packages you name, so a half-finished experiment in your
+build folder can't ship by accident. Handhelds pick updates up through **Steamling Control →
+Updater**, the **Steamling Updater** app in desktop mode, or `sudo pacman -Syu`.
+
+## 4. Build the image
+
+`make image` (or `./build.sh`, which is the same thing with friendlier output) builds the whole SD
+card image and leaves it at `build/image/steamling-sm8550-sd.img`. Write that file to a microSD card
+as an image, with balenaEtcher, Rufus or `dd`, and follow the [install guide](../install.md).
+
+You don't need a separate image-making tool. Arch's own `archiso` builds live installer ISOs for
+x86_64 PCs, not SD card images for Arm handhelds. What Steamling's build does is the Arm
+equivalent: it unpacks Arch Linux ARM's base system, installs packages into it the way `pacstrap`
+would (running Arm programs through qemu), adds our kernel and settings, and writes the result out
+as a partitioned image.
+
+## Could desktop mode be XFCE instead of KDE?
+
+It doesn't have to be KDE, but swapping it won't speed up games. Game mode and desktop mode never
+run at the same time. Steamling starts either Steam's game mode or the desktop, and switching ends
+one before starting the other. While you play, no KDE program is running, so there's nothing for
+XFCE to save.
+
+Desktop mode uses **Plasma Mobile** because it's built for a small touch screen: big touch targets,
+an on-screen keyboard, and it copes with the RP6's screen being mounted sideways. XFCE could be added
+as another desktop choice next to it. Steamling already lets you pick between installed desktops.
+It would mean real work, though:
+
+- XFCE still runs on X11 (its Wayland support is only partial so far), and Steamling's session
+  switcher only starts Wayland desktops.
+- Screen rotation, touch input and an on-screen keyboard would each need setting up separately.
+
+What you'd gain is a smaller image, fewer updates, and a lighter desktop *while you're in desktop
+mode*. If you want to check what's running while you game, connect over SSH while a game runs and
+look:
+
+```sh
+ps -eo rss,comm --sort=-rss | head -20
+systemctl --user list-units --state=running
+```
+
+If anything from KDE shows up there, that's a bug worth fixing on its own, whichever desktop we use.

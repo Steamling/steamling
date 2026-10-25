@@ -97,9 +97,14 @@ came back: …**. The menu's **Log** entry has the details. Here's what each one
 
 ## Updating
 
-Steamling doesn't have its own update server yet, so for now a new version of Steamling means
-flashing a newer image (your games and saves live on the card, so back up anything you care about
-first). Once the update server is up, updates will arrive without reflashing, through any of:
+Steamling updates over the air from a package repo: you press a button and the handheld downloads
+what changed, no reflash. That needs a published repo for your build to point at. There's no
+official one yet, so on a plain build a new version still means flashing a newer image (your games
+and saves live on the card, so back up anything you care about first). If you build Steamling
+yourself, you can publish your own repo and turn updates on: [own-base.md](building/own-base.md)
+walks through it.
+
+Once your build points at a repo, updates come through any of:
 
 - **Steamling Control**: Quick Access Menu → **Steamling Control** → **Updater** →
   **Check for Updates** → **Install Updates**, without leaving game mode.

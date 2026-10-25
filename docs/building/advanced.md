@@ -25,9 +25,10 @@ The emulated steps are the slow part on x86_64. Most of that cost is compiling t
 (mesa, gamescope, FEX, the emulators), so the build can **skip compiling** everything you have
 not changed: `make seed` downloads the already-built packages from a published Steamling repo, and
 only your changes get compiled. With it, an x86_64 PC builds an image in a few hours instead of
-days. Steamling doesn't publish a package repo yet (`STEAMLING_REPO_URL` in
-`config/steamling.conf` is empty), so for now every package compiles and `./build.sh` skips the
-seed step.
+days. There's no official Steamling package repo yet (`STEAMLING_REPO_URL` in
+`config/steamling.conf` is empty), so every package compiles and `./build.sh` skips the seed step,
+unless you publish your own: [own-base.md](own-base.md) shows how, and the same repo gives your
+handhelds over-the-air updates.
 
 An aarch64 host (an Arch/Fedora VM on Apple Silicon, an ARM cloud server) needs no emulation at all
 and is still the fastest way to build everything from source.
