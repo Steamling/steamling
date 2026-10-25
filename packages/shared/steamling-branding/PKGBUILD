@@ -6,7 +6,7 @@
 # #202126 desktop field. Everything is drawn from SVG at build time: no rendered PNG is committed.
 pkgname=steamling-branding
 pkgver=0.1.0
-pkgrel=2.6
+pkgrel=2.7
 pkgdesc="Steamling branding: plymouth boot theme, Plasma splash, wallpaper"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -63,7 +63,7 @@ package() {
   # Name/Description/ImageDir point at OUR dir; the black field follows the SteamOS boot
   # screen. two-step tops the watermark at a(H-h) but centres the throbber on aH, so the still
   # logo and the frames share a top on any screen only when a*h(watermark) = h(throbber)/2. a = 7/16
-  # with the 288-high watermark and the 252-high throbber (288a = 126) puts the logo's centre
+  # with the 576-high watermark and the 504-high throbber (576a = 252) puts the logo's centre
   # just above the screen's, where logo and wordmark sat together. Both are exact in binary, so
   # the two truncate to the same pixel. Messages move to the corner, clear of the logo;
   # steamling-steam-splash reads the field and alignment back.

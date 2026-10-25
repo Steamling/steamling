@@ -7,6 +7,14 @@ _steamling_set_plymouth_theme() {
   sed -i 's/^Theme=spinner$/Theme=steamling/' "${conf}"
 }
 
+# From pkgrel 2.7 the boot frames are drawn at full size, so the DeviceScale=2 shipped before
+# would double them off the screen. Once, on that upgrade: a scale set later is the user's.
+_steamling_unscale_plymouth() {
+  local conf=/etc/plymouth/plymouthd.conf
+  [ -f "${conf}" ] || return 0
+  sed -i 's/^DeviceScale=2$/DeviceScale=1/' "${conf}"
+}
+
 # 0.1.0-1 stamped before any desktop existed, so its stamps are false. Drop them where no
 # wallpaper was ever set; a user's own pick has an Image= line and keeps its stamp.
 _steamling_drop_false_stamps() {
@@ -26,5 +34,6 @@ post_install() {
 
 post_upgrade() {
   _steamling_set_plymouth_theme
+  [ "$(vercmp "${2:-0}" 0.1.0-2.7)" -lt 0 ] && _steamling_unscale_plymouth
   case "${2:-}" in 0.1.0-1) _steamling_drop_false_stamps ;; esac
 }
