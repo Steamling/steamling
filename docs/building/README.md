@@ -99,6 +99,20 @@ cd ~/steamling
 
 It picks up where it left off instead of starting over.
 
+### Put your Wi-Fi in the image (recommended)
+
+Steam needs the internet to sign in, so it's easiest if the handheld is online from its very first
+boot. Give the build your Wi-Fi name and password and it joins your network on its own, before
+Steam starts:
+
+```bash
+./build.sh --wifi "YourNetworkName" --wifi-psk "YourPassword" --wifi-country US
+```
+
+Use your own two-letter country code (US, GB, DE...); 5 GHz networks need it. Add `--ssh` too if
+you'd like to log in from your PC. Without these, you pick a network in Steam's own setup on the
+first boot instead.
+
 ### Building for a handheld other than the RP6
 
 `./build.sh` on its own builds for the Snapdragon 8 Gen 2 handhelds (the Retroid Pocket 6 and
@@ -142,8 +156,7 @@ Then follow the [install guide](../install.md) to set up your handheld and boot 
 
 - **Default password.** The image's `root` and `deck` password is `root`. Change it after your
   first boot (the install guide shows how).
-- **Want SSH or Wi-Fi set up ahead of time?** Run `./build.sh --help` to see the options, or
-  check [advanced.md](advanced.md).
+- **More options.** Run `./build.sh --help` to see them all, or check [advanced.md](advanced.md).
 - **Updating your copy later.** To build the newest version, run:
 
   ```bash
