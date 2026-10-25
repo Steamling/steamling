@@ -162,6 +162,10 @@ else note "package versions" "BROKEN"; printf '%s\n' "${out}" | sed 's/^/    /';
 if out="$(python3 "${STEAMLING_ROOT}/scripts/check-comments.py" 2>&1)"; then note "code comments" "ok"
 else note "code comments" "STALE"; printf '%s\n' "${out}" | sed 's/^/    /'; fail=1; fi
 
+# --- branding: every image of the steamling is generated from steamling-figure.svg ----------
+if out="$(python3 "${STEAMLING_ROOT}/scripts/render-branding.py" --check 2>&1)"; then note "branding images" "ok"
+else note "branding images" "STALE"; printf '%s\n' "${out}" | sed 's/^/    /'; fail=1; fi
+
 # --- SoC families: what a new SoC or board must carry (all SoCs, not just DEVICE) ----
 # An unreferenced board never loads.
 # devices/README.md's key table as "<key> required|optional" (the Absent column says "required"

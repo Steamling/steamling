@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Steamling logo: the baby dragon curled up side-on over a handheld in his lap, head bowed
-     right down to the screen, completely absorbed and paying the viewer no attention. The
-     screen's blue light falls on his face. Transparent ground, made for dark fields. Every part
-     carries a dark ink line and a soft toon shade (the ink* filters). The wordmark is Bricolage
-     Grotesque Bold (SIL Open Font License 1.1) converted to outlines, so no font is needed to
-     render it. The PKGBUILD renders it for the Plasma splash and the wallpaper. -->
-<svg xmlns="http://www.w3.org/2000/svg" width="380" height="420" viewBox="50 35 380 420" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo1YzFjMzBkNS0yZDQ4LTRmYWMtYTk2MS1kOGMzYjQyOTUwMTYAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaGLbylUZCvGCnTgQoCvyF1oAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkNWVlMWU3OS1jYzhjLTQ3ZDgtODhkYS1jZWI0NmMxMjAzOTBscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNozPb8Gd3NVNzbCNxY96djzwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggFYcppE1tIAz4ZW4v7UD1tgSyIYbSX+7goGeAmAyyfYGkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaHNb4KTe+A0eJNVMKKzSZyUAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIBPfumIjEZKdu6XEpRPq9A3ZULExENu6AlPWmHa+b6RYZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GQLuZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjVjMWMzMGQ1LTJkNDgtNGZhYy1hOTYxLWQ4YzNiNDI5NTAxNi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjRlMGMxNTY1LWVmM2MtNDA5ZS05NDczLTM0YTllMzBiOGUyYnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCAVhymkTW0gDPhlbi/tQPW2BLIhhtJf7uCgZ4CYDLJ9gaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFgg6Op6FBQpZoZhGkYx84wPYOUxzGW30wbb7qlehUlQ71CiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggJoZi63C3NQ1bK+fhZv8STZhZrMfGGs/Nr3A7TNGqUiV0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQNh1M3e2Iu5OJ6Rm6qdzNLsqKlRvGQaN6xwBQbIKn2iJwnm1JnCYuw4iZr96ee5lnK/7J6agX5u8K3SM6/IUj/k=</c2pa:manifest></metadata>
+<!-- Steamling logo: the steamling over the "steamling" wordmark, on a transparent
+     ground made for dark fields. Generated by scripts/render-branding.py from
+     steamling-figure.svg and steamling-wordmark.svg; edit those, not this. The
+     PKGBUILD renders it for the Plasma splash and the wallpaper. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="420" viewBox="50 35 380 420">
+<svg x="65" y="40" width="350" height="328" viewBox="68 48 376 352">
 <defs>
   <filter id="inkRed" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
     <feMorphology in="SourceAlpha" operator="dilate" radius="2.4" result="grow"/>
@@ -64,25 +63,6 @@
     <feComposite in2="highin" operator="in" result="light"/>
     <feMerge><feMergeNode in="line"/><feMergeNode in="SourceGraphic"/><feMergeNode in="shadow"/><feMergeNode in="light"/></feMerge>
   </filter>
-  <filter id="inkGold" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-    <feMorphology in="SourceAlpha" operator="dilate" radius="2.0" result="grow"/>
-    <feGaussianBlur in="grow" stdDeviation="0.3" result="growsoft"/>
-    <feFlood flood-color="#3A2306"/>
-    <feComposite in2="growsoft" operator="in" result="line"/>
-    <feOffset in="SourceAlpha" dx="-3.0" dy="-5.0" result="up"/>
-    <feComposite in="SourceAlpha" in2="up" operator="out" result="low"/>
-    <feGaussianBlur in="low" stdDeviation="2.25"/>
-    <feComposite in2="SourceAlpha" operator="in" result="lowin"/>
-    <feFlood flood-color="#8A5A12" flood-opacity="0.55"/>
-    <feComposite in2="lowin" operator="in" result="shadow"/>
-    <feOffset in="SourceAlpha" dx="2.5" dy="3.0" result="dn"/>
-    <feComposite in="SourceAlpha" in2="dn" operator="out" result="high"/>
-    <feGaussianBlur in="high" stdDeviation="1.20"/>
-    <feComposite in2="SourceAlpha" operator="in" result="highin"/>
-    <feFlood flood-color="#FFF0B8" flood-opacity="0.6"/>
-    <feComposite in2="highin" operator="in" result="light"/>
-    <feMerge><feMergeNode in="line"/><feMergeNode in="SourceGraphic"/><feMergeNode in="shadow"/><feMergeNode in="light"/></feMerge>
-  </filter>
   <filter id="inkSteam" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
     <feMorphology in="SourceAlpha" operator="dilate" radius="1.6" result="grow"/>
     <feGaussianBlur in="grow" stdDeviation="0.3" result="growsoft"/>
@@ -122,21 +102,131 @@
   <linearGradient id="hornG" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#EEF0F3"/><stop offset="1" stop-color="#9DA2AA"/>
   </linearGradient>
-  <radialGradient id="irisG" cx="0.4" cy="0.3" r="0.8">
-    <stop offset="0" stop-color="#FBE59A"/><stop offset="0.7" stop-color="#E9C766"/><stop offset="1" stop-color="#C79A2E"/>
-  </radialGradient>
   <linearGradient id="puffG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D5D9DF"/>
   </linearGradient>
-  <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#1D1E23"/><stop offset="1" stop-color="#050506"/>
+
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#A6E4FF" stop-opacity="0.75"/>
+    <stop offset="0.45" stop-color="#8FD8FF" stop-opacity="0.25"/>
+    <stop offset="1" stop-color="#8FD8FF" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="plateG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FF8C8C"/><stop offset="1" stop-color="#E9575E"/>
   </linearGradient>
-  <linearGradient id="screenG" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#23242C"/><stop offset="1" stop-color="#0C0C10"/>
+  <linearGradient id="shellG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2B2D34"/><stop offset="1" stop-color="#121317"/>
   </linearGradient>
-  <linearGradient id="rimG" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D3D6DC"/>
+  <linearGradient id="gripG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1D1E23"/><stop offset="1" stop-color="#0A0A0C"/>
   </linearGradient>
+  <radialGradient id="eyeG" cx="0.45" cy="0.7" r="0.75">
+    <stop offset="0" stop-color="#FFE9A3"/><stop offset="0.6" stop-color="#F2C24E"/><stop offset="1" stop-color="#C8901F"/>
+  </radialGradient>
+</defs>
+  <!-- spade-tipped tail curling round to the front -->
+  <g filter="url(#inkRed)">
+    <path d="M296,350 C342,356 372,338 374,306 C375,292 364,284 354,292 C358,312 342,330 296,330 Z" fill="url(#redSkin)"/>
+  </g>
+  <g filter="url(#inkDark)"><path d="M354,290 C356,276 366,266 380,262 C376,276 374,286 368,300 Z" fill="#8A1520"/></g>
+  <!-- little wings -->
+  <g filter="url(#inkDark)">
+    <path d="M182,262 C160,246 140,244 126,252 C138,256 140,266 136,276 C150,272 162,278 168,290 Z" fill="#8A1520"/>
+    <path d="M298,262 C320,246 340,244 354,252 C342,256 340,266 344,276 C330,272 318,278 312,290 Z" fill="#8A1520"/>
+  </g>
+  <!-- chubby body with rosy belly plates -->
+  <g filter="url(#inkRed)">
+    <ellipse cx="240" cy="314" rx="74" ry="66" fill="url(#redSkin)"/>
+  </g>
+  <g fill="url(#plateG)" stroke="#B9262E" stroke-width="1.5">
+    <rect x="212" y="282" width="56" height="18" rx="9"/>
+    <rect x="208" y="304" width="64" height="18" rx="9"/>
+    <rect x="212" y="326" width="56" height="18" rx="9"/>
+    <rect x="218" y="348" width="44" height="16" rx="8"/>
+  </g>
+  <!-- stubby feet with toe beans -->
+  <g filter="url(#contact)"><g filter="url(#inkRed)">
+    <ellipse cx="198" cy="374" rx="28" ry="14" fill="url(#redSkin)"/>
+    <ellipse cx="282" cy="374" rx="28" ry="14" fill="url(#redSkin)"/>
+  </g></g>
+  <g fill="#FF9AA6"><circle cx="186" cy="378" r="3.6"/><circle cx="198" cy="381" r="3.6"/><circle cx="210" cy="378" r="3.6"/>
+    <circle cx="270" cy="378" r="3.6"/><circle cx="282" cy="381" r="3.6"/><circle cx="294" cy="378" r="3.6"/></g>
+  <!-- horns -->
+  <g filter="url(#inkSilver)">
+    <path d="M190,118 C180,94 164,82 146,82 C160,92 168,108 170,128 Z" fill="url(#hornG)"/>
+    <path d="M290,118 C300,94 316,82 334,82 C320,92 312,108 310,128 Z" fill="url(#hornG)"/>
+  </g>
+  <path d="M176,108 C170,98 162,92 154,90 M304,108 C310,98 318,92 326,90" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="2" stroke-linecap="round"/>
+  <!-- big round head, bowed over the screen -->
+  <g filter="url(#inkRed)">
+    <ellipse cx="240" cy="176" rx="94" ry="84" fill="url(#redSkin)"/>
+    <ellipse cx="240" cy="236" rx="40" ry="24" fill="url(#redSkin)"/>
+  </g>
+  <ellipse cx="210" cy="124" rx="30" ry="12" transform="rotate(-14 210 124)" fill="#FFFFFF" fill-opacity="0.24"/>
+  <path d="M226,98 l6,-10 l6,10 M244,96 l6,-12 l6,12" fill="#8A1520" stroke="#2A0508" stroke-width="2" stroke-linejoin="round"/>
+  
+    <ellipse cx="204" cy="196" rx="17" ry="20" fill="#FFFFFF" stroke="#3A0A0E" stroke-width="2.4"/>
+    <ellipse cx="204" cy="202" rx="13.5" ry="14" fill="url(#eyeG)"/>
+    <ellipse cx="204" cy="205" rx="7.5" ry="9" fill="#170405"/>
+    <circle cx="208" cy="201" r="4.2" fill="#E6F7FF"/>
+    <circle cx="200" cy="210" r="2" fill="#FFFFFF" fill-opacity="0.85"/>
+    <clipPath id="eyeClip204"><ellipse cx="204" cy="196" rx="17" ry="20"/></clipPath>
+    <path clip-path="url(#eyeClip204)" d="M186,192 C190,185 218,185 222,192 L223,172 L185,172 Z" fill="#E12F37"/>
+    <path d="M187,192 C194,185 214,185 221,192" fill="none" stroke="#3A0A0E" stroke-width="2.6" stroke-linecap="round"/>
+  
+    <ellipse cx="276" cy="196" rx="17" ry="20" fill="#FFFFFF" stroke="#3A0A0E" stroke-width="2.4"/>
+    <ellipse cx="276" cy="202" rx="13.5" ry="14" fill="url(#eyeG)"/>
+    <ellipse cx="276" cy="205" rx="7.5" ry="9" fill="#170405"/>
+    <circle cx="280" cy="201" r="4.2" fill="#E6F7FF"/>
+    <circle cx="272" cy="210" r="2" fill="#FFFFFF" fill-opacity="0.85"/>
+    <clipPath id="eyeClip276"><ellipse cx="276" cy="196" rx="17" ry="20"/></clipPath>
+    <path clip-path="url(#eyeClip276)" d="M258,192 C262,185 290,185 294,192 L295,172 L257,172 Z" fill="#E12F37"/>
+    <path d="M259,192 C266,185 286,185 293,192" fill="none" stroke="#3A0A0E" stroke-width="2.6" stroke-linecap="round"/>
+  <ellipse cx="174" cy="226" rx="13" ry="7" fill="#FF8FA3" fill-opacity="0.45"/>
+  <ellipse cx="306" cy="226" rx="13" ry="7" fill="#FF8FA3" fill-opacity="0.45"/>
+  <ellipse cx="230" cy="244" rx="3" ry="2.2" fill="#3A0A0E"/>
+  <ellipse cx="250" cy="244" rx="3" ry="2.2" fill="#3A0A0E"/>
+  <path d="M232,253 Q240,258 248,253" fill="none" stroke="#4A0A10" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- two little puffs of steam escaping either side of his face -->
+  <g filter="url(#inkSteam)">
+    <circle cx="160" cy="250" r="6" fill="url(#puffG)"/><circle cx="144" cy="238" r="8.5" fill="url(#puffG)"/>
+    <circle cx="320" cy="250" r="6" fill="url(#puffG)"/><circle cx="336" cy="238" r="8.5" fill="url(#puffG)"/>
+  </g>
+
+  <g filter="url(#inkRed)">
+    <path d="M178,290 C166,298 160,306 158,314" fill="none" stroke="#D7262E" stroke-width="22" stroke-linecap="round"/>
+    <path d="M302,290 C314,298 320,306 322,314" fill="none" stroke="#D7262E" stroke-width="22" stroke-linecap="round"/>
+  </g>
+  <!-- RP6-shaped handheld from the back: wide rounded body, grips, shoulder buttons, slits -->
+  <g filter="url(#lift)">
+    <rect x="160" y="270" width="28" height="9" rx="4" fill="#9CA1AA"/>
+    <rect x="292" y="270" width="28" height="9" rx="4" fill="#9CA1AA"/>
+    <rect x="192" y="273" width="20" height="7" rx="3" fill="#7D828B"/>
+    <rect x="268" y="273" width="20" height="7" rx="3" fill="#7D828B"/>
+    <rect x="146" y="276" width="188" height="86" rx="24" fill="url(#shellG)" stroke="#6B6F78" stroke-width="3.5"/>
+    <path d="M150,312 C150,344 160,362 190,362 L214,362 C206,348 204,330 206,312 Z" fill="url(#gripG)"/>
+    <path d="M330,312 C330,344 320,362 290,362 L266,362 C274,348 276,330 274,312 Z" fill="url(#gripG)"/>
+    <g fill="#08090B" stroke="#454850" stroke-width="1.2">
+      <rect x="214" y="292" width="52" height="4" rx="2"/>
+      <rect x="214" y="301" width="52" height="4" rx="2"/>
+      <rect x="214" y="310" width="52" height="4" rx="2"/>
+      <rect x="214" y="319" width="52" height="4" rx="2"/>
+      <rect x="214" y="328" width="52" height="4" rx="2"/>
+    </g>
+    <path d="M170,279 L310,279" stroke="#A6E4FF" stroke-width="3" stroke-opacity="0.9" stroke-linecap="round"/>
+  </g>
+  <!-- arms and paws wrapped round the grips, claws on the back -->
+  <g filter="url(#inkRed)">
+    <ellipse cx="158" cy="314" rx="17" ry="19" fill="url(#redSkin)"/>
+    <ellipse cx="322" cy="314" rx="17" ry="19" fill="url(#redSkin)"/>
+  </g>
+  <path d="M168,304 l7,0 M170,314 l7,0 M168,324 l7,0" fill="none" stroke="#E4E7EB" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M312,304 l-7,0 M310,314 l-7,0 M312,324 l-7,0" fill="none" stroke="#E4E7EB" stroke-width="3.4" stroke-linecap="round"/>
+  <!-- the screen's light on his face and paws -->
+  <ellipse cx="240" cy="246" rx="96" ry="46" fill="url(#glow)"/>
+</svg>
+<svg x="105" y="358" width="270" height="56" viewBox="0 -46 270 56">
+<defs>
   <linearGradient id="lingG" x1="0" y1="-40" x2="0" y2="10" gradientUnits="userSpaceOnUse">
     <stop offset="0" stop-color="#EC3A42"/><stop offset="1" stop-color="#BE1E26"/>
   </linearGradient>
@@ -154,89 +244,10 @@
     <feComposite in2="sb" operator="in" result="soft"/>
     <feMerge><feMergeNode in="soft"/><feMergeNode in="hard"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <clipPath id="screenClip"><rect x="-108" y="-63.5" width="217" height="127" rx="10.5"/></clipPath>
-
-  <radialGradient id="glowFace" cx="0.5" cy="0.5" r="0.5">
-    <stop offset="0" stop-color="#9FE0FF" stop-opacity="0.65"/>
-    <stop offset="0.5" stop-color="#8FD8FF" stop-opacity="0.22"/>
-    <stop offset="1" stop-color="#8FD8FF" stop-opacity="0"/>
-  </radialGradient>
-  <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
-    <stop offset="0" stop-color="#9FE0FF" stop-opacity="0.55"/>
-    <stop offset="1" stop-color="#9FE0FF" stop-opacity="0"/>
-  </linearGradient>
-  <radialGradient id="bellyG" cx="0.45" cy="0.35" r="0.7">
-    <stop offset="0" stop-color="#F7B09A"/><stop offset="1" stop-color="#E8806E"/>
-  </radialGradient>
 </defs>
-  <g transform="translate(240 60) scale(0.84) translate(-240 -60)">
-  <!-- tail, curled round the front of him -->
-  <g filter="url(#inkRed)">
-    <path d="M150,340 C110,348 96,374 128,386 C170,400 250,396 300,388 C270,384 190,384 150,374 C130,368 136,352 160,350 Z" fill="url(#redSkin)"/>
-  </g>
-  <g filter="url(#inkDark)"><path d="M298,388 L326,376 L314,396 Z" fill="#8A1520"/></g>
-  <!-- wing, folded on the hunched back -->
-  <g filter="url(#inkDark)">
-    <path d="M170,218 L126,206 L144,230 L118,240 L150,250 L136,268 L178,262 Z" fill="#8A1520"/>
-  </g>
-  <!-- body: a curled, slouched back -->
-  <g filter="url(#inkRed)">
-    <path d="M150,360 C126,300 140,236 196,214 C246,196 300,230 312,290 C320,334 300,372 250,376 C210,380 168,378 150,360 Z" fill="url(#redSkin)"/>
-  </g>
-  <path d="M168,250 C160,270 158,292 162,312" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="6" stroke-linecap="round"/>
-  <!-- feet poking out front -->
-  <g filter="url(#contact)"><g filter="url(#inkRed)">
-    <ellipse cx="298" cy="370" rx="26" ry="12" fill="url(#redSkin)"/>
-  </g></g>
-  <path d="M316,366 l6,6 M322,360 l7,4" fill="none" stroke="#D9DCE1" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- the far arm, behind the handheld -->
-  <g filter="url(#inkRed)">
-    <path d="M276,276 C298,288 324,296 346,300" fill="none" stroke="#B91C24" stroke-width="22" stroke-linecap="round"/>
-  </g>
-  <!-- the handheld, tipped up to his face; we see its back -->
-  <g filter="url(#lift)">
-    <g transform="translate(316 322) rotate(-34)">
-      <rect x="-62" y="-14" width="124" height="28" rx="13" fill="url(#bodyG)" stroke="url(#rimG)" stroke-width="5"/>
-      <rect x="-44" y="-19" width="18" height="6" rx="2.5" fill="url(#rimG)"/>
-      <rect x="26" y="-19" width="18" height="6" rx="2.5" fill="url(#rimG)"/>
-      <path d="M-50,-15 L50,-15" stroke="#9FE0FF" stroke-width="3" stroke-opacity="0.8" stroke-linecap="round"/>
-    </g>
-  </g>
-  <!-- screen light spilling up onto his face -->
-  <!-- head, bowed right down over the screen -->
-  <g transform="rotate(40 250 250)">
-    <g filter="url(#inkSilver)">
-      <path d="M222,168 C204,150 182,146 166,152 C184,156 198,168 206,184 Z" fill="url(#hornG)"/>
-      <path d="M250,152 C246,130 234,116 218,112 C230,126 236,142 234,160 Z" fill="url(#hornG)"/>
-    </g>
-    <g filter="url(#inkRed)">
-      <ellipse cx="256" cy="212" rx="64" ry="56" fill="url(#redSkin)"/>
-      <ellipse cx="306" cy="228" rx="36" ry="24" fill="url(#redSkin)"/>
-    </g>
-    <ellipse cx="236" cy="180" rx="18" ry="7" transform="rotate(-20 236 180)" fill="#FFFFFF" fill-opacity="0.22"/>
-    <ellipse cx="268" cy="236" rx="9" ry="5" fill="#FF8FA3" fill-opacity="0.35"/>
-    <!-- eye locked on the screen: heavy lid, pupil down at the bottom -->
-    <circle cx="282" cy="206" r="12" fill="url(#irisG)" stroke="#3A0A0E" stroke-width="2.2"/>
-    <ellipse cx="286" cy="211" rx="3.6" ry="6.5" fill="#120404"/>
-    <circle cx="289" cy="214" r="2.3" fill="#BFEAFF"/>
-    <path d="M268,206 C270,192 294,192 296,206 L296,190 L268,190 Z" fill="#D7262E"/>
-    <path d="M268,206 C274,200 290,200 296,206" fill="none" stroke="#3A0A0E" stroke-width="2.6" stroke-linecap="round"/>
-    <path d="M268,186 C276,182 288,184 294,190" fill="none" stroke="#6E0F18" stroke-width="3.5" stroke-linecap="round"/>
-    <!-- nostril, tongue poking out in concentration -->
-    <ellipse cx="334" cy="222" rx="2.8" ry="2" fill="#3A0A0E"/>
-    <path d="M290,242 Q306,248 326,240" fill="none" stroke="#4A0A10" stroke-width="3" stroke-linecap="round"/>
-    <path d="M314,245 C316,252 322,254 324,247" fill="#FF8FA3" stroke="#4A0A10" stroke-width="1.6"/>
-  </g>
-  <ellipse cx="312" cy="286" rx="58" ry="44" fill="url(#glowFace)"/>
-  <!-- near arm and paw wrapped round the handheld -->
-  <g filter="url(#inkRed)">
-    <path d="M222,292 C244,316 264,334 288,342" fill="none" stroke="#D7262E" stroke-width="24" stroke-linecap="round"/>
-    <ellipse cx="290" cy="342" rx="15" ry="12" fill="url(#redSkin)"/>
-  </g>
-  <path d="M296,332 l5,-4 M302,340 l6,-2" fill="none" stroke="#D9DCE1" stroke-width="3" stroke-linecap="round"/>
-  </g>
-  <g transform="translate(105.03 404)" filter="url(#wordLift)">
+<g filter="url(#wordLift)">
     <path fill="url(#steamWordG)" d="M16.8 0.9Q13.5 0.9 10.7 0.2Q7.8 -0.5 5.7 -1.9Q3.6 -3.4 2.5 -5.9Q1.5 -8.3 1.7 -11.8L9.8 -12.5Q9.8 -10.2 10.7 -8.7Q11.6 -7.2 13.2 -6.5Q14.9 -5.8 17.1 -5.8Q19.6 -5.8 21.2 -6.6Q22.8 -7.5 22.8 -9.2Q22.8 -10.3 22.1 -10.9Q21.4 -11.6 19.9 -12.1Q18.4 -12.6 15.7 -13.2Q12.6 -14 10.1 -14.8Q7.5 -15.5 5.7 -16.7Q3.8 -17.8 2.8 -19.5Q1.9 -21.2 1.9 -23.7Q1.9 -27.1 3.7 -29.5Q5.5 -31.9 8.7 -33.2Q11.9 -34.5 16.2 -34.5Q20 -34.5 23.3 -33.3Q26.7 -32.1 28.6 -29.3Q30.5 -26.6 30 -22.2L22.1 -21.4Q22.3 -23.4 21.5 -24.8Q20.7 -26.3 19.2 -27Q17.7 -27.7 15.7 -27.7Q13.2 -27.7 11.9 -26.8Q10.5 -25.8 10.5 -24.4Q10.5 -23.2 11.4 -22.4Q12.2 -21.6 13.9 -21.2Q15.6 -20.7 18.1 -20.1Q20.3 -19.7 22.6 -19Q25 -18.3 27 -17.2Q29 -16 30.3 -14.2Q31.5 -12.3 31.5 -9.3Q31.5 -6.3 29.8 -3.9Q28.1 -1.6 24.8 -0.4Q21.6 0.9 16.8 0.9Z M47.2 0.7Q41.7 0.7 38.9 -2.2Q36.1 -5.1 36.1 -11.1V-26.3H32.3V-32.3H32.9Q36.4 -32.7 37.9 -34.6Q39.3 -36.5 39.7 -40.3L39.8 -41.2H45.2V-33.6H53.2V-26.1H45.2V-11.9Q45.2 -9.5 46.4 -8.4Q47.6 -7.3 49.4 -7.3Q50.3 -7.3 51.4 -7.6Q52.4 -7.9 53.2 -8.4V-0.2Q51.4 0.4 49.9 0.5Q48.4 0.7 47.2 0.7Z M71.1 0.9Q66.5 0.9 63.4 -0.5Q60.2 -1.8 58.2 -4.2Q56.2 -6.5 55.3 -9.6Q54.4 -12.7 54.4 -16.2Q54.4 -19.8 55.4 -23.1Q56.3 -26.4 58.2 -29Q60.2 -31.5 63.2 -33Q66.3 -34.5 70.5 -34.5Q74.6 -34.5 77.6 -33.1Q80.6 -31.6 82.5 -29.1Q84.3 -26.5 84.9 -23.1Q85.5 -19.6 84.9 -15.6L60.2 -15.2V-20.4L77.9 -20.7L76.6 -17.7Q76.9 -20.7 76.3 -22.8Q75.8 -24.9 74.3 -26Q72.9 -27.1 70.5 -27.1Q67.9 -27.1 66.3 -25.8Q64.8 -24.5 64.1 -22.2Q63.4 -19.8 63.4 -16.6Q63.4 -11.2 65.3 -8.7Q67.3 -6.1 71.2 -6.1Q73 -6.1 74.2 -6.6Q75.3 -7.1 76.1 -7.9Q76.8 -8.8 77.1 -9.9Q77.4 -11.1 77.3 -12.4L85.8 -11.9Q85.9 -9.7 85.2 -7.4Q84.5 -5.2 82.8 -3.3Q81.1 -1.4 78.3 -0.3Q75.4 0.9 71.1 0.9Z M97.6 0.9Q95.1 0.9 92.8 -0Q90.5 -0.9 89.1 -2.9Q87.6 -4.9 87.6 -8.3Q87.6 -11.4 88.8 -13.3Q90 -15.2 92 -16.4Q94 -17.6 96.5 -18.2Q99 -18.8 101.4 -19.3Q104.8 -19.9 106.5 -20.3Q108.2 -20.6 108.8 -21.2Q109.4 -21.7 109.4 -22.6Q109.4 -24.8 107.8 -26Q106.3 -27.1 103.8 -27.1Q102.3 -27.1 100.8 -26.5Q99.3 -26 98.3 -24.6Q97.3 -23.2 97.3 -20.7L89 -21.3Q89 -25.2 90.3 -27.7Q91.7 -30.3 93.9 -31.8Q96.2 -33.2 98.8 -33.9Q101.5 -34.5 104.1 -34.5Q108.9 -34.5 112 -32.7Q115.2 -31 116.8 -27.6Q118.4 -24.2 118.4 -19.3V-13.2Q118.4 -11 118.4 -8.8Q118.4 -6.6 118.4 -4.4Q118.4 -2.2 118.4 0H110.4Q110.4 -2.5 110.5 -4.9Q110.5 -7.4 110.5 -10.1H110.1Q109.8 -7.1 108.2 -4.6Q106.5 -2.1 103.8 -0.6Q101.1 0.9 97.6 0.9ZM101.2 -6Q102.6 -6 104 -6.5Q105.4 -7 106.6 -8.1Q107.8 -9.3 108.6 -11.1Q109.4 -12.9 109.4 -15.5L109.4 -17L111.1 -17.3Q110.6 -16.4 109.3 -15.9Q108 -15.4 106.4 -15.1Q104.8 -14.8 103.1 -14.5Q101.5 -14.2 100.1 -13.7Q98.6 -13.2 97.8 -12.2Q96.9 -11.3 96.9 -9.7Q96.9 -7.9 98.1 -7Q99.4 -6 101.2 -6Z M122.4 0V-17.7L122.3 -33.6H130.3L130 -19.4H130.6Q131 -24.8 132.3 -28.2Q133.6 -31.5 135.9 -33Q138.1 -34.5 141.2 -34.5Q144.5 -34.5 146.5 -32.9Q148.5 -31.2 149.4 -27.9Q150.3 -24.6 150.2 -19.4H150.7Q151.1 -24.8 152.5 -28.1Q153.9 -31.4 156.2 -32.9Q158.6 -34.5 161.8 -34.5Q164.4 -34.5 166.3 -33.5Q168.2 -32.6 169.5 -30.7Q170.8 -28.7 171.5 -25.8Q172.1 -22.9 172.1 -19V0H162.9V-18.1Q162.9 -20.9 162.4 -22.7Q162 -24.5 161 -25.4Q160.1 -26.3 158.6 -26.3Q156.6 -26.3 155.1 -24.7Q153.5 -23 152.6 -19.7Q151.7 -16.5 151.7 -11.6V0H142.7V-18.4Q142.7 -21.1 142.2 -22.9Q141.8 -24.6 140.8 -25.5Q139.8 -26.3 138.4 -26.3Q136.5 -26.3 135 -24.8Q133.4 -23.3 132.5 -20.1Q131.6 -16.8 131.6 -11.6V0Z"/>
     <path fill="url(#lingG)" d="M176.1 0V-44.5H185.3V0Z M189.7 0V-33.6H198.9V0ZM194.2 -36.5Q191.6 -36.5 190.1 -37.6Q188.7 -38.7 188.7 -40.9Q188.7 -43.1 190.2 -44.2Q191.6 -45.4 194.2 -45.4Q197 -45.4 198.4 -44.2Q199.8 -43 199.8 -40.9Q199.8 -38.8 198.4 -37.6Q197 -36.5 194.2 -36.5Z M203.2 0V-18.3L203.2 -33.6H211.1L210.9 -19.4H211.4Q211.8 -24.5 213.1 -27.9Q214.5 -31.2 216.9 -32.8Q219.3 -34.5 223 -34.5Q228.5 -34.5 231.2 -30.8Q234 -27 234 -19.5V0H224.8V-18.4Q224.8 -22.5 223.6 -24.5Q222.4 -26.4 219.8 -26.4Q217.5 -26.4 215.9 -24.9Q214.3 -23.4 213.4 -20.1Q212.5 -16.7 212.5 -11.3V0Z M251.3 10Q245.6 10 242.3 9.1Q239 8.2 237.6 6.7Q236.3 5.1 236.3 3.1Q236.3 0.3 238.5 -1.4Q240.7 -3.1 245.1 -3.8V-4.2Q241.7 -4.2 239.9 -5.2Q238.1 -6.3 238.1 -8.2Q238.1 -10 239.8 -11.4Q241.5 -12.8 245.4 -13V-13.5Q241.7 -14.3 239.7 -16.7Q237.6 -19.1 237.6 -22.7Q237.6 -26 239.3 -28.4Q241.1 -30.9 244.3 -32.2Q247.5 -33.6 252 -33.6H268.8V-26.4L257.4 -27.8V-27.3Q262.4 -26.6 264.3 -24.8Q266.1 -23 266.1 -20.6Q266.1 -18.1 264.7 -16.2Q263.2 -14.3 260.2 -13.2Q257.2 -12.1 252.7 -12.1Q251.4 -12.1 250 -12.2Q248.7 -12.3 247.7 -12.6Q246.2 -12 245.5 -11.5Q244.8 -10.9 244.8 -10.3Q244.8 -10 245.2 -9.8Q245.5 -9.6 246.1 -9.5Q246.7 -9.5 247.5 -9.5H257.7Q258.9 -9.5 260.9 -9.3Q262.9 -9.2 264.9 -8.4Q266.9 -7.6 268.3 -5.8Q269.7 -4 269.7 -0.7Q269.7 3 267.7 5.3Q265.7 7.7 261.6 8.8Q257.5 10 251.3 10ZM251.2 1.9Q255.6 1.9 257.9 1.5Q260.1 1.2 260.9 0.6Q261.6 -0.1 261.6 -0.9Q261.6 -2 261.1 -2.5Q260.5 -3.1 259.6 -3.4Q258.8 -3.6 257.9 -3.6Q257 -3.7 256.3 -3.7H247.8Q245.4 -2.9 244.6 -2.1Q243.7 -1.4 243.7 -0.5Q243.7 0.6 244.6 1.1Q245.6 1.6 247.2 1.7Q248.9 1.9 251.2 1.9ZM252.2 -17.3Q254.6 -17.3 256 -18.7Q257.3 -20.1 257.3 -22.5Q257.3 -24.9 255.9 -26.4Q254.5 -27.9 252.1 -27.9Q249.7 -27.9 248.3 -26.4Q246.9 -24.9 246.9 -22.5Q246.9 -20.9 247.5 -19.8Q248.2 -18.6 249.4 -17.9Q250.6 -17.3 252.2 -17.3Z"/>
   </g>
+</svg>
 </svg>
