@@ -65,7 +65,14 @@ From the Steamling folder, one command does the lot:
 scripts/own-base.fish
 ```
 
-(You can also skip `local.conf` and pass `--remote` and `--url` instead.)
+Or let `./build.sh` start it, with any of its usual options, which then apply to both builds:
+
+```fish
+./build.sh --build-base --ssh
+```
+
+A plain `./build.sh` never touches the base; only `--build-base` does. (You can also skip
+`local.conf` and pass `--remote` and `--url` to `scripts/own-base.fish` instead.)
 
 The script:
 
