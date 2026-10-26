@@ -6,7 +6,7 @@
 pkgname=gamescope
 epoch=1
 pkgver=3.16.31.rocknix.20261017.610568b
-pkgrel=1.4
+pkgrel=1.5
 _commit=610568b61c0476f0fa1314c4b9d430d3e3fd832e
 install=gamescope.install
 pkgdesc="SteamOS session compositing WM — patched (for msm handhelds)"
@@ -54,9 +54,11 @@ source=("gamescope::git+https://github.com/ValveSoftware/gamescope.git#commit=${
         '0029-rendervulkan-align-upload-ring-allocations-to-the-uniform-offset-limit.patch'
         '0030-steamcompmgr-clear-destroyed-xdg-external-overlay-from-focus.patch'
         # 30/40 fps caps on a fixed-refresh panel: a late frame no longer slips a whole period (armada 0027)
-        '0031-steamcompmgr-clock-anchored-fps-limiter.patch')
+        '0031-steamcompmgr-clock-anchored-fps-limiter.patch'
+        # Steam's refresh slider gets the rate it asked for, not its highest multiple (armada 0032)
+        '0032-steamcompmgr-use-the-exact-rate-for-refresh-only-requests.patch')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd gamescope
