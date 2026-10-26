@@ -34,6 +34,7 @@ open a terminal and do whatever you like.
 - **Steamling Control**, a Quick Access Menu plugin for per-game settings, fan and CPU modes,
   controller and screen calibration, stick lights, SD card formatting, file sharing over the
   network or a USB cable, and SSH.
+- **Epic, GOG and Amazon games** through the Heroic Games Launcher, right in your Steam library.
 - **Emulation** through ES-DE and a full set of emulators, if you want it.
 - **A stable base.** Packages come from a frozen snapshot of Arch Linux ARM, so things don't shift
   under you. If you'd rather live on the edge, you can switch to rolling Arch.
@@ -69,6 +70,7 @@ explains how to build for it and what to report.
 - [Install to internal storage](docs/install-to-internal.md): faster loading, uninstalling, going back to stock
 - [Steamling Control](docs/steamling-control.md): the Quick Access Menu plugin
 - [Emulation](docs/emulation-setup.md): ES-DE, ROMs and BIOS files
+- [Heroic Games Launcher](docs/heroic.md): Epic, GOG and Amazon games
 - [Android apps](docs/waydroid.md): Waydroid
 - [Updating Steamling](docs/updating.md): getting a newer build onto your handheld without reflashing
 - [Snapshots and rollback](docs/snapshots.md): getting back from a bad update
