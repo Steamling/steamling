@@ -5,3 +5,4 @@ for _dc in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do
   [ -r "${_dc}" ] && . "${_dc}"
 done
 echo "STEAMLING_DEVICE=${STEAMLING_DEVICE:-rp6}"
+echo "STEAMLING_PANEL_BACKLIGHT=${STEAMLING_PANEL_BACKLIGHT:-}"
