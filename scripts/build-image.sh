@@ -366,6 +366,12 @@ main() {
   #    ${KERNEL_BUILD_DIR}/out, the device set). Run `make kernel` first.
   install_local_packages "${ROOTFS_DIR}"
   prune_fontconfig_compat_links "${ROOTFS_DIR}"
+  # A repo that bumped a library's soname without rebuilding everything linked to it ships
+  # packages that install fine and crash on load (Plasma Mobile on libPlasma.so.7 vs .so.8: a
+  # black desktop). Fail here instead of on the device.
+  progress_detail "checking every program finds its libraries"
+  "${STEAMLING_ROOT}/scripts/check-sonames.sh" "${ROOTFS_DIR}" \
+    || die "a package in the image needs a library version the image doesn't have (listed above)"
   strip_docs "${ROOTFS_DIR}"
 
   # A live build has no frozen base to lock to, so mark it rolling (the flag `steamling-base
