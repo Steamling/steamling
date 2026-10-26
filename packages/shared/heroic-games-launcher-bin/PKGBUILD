@@ -1,0 +1,35 @@
+# heroic-games-launcher-bin — Heroic, the launcher for Epic, GOG and Amazon games, from upstream's
+# native arm64 build. Windows games run through Proton-CachyOS's arm64 build, which Heroic
+# offers in its own Wine manager on ARM, or through the Proton compat tools Steam already has.
+# Bump = pkgver and the new sha256.
+pkgname=heroic-games-launcher-bin
+pkgver=2.22.4
+pkgrel=1
+pkgdesc="Heroic Games Launcher — Epic, GOG and Amazon games (upstream arm64 build)"
+arch=('aarch64')
+url="https://heroicgameslauncher.com"
+license=('GPL-3.0-only')   # Heroic's upstream build, repackaged
+# python: the bundled legendary and gogdl are python zipapps.
+depends=('gtk3' 'nss' 'alsa-lib' 'libxss' 'python')
+provides=('heroic-games-launcher')
+conflicts=('heroic-games-launcher')
+options=('!strip' '!debug')
+source=("Heroic-${pkgver}-linux-arm64.tar.xz::https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${pkgver}/Heroic-${pkgver}-linux-arm64.tar.xz"
+        'heroic.desktop')
+sha256sums=('f1129cb27f21337a2fc8dd24a0e849b133e5f6e2766aedcd9180f56a8675179c'
+            'SKIP')
+
+package() {
+  install -d "${pkgdir}/opt"
+  cp -a "${srcdir}/Heroic-${pkgver}-linux-arm64" "${pkgdir}/opt/heroic"
+  # Electron's setuid sandbox helper, for kernels or policies that refuse user namespaces.
+  chmod 4755 "${pkgdir}/opt/heroic/chrome-sandbox"
+  # Its own updater would overwrite a pacman-owned tree; updates come with the package.
+  rm -f "${pkgdir}/opt/heroic/resources/app-update.yml"
+  install -d "${pkgdir}/usr/bin"
+  ln -s /opt/heroic/heroic "${pkgdir}/usr/bin/heroic"
+  install -Dm644 "${srcdir}/heroic.desktop" "${pkgdir}/usr/share/applications/heroic.desktop"
+  # 1024 px, a size hicolor has no directory for, so it goes where Icon= falls back to.
+  install -Dm644 "${pkgdir}/opt/heroic/resources/app.asar.unpacked/build/icon.png" \
+    "${pkgdir}/usr/share/pixmaps/heroic.png"
+}
