@@ -32,7 +32,8 @@ open a terminal and do whatever you like.
 - **Tuned out of the box.** It ships its own kernel (based on ROCKNIX's), and the scheduler, fan
   curve and graphics drivers are set up for smooth frame times. Set a frame cap and play.
 - **Steamling Control**, a Quick Access Menu plugin for per-game settings, fan and CPU modes,
-  controller and screen calibration, stick lights, SD card formatting and file sharing.
+  controller and screen calibration, stick lights, SD card formatting, file sharing over the
+  network or a USB cable, and SSH.
 - **Emulation** through ES-DE and a full set of emulators, if you want it.
 - **A stable base.** Packages come from a frozen snapshot of Arch Linux ARM, so things don't shift
   under you. If you'd rather live on the edge, you can switch to rolling Arch.
@@ -69,6 +70,7 @@ explains how to build for it and what to report.
 - [Steamling Control](docs/steamling-control.md): the Quick Access Menu plugin
 - [Emulation](docs/emulation-setup.md): ES-DE, ROMs and BIOS files
 - [Android apps](docs/waydroid.md): Waydroid
+- [Updating Steamling](docs/updating.md): getting a newer build onto your handheld without reflashing
 - [Snapshots and rollback](docs/snapshots.md): getting back from a bad update
 - [Known issues](docs/known-issues.md)
 - [Building Steamling](docs/building/README.md) and [contributing](CONTRIBUTING.md)

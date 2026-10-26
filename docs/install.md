@@ -106,24 +106,27 @@ came back: …**. The menu's **Log** entry has the details. Here's what each one
 | Android starts instead | **Boot mode** is set to **Android**, or Volume + was held. | Set **Boot mode** back to **Linux**. |
 
 > [!IMPORTANT]
-> **Then change the default password.** It is `root` and publicly known: run `passwd` (and
-> `sudo passwd root`) in a terminal. SSH is off by default.
+> **Then change the default password.** The `deck` user's password (and root's) is `root` and
+> publicly known: run `passwd` (and `sudo passwd root`) in a terminal. SSH is off by default.
+
+## Handy to know
+
+- **Screenshots.** Hold the **Home** button and press **R1**, in a game or in Steam's menus. Steam
+  keeps them under **Media** in its main menu. To copy them to a PC, turn on
+  [USB file transfer](steamling-control.md#usb-file-transfer), or over SSH:
+  `scp -r deck@steamling:'~/.local/share/Steam/userdata/*/760/remote/*/screenshots' .`
+- **Logging in from a PC.** Turn on **Allow SSH logins** in
+  [Steamling Control → Library](steamling-control.md#remote-access), then `ssh deck@steamling`
+  (or `deck@steamling.local`). Root can't log in over SSH; use `sudo` as `deck`.
+- **Sleep.** A short press of the power button puts it to sleep and wakes it again; **Sleep** in
+  Steam's power menu works too.
 
 ## Updating
 
-Steamling updates over the air from a package repo: you press a button and the handheld downloads
-what changed, no reflash. That needs a published repo for your build to point at. There's no
-official one yet, so on a plain build a new version still means flashing a newer image (your games
-and saves live on the card, so back up anything you care about first). If you build Steamling
-yourself, you can publish your own repo and turn updates on: [own-base.md](building/own-base.md)
-walks through it.
-
-Once your build points at a repo, updates come through any of:
-
-- **Steamling Control**: Quick Access Menu → **Steamling Control** → **Updater** →
-  **Check for Updates** → **Install Updates**, without leaving game mode.
-- **Steamling Updater**: in desktop mode, launch the **Steamling Updater** app.
-- **Terminal**: `sudo pacman -Syu`, like any Arch system.
+There's no download server for Steamling, so updates don't arrive on their own. When you build a
+newer version, you can either flash the new image (which wipes the card, so back up your saves
+first) or send it to the handheld over your home network without reflashing.
+[Updating Steamling](updating.md) walks through both.
 
 The Steam client updates itself separately and tells you when one is available. If an update goes
 wrong, see [snapshots and rollback](snapshots.md).
