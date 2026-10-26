@@ -52,7 +52,9 @@ def _abl():
     if state == "mixed":
         return "The two bootloader slots differ. Update from Steamling Tools to make them match."
     if state == "nopart":
-        return "Running from the SD card"
+        # The bootloader slots live on internal storage whichever disk we booted from, so this
+        # means they could not be found, not that we're on the SD card.
+        return "Bootloader partitions not found"
     return ""
 
 
