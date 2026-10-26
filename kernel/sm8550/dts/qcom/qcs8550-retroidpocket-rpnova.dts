@@ -57,3 +57,52 @@
 	trigger-left-deadzone = <100>;
 	trigger-right-deadzone = <100>;
 };
+
+&pm8550b_hv_haptics {
+	/*
+	 * Like the RP6, the Nova's motor is an LRA (~170 Hz, the 5880 us period), not
+	 * the Odin 2's ERM the AYN tree describes: driven as an ERM at up to 5 V it
+	 * only ticks as it starts and stops. Drive voltage and effects as Android has
+	 * them for this board.
+	 */
+	/delete-property/ qcom,use-erm;
+	qcom,vmax-mv = <1300>;
+
+	effect_0 {
+		qcom,wf-pattern-data = <0x11f 0x00 0x00>,
+				       <0x13f 0x00 0x00>,
+				       <0x15f 0x00 0x00>,
+				       <0x17f 0x00 0x00>,
+				       <0x17f 0x00 0x00>,
+				       <0x15f 0x00 0x00>,
+				       <0x13f 0x00 0x00>,
+				       <0x11f 0x00 0x00>;
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+
+	effect_1 {
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+
+	effect_2 {
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+
+	effect_3 {
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+
+	effect_4 {
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+
+	effect_5 {
+		qcom,wf-vmax-mv = <1300>;
+		qcom,wf-auto-res-disable;
+	};
+};
