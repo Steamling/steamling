@@ -1039,82 +1039,6 @@ function ShaderCache({ appid, name, running }) {
     return (SP_JSX.jsx(DFL.PanelSection, { title: t("SHADER CACHE"), children: SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: description(), disabled: busy || running || !info || info.bytes === 0, onClick: () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Clear Shader Cache"), strDescription: t("Delete the {size} of compiled shaders kept for {name}? The game builds them again as it runs.", { size, name }), strOKButtonText: t("Clear"), onOK: clear })), children: busy ? t("Clearing…") : t("Clear Shader Cache ({size})", { size }) }) }) }));
 }
 
-const REFRESH_MS = 2000;
-const SHOW_KEY = "steamling-control.monitor";
-function remembered() {
-    try {
-        return window.localStorage.getItem(SHOW_KEY) === "1";
-    }
-    catch (error) {
-        return false;
-    }
-}
-function remember(on) {
-    try {
-        window.localStorage.setItem(SHOW_KEY, on ? "1" : "0");
-    }
-    catch (error) {
-    }
-}
-const dash = "–";
-function cpuText(stats) {
-    const clocks = stats.cpu.clusters.map((c) => `${(c.mhz / 1000).toFixed(1)}`).join(" / ");
-    const load = stats.cpu.load === null ? dash : `${stats.cpu.load}%`;
-    return t("{load} busy · {clocks} GHz", { load, clocks: clocks || dash });
-}
-function tempText(stats) {
-    const parts = [];
-    if (stats.temps.cpu !== undefined)
-        parts.push(t("CPU {n}°C", { n: stats.temps.cpu }));
-    if (stats.temps.gpu !== undefined)
-        parts.push(t("GPU {n}°C", { n: stats.temps.gpu }));
-    if (stats.battery?.tempC != null)
-        parts.push(t("Battery {n}°C", { n: stats.battery.tempC }));
-    return parts.join(" · ") || dash;
-}
-function batteryText(stats) {
-    const b = stats.battery;
-    if (!b)
-        return dash;
-    const pct = b.percent === null ? dash : `${b.percent}%`;
-    if (b.watts === null)
-        return pct;
-    const flow = b.status === "Charging" ? t("charging at {w} W", { w: b.watts }) : t("drawing {w} W", { w: b.watts });
-    return `${pct} · ${flow}`;
-}
-function SystemMonitor() {
-    const [show, setShow] = SP_REACT.useState(remembered);
-    const [stats, setStats] = SP_REACT.useState(null);
-    const visible = useQamVisible();
-    // Only while it is switched on and the menu is open: nothing reads these numbers otherwise.
-    SP_REACT.useEffect(() => {
-        if (!show || !visible)
-            return;
-        let cancelled = false;
-        const tick = () => systemStats()
-            .then((next) => {
-            if (!cancelled)
-                setStats(next);
-        })
-            .catch(() => { });
-        tick();
-        const timer = window.setInterval(tick, REFRESH_MS);
-        return () => {
-            cancelled = true;
-            window.clearInterval(timer);
-        };
-    }, [show, visible]);
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("SYSTEM MONITOR"), children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Show live readings"), description: t("Updates every 2 seconds while this menu is open"), checked: show, onChange: (on) => {
-                        setShow(on);
-                        remember(on);
-                    } }) }), show && stats ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: t("CPU"), description: cpuText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("GPU"), description: stats.gpu ? t("{mhz} of {max} MHz", { mhz: stats.gpu.mhz, max: stats.gpu.maxMhz }) : dash }), SP_JSX.jsx(DFL.Field, { label: t("Temperature"), description: tempText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("Battery"), description: batteryText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("Memory"), description: stats.memory
-                            ? t("{used} of {total} GB", {
-                                used: (stats.memory.usedMb / 1024).toFixed(1),
-                                total: (stats.memory.totalMb / 1024).toFixed(1),
-                            })
-                            : dash }), stats.fan ? (SP_JSX.jsx(DFL.Field, { label: t("Fan"), description: stats.fan.rpm !== null ? t("{rpm} RPM", { rpm: stats.fan.rpm }) : t("{n}% speed", { n: stats.fan.percent ?? 0 }) })) : null] })) : null] }));
-}
-
 // Audio buffer (PULSE_LATENCY_MSEC): absorbs FEX-mixer overruns (SFX-burst crackle) at the
 // cost of audio latency — keep rhythm games on Game default.
 const audioLatencyOptions = [
@@ -1215,6 +1139,121 @@ function TweakFields({ config, appid, values, patch }) {
                 } }), SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: "Mesa Version", value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
+function describe(config, suggestion) {
+    const lines = [];
+    const s = suggestion.settings;
+    const pick = (options, value) => options.find((o) => o.data === String(value))?.label || String(value);
+    if (suggestion.proton)
+        lines.push(t("Proton: {tool}", { tool: suggestion.proton }));
+    if (s.fexProfile)
+        lines.push(t("FEX Preset: {value}", { value: config.fexProfiles?.[s.fexProfile]?.label || s.fexProfile }));
+    if (s.audioLatency !== undefined)
+        lines.push(t("Audio Buffer: {value}", { value: pick(audioLatencyOptions, s.audioLatency) }));
+    if (s.mesaVersion)
+        lines.push(t("Mesa Version: {value}", { value: s.mesaVersion }));
+    if (s.fanMode)
+        lines.push(t("Fan Curve: {value}", { value: pick(fanOptions, s.fanMode) }));
+    if (s.lavdMode)
+        lines.push(t("CPU Scheduler: {value}", { value: pick(lavdOptions, s.lavdMode) }));
+    if (s.gamepadType)
+        lines.push(t("Controller Type: {value}", { value: s.gamepadType }));
+    if (s.disableXalia !== undefined)
+        lines.push(s.disableXalia ? t("Xalia off") : t("Xalia on"));
+    if (s.touchDisabled)
+        lines.push(t("Touchscreen off while playing"));
+    if (s.envVars)
+        lines.push(t("Environment: {value}", { value: s.envVars }));
+    return lines;
+}
+/** One-tap known-good settings for the selected game, when the list has an entry for it. */
+function Suggestion({ config, appid, apply }) {
+    const suggestion = config.suggestions?.[appid];
+    if (!suggestion)
+        return null;
+    const lines = describe(config, suggestion);
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("SUGGESTED SETTINGS"), children: [suggestion.note ? SP_JSX.jsx("div", { className: "steamling-note", children: suggestion.note }) : null, SP_JSX.jsx(DFL.Field, { label: t("Would set"), description: lines.join(" · ") }), suggestion.tested ? SP_JSX.jsx("div", { className: "steamling-note", children: t("Tested on {where}", { where: suggestion.tested }) }) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: t("Turns on per-game settings for this game and fills them in. You can still change anything afterwards."), onClick: () => {
+                        apply(suggestion.settings);
+                        if (suggestion.proton)
+                            setCompatTool(appid, suggestion.proton);
+                    }, children: t("Use Suggested Settings") }) })] }));
+}
+
+const REFRESH_MS = 2000;
+const SHOW_KEY = "steamling-control.monitor";
+function remembered() {
+    try {
+        return window.localStorage.getItem(SHOW_KEY) === "1";
+    }
+    catch (error) {
+        return false;
+    }
+}
+function remember(on) {
+    try {
+        window.localStorage.setItem(SHOW_KEY, on ? "1" : "0");
+    }
+    catch (error) {
+    }
+}
+const dash = "–";
+function cpuText(stats) {
+    const clocks = stats.cpu.clusters.map((c) => `${(c.mhz / 1000).toFixed(1)}`).join(" / ");
+    const load = stats.cpu.load === null ? dash : `${stats.cpu.load}%`;
+    return t("{load} busy · {clocks} GHz", { load, clocks: clocks || dash });
+}
+function tempText(stats) {
+    const parts = [];
+    if (stats.temps.cpu !== undefined)
+        parts.push(t("CPU {n}°C", { n: stats.temps.cpu }));
+    if (stats.temps.gpu !== undefined)
+        parts.push(t("GPU {n}°C", { n: stats.temps.gpu }));
+    if (stats.battery?.tempC != null)
+        parts.push(t("Battery {n}°C", { n: stats.battery.tempC }));
+    return parts.join(" · ") || dash;
+}
+function batteryText(stats) {
+    const b = stats.battery;
+    if (!b)
+        return dash;
+    const pct = b.percent === null ? dash : `${b.percent}%`;
+    if (b.watts === null)
+        return pct;
+    const flow = b.status === "Charging" ? t("charging at {w} W", { w: b.watts }) : t("drawing {w} W", { w: b.watts });
+    return `${pct} · ${flow}`;
+}
+function SystemMonitor() {
+    const [show, setShow] = SP_REACT.useState(remembered);
+    const [stats, setStats] = SP_REACT.useState(null);
+    const visible = useQamVisible();
+    // Only while it is switched on and the menu is open: nothing reads these numbers otherwise.
+    SP_REACT.useEffect(() => {
+        if (!show || !visible)
+            return;
+        let cancelled = false;
+        const tick = () => systemStats()
+            .then((next) => {
+            if (!cancelled)
+                setStats(next);
+        })
+            .catch(() => { });
+        tick();
+        const timer = window.setInterval(tick, REFRESH_MS);
+        return () => {
+            cancelled = true;
+            window.clearInterval(timer);
+        };
+    }, [show, visible]);
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("SYSTEM MONITOR"), children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Show live readings"), description: t("Updates every 2 seconds while this menu is open"), checked: show, onChange: (on) => {
+                        setShow(on);
+                        remember(on);
+                    } }) }), show && stats ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: t("CPU"), description: cpuText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("GPU"), description: stats.gpu ? t("{mhz} of {max} MHz", { mhz: stats.gpu.mhz, max: stats.gpu.maxMhz }) : dash }), SP_JSX.jsx(DFL.Field, { label: t("Temperature"), description: tempText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("Battery"), description: batteryText(stats) }), SP_JSX.jsx(DFL.Field, { label: t("Memory"), description: stats.memory
+                            ? t("{used} of {total} GB", {
+                                used: (stats.memory.usedMb / 1024).toFixed(1),
+                                total: (stats.memory.totalMb / 1024).toFixed(1),
+                            })
+                            : dash }), stats.fan ? (SP_JSX.jsx(DFL.Field, { label: t("Fan"), description: stats.fan.rpm !== null ? t("{rpm} RPM", { rpm: stats.fan.rpm }) : t("{n}% speed", { n: stats.fan.percent ?? 0 }) })) : null] })) : null] }));
+}
+
 function Games({ config, setConfig, reload }) {
     const runtimeGame = config.game;
     // One app-store lookup per game: worth doing once per library change, not on every render.
@@ -1256,6 +1295,23 @@ function Games({ config, setConfig, reload }) {
             return next;
         });
     };
+    // A suggestion turns per-game settings on and fills them in, in one save.
+    const applySuggestion = (settings) => {
+        if (!game?.appid)
+            return;
+        setConfig((current) => {
+            if (!current)
+                return current;
+            const next = { ...current, tweaks: clone(current.tweaks) };
+            next.tweaks.games[game.appid] = {
+                ...(next.tweaks.games[game.appid] || {}),
+                ...settings,
+                enabled: true,
+                name: game.name || "",
+            };
+            return next;
+        });
+    };
     // "" is the explicit Default target, not "nothing selected"; store a sentinel
     // so it doesn't fall back to the running game in the selectedGame derivation.
     const setSelectedGame = (appid) => {
@@ -1285,7 +1341,7 @@ function Games({ config, setConfig, reload }) {
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
     const showFields = editingDefault || perGameEnabled;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), !editingDefault ? SP_JSX.jsx(Suggestion, { config: config, appid: game.appid, apply: applySuggestion }) : null, showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
 }
 
 // Replaces the stock "Add a Non-Steam Game" flow: Steam's file browser cannot open a new

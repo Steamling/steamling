@@ -1,6 +1,7 @@
 from .led import led_config
 from .modes import fan_mode, lavd_mode
 from .steam import installed_games
+from .suggestions import load_suggestions
 from .tweaks import fex_profile_labels, load_fex_contract, load_tweaks, mesa_versions
 
 
@@ -14,4 +15,5 @@ def build_config():
         "mesaVersions": mesa_versions(),
         "installedGames": installed_games(),
         "led": led_config(),
+        "suggestions": load_suggestions(),
     }

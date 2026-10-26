@@ -6,6 +6,7 @@ import type { Modes } from "../backend";
 import { ConfigSection } from "../components/ConfigSection";
 import { PerformanceOverlay } from "../components/PerformanceOverlay";
 import { ShaderCache } from "../components/ShaderCache";
+import { Suggestion } from "../components/Suggestion";
 import { SystemMonitor } from "../components/SystemMonitor";
 import { EnvVarsButton, PerfFields, TouchField, TweakFields, XaliaToggle, audioLatencyOptions, fanOptions, lavdOptions } from "../components/GameFields";
 import { SelectEdit } from "../components/widgets";
@@ -54,6 +55,21 @@ export function Games({ config, setConfig, reload }: {
       return next;
     });
   };
+  // A suggestion turns per-game settings on and fills them in, in one save.
+  const applySuggestion = (settings: Record<string, any>) => {
+    if (!game?.appid) return;
+    setConfig((current) => {
+      if (!current) return current;
+      const next = { ...current, tweaks: clone(current.tweaks) };
+      next.tweaks.games[game.appid] = {
+        ...(next.tweaks.games[game.appid] || {}),
+        ...settings,
+        enabled: true,
+        name: game.name || "",
+      };
+      return next;
+    });
+  };
   // "" is the explicit Default target, not "nothing selected"; store a sentinel
   // so it doesn't fall back to the running game in the selectedGame derivation.
   const setSelectedGame = (appid: any) => {
@@ -90,6 +106,7 @@ export function Games({ config, setConfig, reload }: {
         <SelectEdit label="Game" value={game?.appid || ""} options={targetOptions} onChange={setSelectedGame} />
         {!editingDefault ? <ToggleField label="Use Per-Game Settings" checked={perGameEnabled} onChange={setPerGameEnabled} /> : null}
       </PanelSection>
+      {!editingDefault ? <Suggestion config={config} appid={game!.appid} apply={applySuggestion} /> : null}
       {showFields ? (
         <PanelSection title="PERFORMANCE">
           {editingDefault ? (

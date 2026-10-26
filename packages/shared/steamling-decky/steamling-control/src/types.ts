@@ -52,9 +52,20 @@ export interface Config {
   /** Turnip payload choices, one per series (data "25.2"); the label marks single-arch series. */
   mesaVersions?: DropdownChoice[];
   installedGames: InstalledGame[];
+  /** Known-good per-game settings, by appid (steamling_control/suggestions.py). */
+  suggestions?: Record<string, GameSuggestion>;
   led: LedConfig;
   game?: GameRef | null;
   selectedGame?: GameRef | null;
+}
+
+export interface GameSuggestion {
+  name: string;
+  settings: Record<string, any>;
+  /** Steam compat tool name to pick, or "" to leave it. */
+  proton: string;
+  note: string;
+  tested: string;
 }
 
 export interface DropdownChoice {

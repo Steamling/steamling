@@ -77,6 +77,37 @@ With per-game settings on, the **Config** section exports the game's settings to
 `<name>.steamling.json` file, and imports one, so a tuned setup can be passed to other Steamling
 users. Importing overwrites that game's settings.
 
+### Suggested settings
+
+When a game has known-good settings on file, picking it shows **Suggested Settings**: what they
+would change, why, and which handheld they were tested on. **Use Suggested Settings** turns on
+per-game settings for that game and fills them in; you can still change anything afterwards.
+
+The list that ships with Steamling starts empty, because a suggestion should come from someone
+actually playing the game on one of these handhelds. To add your own, create
+`/etc/steamling/game-suggestions.json` on the handheld:
+
+```json
+{
+  "games": {
+    "1234560": {
+      "name": "Some Game",
+      "settings": { "fexProfile": "fast", "audioLatency": "90" },
+      "proton": "",
+      "note": "Fast preset runs it at a steady 60 with no glitches; 90 ms clears the crackle.",
+      "tested": "Retroid Pocket 6, October 2026"
+    }
+  }
+}
+```
+
+The number is the game's Steam app ID (in its store page address). `settings` takes the same
+names the per-game tweaks use: `fexProfile` (`default`, `fast`, `compatible`), `audioLatency`
+(`60`, `90`, `120`), `mesaVersion`, `fanMode`, `lavdMode`, `gamepadType`, `disableXalia`,
+`touchDisabled` and `envVars`. `proton` is optional. If a setup works well for you, please share
+it in an issue so it can go into the shipped list
+(`packages/shared/steamling-decky/steamling-control/py_modules/steamling_control/game-suggestions.json`).
+
 ### Shader cache
 
 With a game picked, **Clear Shader Cache** shows how much compiled shader data Steam keeps for it
