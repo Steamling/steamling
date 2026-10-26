@@ -132,10 +132,37 @@ OUT=/var/log/steamling-diag.txt
   for c in /sys/class/drm/card*-*; do
     [ -e "$c/status" ] && echo "$(basename "$c"): $(cat "$c/status") $(cat "$c/enabled" 2>/dev/null)"
   done
+  echo "board file: $(/usr/lib/steamling/steamling-board-env 2>/dev/null | sed -n 's/^STEAMLING_DEVICE=//p')"
+  ( . /usr/lib/steamling/device.conf 2>/dev/null
+    [ "${STEAMLING_BOARD_UNKNOWN:-0}" = 1 ] && echo "board file: NOT MATCHED, this model fell back to the family default"
+    echo "panel: ${STEAMLING_PANEL_W}x${STEAMLING_PANEL_H}@${STEAMLING_PANEL_REFRESH} orient=${STEAMLING_PANEL_ORIENT} output=${STEAMLING_PANEL_OUTPUT}" )
+  printf '\n## controls: InputPlumber virtual pads (name, then the source and target devices)\n'
+  echo "inputplumber: $(systemctl is-active inputplumber 2>/dev/null)"
+  for cd in $(busctl --system tree org.shadowblip.InputPlumber 2>/dev/null | grep -o '/org/shadowblip/InputPlumber/CompositeDevice[0-9]*' | sort -u); do
+    echo "$cd: $(busctl --system get-property org.shadowblip.InputPlumber "$cd" org.shadowblip.Input.CompositeDevice Name 2>/dev/null)"
+    echo "  sources: $(busctl --system get-property org.shadowblip.InputPlumber "$cd" org.shadowblip.Input.CompositeDevice SourceDevicePaths 2>/dev/null)"
+    for t in $(busctl --system get-property org.shadowblip.InputPlumber "$cd" org.shadowblip.Input.CompositeDevice TargetDevices 2>/dev/null | grep -o '"[^"]*"' | tr -d '"'); do
+      echo "  target: $t $(busctl --system get-property org.shadowblip.InputPlumber "$t" org.shadowblip.Input.Target DeviceType 2>/dev/null)"
+    done
+  done
+  printf '\n## input devices the kernel sees (name / phys)\n'
+  grep -E '^N: |^P: ' /proc/bus/input/devices 2>/dev/null | paste - - | sed 's/N: Name=//; s/\tP: Phys=/  phys=/'
+  printf '\n## audio: sound cards (the UCM profile is picked by these names)\n'
+  cat /proc/asound/cards 2>/dev/null || echo "(no sound cards)"
+  wpctl status 2>/dev/null | sed -n '/^Audio/,/^Video/p' | head -30
+  printf '\n## battery and fan\n'
+  for ps in /sys/class/power_supply/*; do
+    [ -e "$ps/type" ] || continue
+    echo "$(basename "$ps"): type=$(cat "$ps/type") status=$(cat "$ps/status" 2>/dev/null) capacity=$(cat "$ps/capacity" 2>/dev/null)"
+  done
+  for h in /sys/class/hwmon/hwmon*; do
+    [ -e "$h/name" ] || continue
+    { [ -e "$h/fan1_input" ] || [ -e "$h/pwm1" ]; } && echo "$(cat "$h/name"): fan=$(cat "$h"/fan1_input 2>/dev/null) pwm=$(cat "$h"/pwm1 2>/dev/null)"
+  done
   printf '\n## suspend support\n'
+  echo "pm_async: $(cat /sys/power/pm_async 2>/dev/null)"
   echo "mem_sleep: $(cat /sys/power/mem_sleep 2>/dev/null)"
   echo "state:     $(cat /sys/power/state 2>/dev/null)"
-  printf '\n## input devices\n'; ls -1 /dev/input 2>/dev/null
   printf '\n## dmesg errors/warnings (tail)\n'; dmesg --level=err,warn 2>/dev/null | tail -100
 } > "$OUT" 2>&1
 
