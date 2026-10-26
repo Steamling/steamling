@@ -130,6 +130,14 @@ GS_ENV+=(STEAM_MULTIPLE_XWAYLANDS=1
          QT_IM_MODULE=steam GTK_IM_MODULE=Steam
          SRT_URLOPEN_PREFER_STEAM=1 STEAM_DISABLE_AUDIO_DEVICE_SWITCHING=1 STEAM_ALLOW_DRIVE_UNMOUNT=1)
 
+# The performance overlay's settings file. Steam writes the overlay level picked in the quick
+# access menu here and mangoapp re-reads it on every change; without the variable neither knows
+# where the other is, and the overlay level does nothing. A fixed name, not mktemp, so Steamling
+# Control can set the level too. Starts hidden so nothing shows before Steam has decided.
+MANGOHUD_CONFIGFILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/steamling-mangohud.conf"
+printf 'no_display\n' > "${MANGOHUD_CONFIGFILE}" 2>/dev/null || true
+GS_ENV+=(MANGOHUD_CONFIGFILE="${MANGOHUD_CONFIGFILE}")
+
 # Do NOT pin the client itself: scx_lavd places the bursty threads itself and needs the littles free
 # for batch work. Game launches get the big cores through steam-launch-wrapper instead.
 . /usr/lib/steamling/steamling-steam-env
