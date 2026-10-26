@@ -11,6 +11,8 @@ loader_src=/usr/share/decky-loader/PluginLoader
 loader_version_src=/usr/share/decky-loader/.loader.version
 src=/usr/share/decky-plugins
 
+elf_machine() { od -An -tx1 -j18 -N2 "$1" 2>/dev/null | tr -d ' \n'; }
+
 loader_needs_seed() {
     [[ ! -x "${homebrew}/services/PluginLoader" ]] && return 0
     [[ -f "${loader_version_src}" ]] || return 1
@@ -21,7 +23,11 @@ loader_needs_seed() {
     bundled=$(<"${loader_version_src}"); bundled=${bundled//-/\~}
     current=$(<"${homebrew}/services/.loader.version"); current=${current//-/\~}
     newest=$(printf '%s\n%s\n' "${current}" "${bundled}" | sort -V | tail -n1)
-    [[ "${newest}" == "${bundled}" && "${bundled}" != "${current}" ]]
+    [[ "${newest}" == "${bundled}" ]] || return 1
+    [[ "${bundled}" != "${current}" ]] && return 0
+    # Same version, but the installed copy is the x86_64 build (b7 00 = aarch64): the native one
+    # replaces it, so the loader stops running under FEX.
+    [[ "$(elf_machine "${homebrew}/services/PluginLoader")" != b700 && "$(elf_machine "${loader_src}")" == b700 ]]
 }
 
 install -d -m 0755 "${homebrew}/services"
@@ -40,10 +46,7 @@ if loader_needs_seed && [[ -x "${loader_src}" ]]; then
     [[ ! -f "${loader_version_src}" ]] || install -Dpm 0644 "${loader_version_src}" "${homebrew}/services/.loader.version"
 fi
 
-if [[ ! -f "${homebrew}/settings/loader.json" ]]; then
-    # Default new installs to Decky's prerelease channel: stable Decky lacks the Steam-on-ARM fixes.
-    printf '{\n  "branch": 1\n}\n' >"${homebrew}/settings/loader.json"
-fi
+# No loader.json seed: Decky's own default, the stable channel, has ARM support now.
 
 if [[ -d "$src" ]]; then
     for plugin in "$src"/*/; do

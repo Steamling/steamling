@@ -3,22 +3,21 @@
 # The plugin frontend (dist/index.js) is prebuilt and committed — no node at package build time.
 pkgname=steamling-decky
 pkgver=0.1.0
-pkgrel=44.8
-pkgdesc="Decky Loader (under FEX, namespaced binfmt) + Steamling Control QAM plugin"
-arch=('any')
-# PluginLoader is an x86_64 PyInstaller build: strip can't read it here, and on a matching host
-# it would cut off the archive PyInstaller appends to the binary.
+pkgrel=45
+pkgdesc="Decky Loader (native arm64) + Steamling Control QAM plugin"
+arch=('aarch64')
+# PluginLoader is a PyInstaller onefile build: stripping would cut off the archive appended to it.
 options=('!strip' '!debug')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
 # Every game's launch options name steamling-game-launch; older steamling-steam releases lack it.
 depends=('fex-emu' 'fex-rootfs' 'steamling-steam>=0.1.0-67')
-_loaderver=v3.2.10
+_loaderver=v3.3.0
 source=('steamling-decky-run' 'steamling-decky-sync' 'steamling-decky-killall' 'steamling-decky-sync.service'
         'steamling-decky-loader.service' 'PluginLoader.json'
-        "PluginLoader-${_loaderver}::https://github.com/SteamDeckHomebrew/decky-loader/releases/download/${_loaderver}/PluginLoader")
+        "PluginLoader-${_loaderver}::https://github.com/SteamDeckHomebrew/decky-loader/releases/download/${_loaderver}/PluginLoader-arm64")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'c2cf316a53e1c1d318c6dda8821c827e5db275922987f9097956d7a1576e8258')
+            '8ef5dcf36cbbbb6e97201a6baed5d79c4cc44ec27789fc9af1c5b6ae8f0b25b6')
 
 package() {
   install -Dm755 "${srcdir}/PluginLoader-${_loaderver}" "${pkgdir}/usr/share/decky-loader/PluginLoader"
