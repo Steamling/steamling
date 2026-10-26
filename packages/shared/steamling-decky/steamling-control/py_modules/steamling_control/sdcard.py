@@ -15,9 +15,9 @@ LABEL_RE = re.compile(r"^[A-Za-z0-9_-]{1,16}$")  # ext4 volume labels cap at 16 
 _format_lock = threading.Lock()  # one format at a time; a second RPC fails fast
 
 
-# The panel polls this while it is open, from a Python that runs emulated under FEX, so it reads
+# The panel polls this while it is open, cheaply (the loader may be the x86 build under FEX), so it reads
 # the kernel and udev directly rather than spawning lsblk and findmnt. /proc/1/mountinfo is PID
-# 1's table, what `findmnt -N 1` reads: the loader runs in its own mount namespace
+# 1's table, what `findmnt -N 1` reads: an x86 loader runs in its own mount namespace
 # (steamling-decky-run), and the host's table is the authoritative one for the UI.
 SYS_BLOCK = Path("/sys/class/block")
 UDEV_DATA = Path("/run/udev/data")

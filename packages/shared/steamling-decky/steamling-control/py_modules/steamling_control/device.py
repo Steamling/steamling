@@ -17,8 +17,7 @@ SSHD = Path("/usr/bin/sshd")
 
 
 def _host(args, timeout):
-    # This python is an x86_64 FEX guest whose rootfs shadows bash and systemctl; systemd-run
-    # hands the aarch64 command to PID 1 instead (sharing.py, updates.py).
+    # Through PID 1, never in-process: see sharing.py.
     return run_cmd(
         ["systemd-run", "--quiet", "--collect", "--wait", "--pipe", *args],
         timeout=timeout,

@@ -81,7 +81,7 @@ class Plugin:
         return await asyncio.to_thread(restart_game_mode)
 
     # The setters answer with only the fields they change, which is all the frontend reads back:
-    # get_config re-reads the whole Steam library, and this Python runs emulated under FEX.
+    # get_config re-reads the whole Steam library, which is slow under FEX on an x86 loader.
     @staticmethod
     def _modes():
         return {"fanMode": fan_mode(), "lavdMode": lavd_mode()}

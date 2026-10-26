@@ -17,8 +17,9 @@ _install_lock = threading.Lock()
 
 
 def _host(args, timeout):
-    # This python is an x86_64 FEX guest whose rootfs shadows bash and systemctl; a direct call
-    # would run the aarch64 script under an x86 bash. systemd-run hands it to PID 1 (updates.py).
+    # The loader may still be the x86_64 build under FEX (steamling-decky-run), whose rootfs
+    # shadows bash and systemctl: a direct call would run the aarch64 script under an x86 bash.
+    # systemd-run hands it to PID 1, which works the same from the native loader (updates.py).
     return run_cmd(
         ["systemd-run", "--quiet", "--collect", "--wait", "--pipe", *args],
         timeout=timeout,

@@ -17,7 +17,7 @@ _lock = threading.Lock()
 
 
 def _host(args, timeout):
-    # x86_64 FEX guest: the tool must run as the host python under PID 1 (see sharing.py).
+    # The tool runs as the host python under PID 1 (see sharing.py).
     return run_cmd(["systemd-run", "--quiet", "--collect", "--wait", "--pipe", *args], timeout=timeout)
 
 

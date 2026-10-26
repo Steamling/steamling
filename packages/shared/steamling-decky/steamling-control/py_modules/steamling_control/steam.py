@@ -4,7 +4,7 @@ STEAM_ROOT = Path("/home/deck/.local/share/Steam")
 STEAM_APPS_DIR = STEAM_ROOT / "steamapps"
 
 
-# Re-parsing every appmanifest costs real time in this emulated Python, and the panel asks on
+# Re-parsing every appmanifest costs real time, more so under FEX on an x86 loader, and the panel asks on
 # every open. Steam writes manifests by rename, so a library change always moves the mtime of
 # its steamapps dir, and an added or removed library moves libraryfolders.vdf: that is the key.
 _cache = {"key": None, "games": []}
