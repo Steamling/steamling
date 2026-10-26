@@ -39,7 +39,12 @@ and tells you how much to free if it does not fit: uninstall games or move ROMs 
 and reinstall them onto internal storage afterwards.
 
 Desktop mode: **Steamling Tools → Install or remove internal Steamling…**, pick how much internal
-storage Android keeps, and let it run. Or from a terminal:
+storage Android keeps, and let it run. Leave the handheld plugged in and don't power it off until
+the window says it's done.
+
+![The Steamling Installer copying the system to internal storage in desktop mode](images/install-internal-progress.jpeg)
+
+Or from a terminal:
 
 ```bash
 # 1. dry-run - prints the exact partition plan, makes NO changes. Review it.
