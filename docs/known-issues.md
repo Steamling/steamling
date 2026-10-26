@@ -17,9 +17,12 @@ Open an [issue on GitHub](https://github.com/dvandenburgh/steamling/issues).
 
 ## Desktop mode
 
-- **Desktop mode comes up as a black screen on the Retroid Pocket 6.** Leaving game mode for the
-  desktop shows nothing. Hold the power button to restart; the handheld comes back up in game
-  mode. This is being worked on.
+- **Desktop mode is a black screen on images built before October 26, 2026.** Those builds could
+  pick up a Plasma Mobile that doesn't match the rest of Plasma, so the mobile shell crashes as it
+  starts. Newer builds carry their own Plasma Mobile and refuse to build with a mismatch like that.
+  On an older image, hold the power button to get back to game mode, then switch desktop mode to
+  the full Plasma desktop over SSH, which isn't affected:
+  `XDG_RUNTIME_DIR=/run/user/$(id -u) steamling-desktop-select plasma`
 
 ## Hardware
 
