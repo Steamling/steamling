@@ -85,8 +85,21 @@ Formatting it erases the Steamling system on it, so first:
   `steamling-abl-backup/` folder are your only way back to the stock bootloader. Your PC or
   Android's internal storage are both fine.
 
-Then open **Steamling Control → Library → SD card** and press **Format SD Card**
-([details](steamling-control.md#sd-card)). Steam picks the card up as a library straight away.
+Then format it from Steam: **Settings → Storage**, select the **MicroSD Card**, and pick
+**Format SD Card**. It takes about a minute. (**Steamling Control → Library → SD card** does the
+same thing; see [SD card](steamling-control.md#sd-card).)
+
+![Steam formatting the microSD card](images/steam-format-sd-card.jpeg)
+
+When it's done, the card shows up under **Storage** next to the internal drive, empty and ready.
+
+![Steam's Storage page listing the internal drive and the freshly formatted microSD card](images/steam-storage-sd-card.jpeg)
+
+From then on, installing a game asks where it should go. Pick **MicroSD Card** there, or select
+the card under **Storage** and press **X** to make it the default.
+
+![Steam's install dialog offering the internal drive or the microSD card](images/steam-install-to-sd-card.jpeg)
+
 If you have a spare card, you can also keep the Steamling card as a rescue card and format the
 spare instead.
 
