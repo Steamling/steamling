@@ -34,10 +34,8 @@ if [ ! -e "${DEFAULTS}" ]; then
   done > "${DEFAULTS}.tmp" && mv "${DEFAULTS}.tmp" "${DEFAULTS}"
 fi
 
-[ -r "${CONF}" ] || exit 0
-
 applied=0
-while IFS='=' read -r key value; do
+[ -r "${CONF}" ] && while IFS='=' read -r key value; do
   key="${key%%[[:space:]]*}"
   value="${value%%[[:space:]]*}"
   # Plain parameter names only: a key with a path in it would write anywhere root can.
@@ -52,6 +50,37 @@ while IFS='=' read -r key value; do
     echo "failed to write ${key}" >&2
   fi
 done < "${CONF}"
+
+# Steamling Control's stick response: percentages of the calibrated values (or the boot-time
+# defaults), the same maths as its tuning.py. Scaled from those, never from the live value, so a
+# second run can't compound it.
+TUNING=/etc/steamling/gamepad-tuning.conf
+value_in() {  # <file> <key>
+  sed -n "s/^$2=\(-\{0,1\}[0-9][0-9]*\)[[:space:]]*$/\1/p" "$1" 2>/dev/null | tail -n 1
+}
+base_of() {
+  local v
+  v="$(value_in "${CONF}" "$1")"
+  [ -n "${v}" ] || v="$(value_in "${DEFAULTS}" "$1")"
+  printf '%s' "${v}"
+}
+if [ -r "${TUNING}" ]; then
+  for stick in left right; do
+    dz="$(value_in "${TUNING}" "${stick}_deadzone")"
+    outer="$(value_in "${TUNING}" "${stick}_outer")"
+    case "${dz}" in 50|75|100|150|200|300) ;; *) dz=100 ;; esac
+    case "${outer}" in 100|95|90|85|80) ;; *) outer=100 ;; esac
+    [ "${dz}" = 100 ] && [ "${outer}" = 100 ] && continue
+    for axis in "axis_${stick}x" "axis_${stick}y"; do
+      for pair in "deadzone:${dz}" "antideadzone:${dz}" "max:${outer}" "min:${outer}"; do
+        key="${axis}_${pair%%:*}"
+        base="$(base_of "${key}")"
+        [ -n "${base}" ] && [ -w "${params}/${key}" ] || continue
+        printf '%s' "$(( base * ${pair##*:} / 100 ))" > "${params}/${key}" && applied=1
+      done
+    done
+  done
+fi
 
 # The driver only picks up the new values when told to re-read them.
 [ "${applied}" = "1" ] && printf '1' > "${params}/update_params"

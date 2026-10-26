@@ -240,3 +240,12 @@ export type RumbleStatus = {
   /** percent: 25, 50, 75 or 100 */
   strength: number;
 };
+
+/** Percentages of the calibrated values: deadzone 50-300, outer (full tilt) 80-100. */
+export type StickTuning = { deadzone: number; outer: number };
+
+export type TuningStatus = {
+  available: boolean;
+  left: StickTuning;
+  right: StickTuning;
+};

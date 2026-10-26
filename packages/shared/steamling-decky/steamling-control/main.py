@@ -22,6 +22,7 @@ from steamling_control.sharing import install_samba, set_share, share_status
 from steamling_control.snapshots import reboot_system, snapshot_status, start_rollback
 from steamling_control.stats import system_stats
 from steamling_control.touch import sync_touch
+from steamling_control.tuning import set_tuning, tuning_status
 from steamling_control.tweaks import load_tweaks, save_tweaks
 from steamling_control.updates import check_updates, start_update, update_status
 
@@ -187,6 +188,12 @@ class Plugin:
 
     async def set_rumble(self, enabled, strength):
         return await asyncio.to_thread(set_rumble, bool(enabled), int(strength))
+
+    async def tuning_status(self):
+        return await asyncio.to_thread(tuning_status)
+
+    async def set_tuning(self, stick, deadzone, outer):
+        return await asyncio.to_thread(set_tuning, str(stick), int(deadzone), int(outer))
 
     async def overlay_status(self):
         return await asyncio.to_thread(overlay_status)

@@ -203,6 +203,13 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
   it across reboots, **Discard** drops it, **Reset to Defaults** returns to the driver's
   values. The controller is paused for Steam while it runs, so **Cancel** works by touch.
   Boards whose gamepad driver cannot be calibrated say so.
+- **Stick Response** (boards whose gamepad driver can be calibrated): per stick, the **dead
+  zone** (how far it moves before it registers, from half to three times the calibrated size)
+  and **full tilt** (how far you push to reach 100%, from the edge in to 80% of the way). Raise
+  the dead zone if a stick drifts; bring full tilt in if you can't quite reach the edge. They sit
+  on top of the calibration, so recalibrating keeps them, and they apply everywhere, desktop
+  mode included. For a response curve, use Steam Input's per-game controller settings: the
+  drivers here don't do curves.
 - **Rumble**: **Enable rumble** switches vibration on or off for every game, and **Strength**
   sets it to 25, 50, 75 or 100%. Each shows only on handhelds whose drivers support it (the
   Retroid Pocket 6 has both). The choice is kept across reboots.

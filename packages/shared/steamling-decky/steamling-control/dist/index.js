@@ -67,6 +67,8 @@ const cacheInfo = (appid) => call("cache_info", appid);
 const clearCache = (appid) => call("clear_cache", appid);
 const rumbleStatus = () => call("rumble_status");
 const setRumble = (enabled, strength) => call("set_rumble", enabled, strength);
+const tuningStatus = () => call("tuning_status");
+const setTuning = (stick, deadzone, outer) => call("set_tuning", stick, deadzone, outer);
 const overlayStatus = () => call("overlay_status");
 const setOverlay = (level) => call("set_overlay", level);
 const systemStats = () => call("system_stats");
@@ -545,6 +547,43 @@ function Rumble() {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: t("RUMBLE"), children: [rumble.canSwitch ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Enable rumble"), checked: rumble.enabled, onChange: (on) => save(on, rumble.strength) }) })) : null, rumble.canScale ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Strength"), value: index, min: 0, max: STRENGTHS.length - 1, step: 1, notchCount: STRENGTHS.length, notchLabels: STRENGTHS.map((pct, i) => ({ notchIndex: i, label: `${pct}%` })), notchTicksVisible: true, disabled: rumble.canSwitch && !rumble.enabled, onChange: (i) => save(rumble.enabled, STRENGTHS[i] ?? 100) }) })) : null, error ? SP_JSX.jsx("div", { className: "steamling-note", children: error }) : null] }));
 }
 
+function SelectEdit({ label, value, options, onChange }) {
+    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
+}
+
+const deadzones = [50, 75, 100, 150, 200, 300];
+const outers = [100, 95, 90, 85, 80];
+function Stick({ label, stick, value, save }) {
+    const dzOptions = deadzones.map((pct) => ({
+        data: pct,
+        label: pct === 100 ? t("Calibrated (100%)") : pct < 100 ? t("Smaller ({pct}%)", { pct }) : t("Bigger ({pct}%)", { pct }),
+    }));
+    const outerOptions = outers.map((pct) => ({
+        data: pct,
+        label: pct === 100 ? t("At the edge") : t("At {pct}% of the way", { pct }),
+    }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("{stick}: dead zone", { stick: label }), value: value.deadzone, options: dzOptions, onChange: (pct) => save(stick, { ...value, deadzone: Number(pct) }) }), SP_JSX.jsx(SelectEdit, { label: t("{stick}: full tilt", { stick: label }), value: value.outer, options: outerOptions, onChange: (pct) => save(stick, { ...value, outer: Number(pct) }) })] }));
+}
+function StickResponse() {
+    const [status, setStatus] = SP_REACT.useState(null);
+    const [error, setError] = SP_REACT.useState("");
+    SP_REACT.useEffect(() => {
+        tuningStatus().then(setStatus).catch((err) => setError(String(err)));
+    }, []);
+    if (!status?.available)
+        return null;
+    const save = (stick, next) => {
+        setError("");
+        setStatus({ ...status, [stick]: next });
+        setTuning(stick, next.deadzone, next.outer)
+            .then(setStatus)
+            .catch((err) => setError(String(err)));
+    };
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("STICK RESPONSE"), children: [SP_JSX.jsx(Stick, { label: t("Left stick"), stick: "left", value: status.left, save: save }), SP_JSX.jsx(Stick, { label: t("Right stick"), stick: "right", value: status.right, save: save }), SP_JSX.jsx("div", { className: "steamling-note", children: error ||
+                    t("Dead zone: how far a stick moves before it registers, relative to calibration. Full tilt: how far you push to reach 100%. Applies everywhere, kept across reboots. Steam Input adds per-game curves on top.") })] }));
+}
+
 function hsvToRgb(h, s, v) {
     const hh = ((h % 360) + 360) % 360;
     const ss = Math.max(0, Math.min(100, s)) / 100;
@@ -603,7 +642,7 @@ function sideHsv(side) {
     return rgbToHsv(side.r, side.g, side.b);
 }
 function Controller(props) {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(StickResponse, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
 }
 function StickLights({ config, setConfig, reload }) {
     const led = config.led;
@@ -851,11 +890,6 @@ function resolveCompatTool(wanted, tools) {
         ? tools.find((tool) => /cachy/i.test(haystack(tool)) && !/x86/i.test(haystack(tool)))
         : tools.find((tool) => /(^|\D)11(\D|$)/.test(haystack(tool)) && !/arm|cachy/i.test(haystack(tool)));
     return { tool: fallback?.name || "", fallback: true };
-}
-
-function SelectEdit({ label, value, options, onChange }) {
-    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
 }
 
 function ExportNameModal({ game, base, onDone, closeModal }) {

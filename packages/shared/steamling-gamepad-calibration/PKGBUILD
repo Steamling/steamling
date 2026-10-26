@@ -2,7 +2,7 @@
 # driver's module parameters at boot, before InputPlumber claims the pad.
 pkgname=steamling-gamepad-calibration
 pkgver=0.1.0
-pkgrel=3.1
+pkgrel=3.2
 pkgdesc="steamling gamepad calibration: replays the saved stick/trigger calibration at boot"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"

@@ -141,6 +141,12 @@ def _write_params(params, values):
     (params / "update_params").write_text("1")
 
 
+def _retune():
+    # The stick response (tuning.py) sits on top of whatever calibration is in force.
+    from . import tuning
+    tuning.apply()
+
+
 def _parse_kv(text):
     values = {}
     for line in text.splitlines():
@@ -464,6 +470,7 @@ def save():
     lines = ["# Written by Steamling Control: gamepad driver parameters, replayed at boot."]
     lines += [f"{key}={result[key]}" for key in _all_keys() if key in result]
     atomically_write(CONF, "\n".join(lines) + "\n", mode=0o644)
+    _retune()
     with _session.lock:
         _session.phase = "idle"
         _session.result = {}
@@ -486,6 +493,7 @@ def reset():
     except FileNotFoundError:
         pass
     _write_params(params, defaults)
+    _retune()
     with _session.lock:
         _session.phase = "idle"
         _session.result = {}
@@ -511,3 +519,4 @@ def recover():
     values = {k: v for k, v in values.items() if k in _all_keys() and (params / k).exists()}
     if values:
         _write_params(params, values)
+    _retune()
