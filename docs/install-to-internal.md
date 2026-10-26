@@ -69,6 +69,22 @@ hold **Volume −** to open the boot menu and set **Boot source** to **Internal*
 Switch it back to **SD card** whenever you want to boot the SD again; nothing on either disk
 changes.
 
+### Using the SD card for games afterwards
+
+Once the handheld boots from internal storage, the Steamling card is free to become game storage.
+Formatting it erases the Steamling system on it, so first:
+
+- **Make sure internal storage boots.** Without the card, a broken internal install has nothing
+  to fall back on until you flash a new card.
+- **Copy your bootloader backups off the card.** `abl_a.img`, `abl_b.img` and any
+  `steamling-abl-backup/` folder are your only way back to the stock bootloader. Your PC or
+  Android's internal storage are both fine.
+
+Then open **Steamling Control → Library → SD card** and press **Format SD Card**
+([details](steamling-control.md#sd-card)). Steam picks the card up as a library straight away.
+If you have a spare card, you can also keep the Steamling card as a rescue card and format the
+spare instead.
+
 ---
 
 ## Uninstall from internal
