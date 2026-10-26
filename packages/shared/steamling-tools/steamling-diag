@@ -166,10 +166,17 @@ OUT=/var/log/steamling-diag.txt
   printf '\n## dmesg errors/warnings (tail)\n'; dmesg --level=err,warn 2>/dev/null | tail -100
 } > "$OUT" 2>&1
 
-mp=$(mktemp -d)
-if mount /dev/disk/by-partlabel/system "$mp" 2>/dev/null || mount -L STEAMLING "$mp" 2>/dev/null || mount -L ROCKNIX "$mp" 2>/dev/null; then
-  cp "$OUT" "$mp/steamling-diag.txt" 2>/dev/null || true
-  sync
-  umount "$mp" 2>/dev/null || true
+# The boot partition of the disk we booted from is already mounted at /flash. Only when it isn't
+# go looking by label, and never by a generic name like "system", which on some Android layouts
+# is Android's own partition.
+if mountpoint -q /flash; then
+  cp "$OUT" /flash/steamling-diag.txt 2>/dev/null && sync
+else
+  mp=$(mktemp -d)
+  if mount -L STEAMLING "$mp" 2>/dev/null || mount -L ROCKNIX "$mp" 2>/dev/null; then
+    cp "$OUT" "$mp/steamling-diag.txt" 2>/dev/null || true
+    sync
+    umount "$mp" 2>/dev/null || true
+  fi
+  rmdir "$mp" 2>/dev/null || true
 fi
-rmdir "$mp" 2>/dev/null || true
