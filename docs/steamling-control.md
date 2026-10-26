@@ -210,6 +210,11 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
   on top of the calibration, so recalibrating keeps them, and they apply everywhere, desktop
   mode included. For a response curve, use Steam Input's per-game controller settings: the
   drivers here don't do curves.
+- **Back Paddles** (handhelds with back buttons): make a paddle press another button (A, B, X,
+  Y, a bumper, a stick click, Select or Start) everywhere: in game mode, desktop mode and
+  emulators started outside Steam. Left as **Back button** (the default), Steam sees them as
+  the Steam Deck's L4/R4 and you can map them per game in Steam Input instead, which is usually
+  the better choice for Steam games.
 - **Rumble**: **Enable rumble** switches vibration on or off for every game, and **Strength**
   sets it to 25, 50, 75 or 100%. Each shows only on handhelds whose drivers support it (the
   Retroid Pocket 6 has both). The choice is kept across reboots.

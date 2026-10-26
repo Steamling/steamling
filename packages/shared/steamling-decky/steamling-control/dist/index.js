@@ -69,6 +69,8 @@ const rumbleStatus = () => call("rumble_status");
 const setRumble = (enabled, strength) => call("set_rumble", enabled, strength);
 const tuningStatus = () => call("tuning_status");
 const setTuning = (stick, deadzone, outer) => call("set_tuning", stick, deadzone, outer);
+const paddleStatus = () => call("paddle_status");
+const setPaddles = (left, right) => call("set_paddles", left, right);
 const overlayStatus = () => call("overlay_status");
 const setOverlay = (level) => call("set_overlay", level);
 const systemStats = () => call("system_stats");
@@ -296,6 +298,74 @@ const styles = `
       }
     `;
 
+// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
+// text in the code, so it needs no catalog.
+const catalogs = {};
+
+function language() {
+    try {
+        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
+        const raw = String(steam || navigator.language || "en").toLowerCase();
+        return raw.split(/[-_]/)[0];
+    }
+    catch (error) {
+        return "en";
+    }
+}
+let cached;
+function catalog() {
+    if (cached === undefined)
+        cached = catalogs[language()] || null;
+    return cached;
+}
+function t(text, vars) {
+    let out = catalog()?.[text] ?? text;
+    if (vars) {
+        for (const [key, value] of Object.entries(vars))
+            out = out.split(`{${key}}`).join(String(value));
+    }
+    return out;
+}
+
+function SelectEdit({ label, value, options, onChange }) {
+    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
+}
+
+function options(side) {
+    return [
+        { data: "", label: side === "left" ? t("Back button L4 (default)") : t("Back button R4 (default)") },
+        { data: "South", label: t("A") },
+        { data: "East", label: t("B") },
+        { data: "West", label: t("X") },
+        { data: "North", label: t("Y") },
+        { data: "LeftBumper", label: t("L1 / LB") },
+        { data: "RightBumper", label: t("R1 / RB") },
+        { data: "LeftStick", label: t("L3 (left stick click)") },
+        { data: "RightStick", label: t("R3 (right stick click)") },
+        { data: "Select", label: t("Select / View") },
+        { data: "Start", label: t("Start / Menu") },
+    ];
+}
+function BackPaddles() {
+    const [status, setStatus] = SP_REACT.useState(null);
+    const [error, setError] = SP_REACT.useState("");
+    SP_REACT.useEffect(() => {
+        paddleStatus().then(setStatus).catch(() => { });
+    }, []);
+    if (!status?.available)
+        return null;
+    const save = (left, right) => {
+        setError("");
+        setStatus({ ...status, left, right });
+        setPaddles(left, right)
+            .then(setStatus)
+            .catch((err) => setError(String(err)));
+    };
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("BACK PADDLES"), children: [SP_JSX.jsx(SelectEdit, { label: t("Left paddle"), value: status.left, options: options("left"), onChange: (v) => save(String(v), status.right) }), SP_JSX.jsx(SelectEdit, { label: t("Right paddle"), value: status.right, options: options("right"), onChange: (v) => save(status.left, String(v)) }), SP_JSX.jsx("div", { className: "steamling-note", children: error ||
+                    t("Remaps the paddles for everything, desktop mode and emulators included. Leave them as back buttons to map them per game in Steam Input instead.") })] }));
+}
+
 function instruction(s) {
     if (s.kind === "trigger") {
         return s.stage === "release"
@@ -493,35 +563,6 @@ function PanelCalibration() {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: "DISPLAY", children: [SP_JSX.jsx(DFL.Field, { label: "Refresh rate", description: status.saved ? "Calibrated" : "Factory timing" }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(PanelModal, { initial: status, onChange: setStatus })), children: "Calibrate Display" }) })] }));
 }
 
-// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
-// text in the code, so it needs no catalog.
-const catalogs = {};
-
-function language() {
-    try {
-        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
-        const raw = String(steam || navigator.language || "en").toLowerCase();
-        return raw.split(/[-_]/)[0];
-    }
-    catch (error) {
-        return "en";
-    }
-}
-let cached;
-function catalog() {
-    if (cached === undefined)
-        cached = catalogs[language()] || null;
-    return cached;
-}
-function t(text, vars) {
-    let out = catalog()?.[text] ?? text;
-    if (vars) {
-        for (const [key, value] of Object.entries(vars))
-            out = out.split(`{${key}}`).join(String(value));
-    }
-    return out;
-}
-
 const STRENGTHS = [25, 50, 75, 100];
 function Rumble() {
     const [rumble, setRumbleState] = SP_REACT.useState(null);
@@ -545,11 +586,6 @@ function Rumble() {
     };
     const index = Math.max(0, STRENGTHS.indexOf(rumble.strength));
     return (SP_JSX.jsxs(DFL.PanelSection, { title: t("RUMBLE"), children: [rumble.canSwitch ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Enable rumble"), checked: rumble.enabled, onChange: (on) => save(on, rumble.strength) }) })) : null, rumble.canScale ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Strength"), value: index, min: 0, max: STRENGTHS.length - 1, step: 1, notchCount: STRENGTHS.length, notchLabels: STRENGTHS.map((pct, i) => ({ notchIndex: i, label: `${pct}%` })), notchTicksVisible: true, disabled: rumble.canSwitch && !rumble.enabled, onChange: (i) => save(rumble.enabled, STRENGTHS[i] ?? 100) }) })) : null, error ? SP_JSX.jsx("div", { className: "steamling-note", children: error }) : null] }));
-}
-
-function SelectEdit({ label, value, options, onChange }) {
-    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
 }
 
 const deadzones = [50, 75, 100, 150, 200, 300];
@@ -642,7 +678,7 @@ function sideHsv(side) {
     return rgbToHsv(side.r, side.g, side.b);
 }
 function Controller(props) {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(StickResponse, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(StickResponse, {}), SP_JSX.jsx(BackPaddles, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
 }
 function StickLights({ config, setConfig, reload }) {
     const led = config.led;

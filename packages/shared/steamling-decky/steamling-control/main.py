@@ -16,6 +16,7 @@ from steamling_control.gamepad import sync_gamepad
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
 from steamling_control.overlay import overlay_status, set_overlay
+from steamling_control.paddles import paddle_status, set_paddles
 from steamling_control.rumble import restore_rumble, rumble_status, set_rumble
 from steamling_control.sdcard import detect_sdcard, format_sdcard
 from steamling_control.sharing import install_samba, set_share, share_status
@@ -194,6 +195,12 @@ class Plugin:
 
     async def set_tuning(self, stick, deadzone, outer):
         return await asyncio.to_thread(set_tuning, str(stick), int(deadzone), int(outer))
+
+    async def paddle_status(self):
+        return await asyncio.to_thread(paddle_status)
+
+    async def set_paddles(self, left, right):
+        return await asyncio.to_thread(set_paddles, str(left), str(right))
 
     async def overlay_status(self):
         return await asyncio.to_thread(overlay_status)

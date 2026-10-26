@@ -249,3 +249,11 @@ export type TuningStatus = {
   left: StickTuning;
   right: StickTuning;
 };
+
+export type PaddleStatus = {
+  /** a pad with back paddles is connected */
+  available: boolean;
+  /** InputPlumber button name the paddle sends instead, "" = stays a back button */
+  left: string;
+  right: string;
+};

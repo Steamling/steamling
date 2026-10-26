@@ -30,9 +30,21 @@ kind_of() {
 
 usage() { echo "usage: steamling-gamepad-target <kind>|--apply" >&2; exit 2; }
 
+PROFILE=/etc/steamling/gamepad-profile.json
+
+# Steamling Control's back-paddle mapping is an InputPlumber profile, and InputPlumber starts
+# every composite on its stock one, so it is loaded again here.
+load_profile() {
+  [ -r "${PROFILE}" ] || return 0
+  for path in $(composites); do
+    busctl --system call "${SERVICE}" "${path}" "${IFACE}" LoadProfilePath s "${PROFILE}" >/dev/null 2>&1 \
+      || echo "steamling-gamepad-target: failed to load ${PROFILE} on ${path}" >&2
+  done
+}
+
 case "${1:-}" in
   --apply)
-    KIND="$(cat "${STATE}" 2>/dev/null)" || exit 0 ;;
+    KIND="$(cat "${STATE}" 2>/dev/null)" || KIND="" ;;
   -*|"")
     usage ;;
   *)
@@ -40,7 +52,7 @@ case "${1:-}" in
     mkdir -p /run/steamling 2>/dev/null || true
     printf '%s\n' "${KIND}" > "${STATE}" 2>/dev/null || true ;;
 esac
-[ -n "${KIND}" ] || exit 0
+[ -n "${KIND}" ] || [ -r "${PROFILE}" ] || exit 0
 
 # Composites appear a moment after the bus name does (udev enumeration), so ordering behind
 # inputplumber.service is not enough to find one.
@@ -50,6 +62,9 @@ while [ -z "$(composites)" ]; do
   [ "${i}" -ge 100 ] && exit 0
   sleep 0.1
 done
+
+[ "${1:-}" = --apply ] && load_profile
+[ -n "${KIND}" ] || exit 0
 
 for path in $(composites); do
   targets="$(busctl --system get-property "${SERVICE}" "${path}" "${IFACE}" TargetDevices 2>/dev/null \

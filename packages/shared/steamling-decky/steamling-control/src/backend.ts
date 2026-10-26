@@ -1,5 +1,5 @@
 import { call } from "@decky/api";
-import type { CacheInfo, CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, OverlayStatus, PanelStatus, RumbleStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, SystemStats, TuningStatus, Tweaks, UpdateInfo, UpdateStatus, UsbTransferStatus } from "./types";
+import type { CacheInfo, CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, OverlayStatus, PaddleStatus, PanelStatus, RumbleStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, SystemStats, TuningStatus, Tweaks, UpdateInfo, UpdateStatus, UsbTransferStatus } from "./types";
 
 export const getConfig = () => call<[], Config>("get_config");
 // The setters answer with only what they changed: a full get_config re-reads the whole Steam
@@ -53,6 +53,8 @@ export const setRumble = (enabled: boolean, strength: number) =>
 export const tuningStatus = () => call<[], TuningStatus>("tuning_status");
 export const setTuning = (stick: string, deadzone: number, outer: number) =>
   call<[string, number, number], TuningStatus>("set_tuning", stick, deadzone, outer);
+export const paddleStatus = () => call<[], PaddleStatus>("paddle_status");
+export const setPaddles = (left: string, right: string) => call<[string, string], PaddleStatus>("set_paddles", left, right);
 export const overlayStatus = () => call<[], OverlayStatus>("overlay_status");
 export const setOverlay = (level: string) => call<[string], OverlayStatus>("set_overlay", level);
 export const systemStats = () => call<[], SystemStats>("system_stats");

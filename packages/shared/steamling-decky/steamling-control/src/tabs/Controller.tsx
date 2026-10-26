@@ -1,6 +1,7 @@
 import { PanelSection, PanelSectionRow, ToggleField } from "@decky/ui";
 import type { Dispatch, SetStateAction } from "react";
 import { setLed, setLedEnabled, setLedLinked, setLedSides } from "../backend";
+import { BackPaddles } from "../components/BackPaddles";
 import { Calibration } from "../components/Calibration";
 import { ColorControls } from "../components/ColorControls";
 import { PanelCalibration } from "../components/PanelCalibration";
@@ -33,6 +34,7 @@ export function Controller(props: TabProps) {
     <>
       <Calibration />
       <StickResponse />
+      <BackPaddles />
       <Rumble />
       {props.config.led.available && <StickLights {...props} />}
       <PanelCalibration />
