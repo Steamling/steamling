@@ -42,7 +42,8 @@ OUT=/var/log/steamling-diag.txt
   printf '\n## wifi: iwd station\n'; iwctl station wlan0 show 2>/dev/null || echo "(iwctl n/a)"
   printf '\n## rfkill\n'; rfkill list 2>/dev/null || echo "(rfkill n/a)"
   printf '\n## regulatory.db present?\n'; ls -l /usr/lib/firmware/regulatory.db* 2>/dev/null || echo "MISSING"
-  printf '\n## ath12k dmesg\n'; dmesg 2>/dev/null | grep -i ath12k | tail -20
+  printf '\n## wifi driver dmesg (ath11k or ath12k, depending on the chip)\n'
+  dmesg 2>/dev/null | grep -iE 'ath1[12]k' | tail -20
   printf '\n## wifi: FORCED connect attempt (prints the real activation failure reason)\n'
   prof=$(ls /etc/NetworkManager/system-connections/*.nmconnection 2>/dev/null | head -1)
   if nmcli -g GENERAL.STATE device show wlan0 2>/dev/null | grep -q '^100'; then
