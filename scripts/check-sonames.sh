@@ -45,9 +45,10 @@ check_file() {  # <file> <needed...> (after RUNPATH dirs in rp[])
     done
     [ "${ok}" = 1 ] && continue
     base="${n%%.so*}.so"
+    # Report the shortest match: the soname (libPlasma.so.6), not the full-version file beside it.
     cand=""
     for r in "${!have[@]}"; do
-      case "${r}" in "${base}".[0-9]*) cand="${r}"; break ;; esac
+      case "${r}" in "${base}".[0-9]*) [ -z "${cand}" ] || [ "${#r}" -lt "${#cand}" ] && cand="${r}" ;; esac
     done
     if [ -n "${cand}" ]; then stale+=("${f#"${root}"}|${n}|${cand}")
     else absent+=("${f#"${root}"}|${n}"); fi
