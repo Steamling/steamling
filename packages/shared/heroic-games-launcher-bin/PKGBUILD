@@ -10,7 +10,7 @@ arch=('aarch64')
 url="https://heroicgameslauncher.com"
 license=('GPL-3.0-only')   # Heroic's upstream build, repackaged
 # python: the bundled legendary and gogdl are python zipapps.
-depends=('gtk3' 'nss' 'alsa-lib' 'libxss' 'python')
+depends=('gtk3' 'nss' 'alsa-lib' 'python')
 provides=('heroic-games-launcher')
 conflicts=('heroic-games-launcher')
 options=('!strip' '!debug')
