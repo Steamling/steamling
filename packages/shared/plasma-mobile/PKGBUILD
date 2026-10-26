@@ -18,7 +18,9 @@ depends=('gcc-libs' 'glibc'
          'libkscreen' "libplasma>=${pkgver}" "libplasma<${pkgver%.*}.90" 'libxcb' 'modemmanager-qt' 'networkmanager-qt'
          "plasma-activities>=${pkgver}" 'plasma-nano' "plasma-workspace>=${pkgver}" 'qcoro'
          'qt6-base' 'qt6-declarative' 'systemd-libs' 'wayland')
-makedepends=('extra-cmake-modules' 'git' 'plasma-wayland-protocols')
+# vulkan-headers: Qt6Gui's CMake package looks for them (qt6-base is built with Vulkan) and,
+# without them, reports Qt6Gui as not found, so Qt6Quick and everything after it fails to configure.
+makedepends=('extra-cmake-modules' 'git' 'plasma-wayland-protocols' 'vulkan-headers')
 optdepends=('plasma-settings: the settings app the mobile shell opens')
 source=("plasma-mobile::git+https://github.com/KDE/plasma-mobile.git#commit=${_commit}")
 sha256sums=('SKIP')
