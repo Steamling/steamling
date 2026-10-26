@@ -63,6 +63,8 @@ const calibrationReset = () => call("calibration_reset");
 const panelStatus = () => call("panel_status");
 const panelCalibrate = () => call("panel_calibrate");
 const panelReset = () => call("panel_reset");
+const overlayStatus = () => call("overlay_status");
+const setOverlay = (level) => call("set_overlay", level);
 
 function useDebouncedSave(options) {
     const { config, field, snapshot, save, setConfig, onError, delay = 900 } = options;
@@ -890,6 +892,80 @@ function ConfigSection({ game, reload }) {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: "CONFIG", children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doExport, children: "Export Game Config" }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doImport, children: "Import Game Config" }) }), SP_JSX.jsx("div", { className: "steamling-note", children: "Per-game tweaks and Proton pick; fan settings and defaults stay local" })] }));
 }
 
+// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
+// text in the code, so it needs no catalog.
+const catalogs = {};
+
+function language() {
+    try {
+        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
+        const raw = String(steam || navigator.language || "en").toLowerCase();
+        return raw.split(/[-_]/)[0];
+    }
+    catch (error) {
+        return "en";
+    }
+}
+let cached;
+function catalog() {
+    if (cached === undefined)
+        cached = catalogs[language()] || null;
+    return cached;
+}
+function t(text, vars) {
+    let out = catalog()?.[text] ?? text;
+    return out;
+}
+
+function PerformanceOverlay() {
+    const [overlay, setOverlayState] = SP_REACT.useState(null);
+    const [error, setError] = SP_REACT.useState("");
+    const busy = SP_REACT.useRef(false);
+    const visible = useQamVisible();
+    // Re-read on every open: Steam's own Performance Overlay setting writes the same file.
+    SP_REACT.useEffect(() => {
+        if (!visible)
+            return;
+        let cancelled = false;
+        overlayStatus()
+            .then((next) => {
+            if (!cancelled && !busy.current)
+                setOverlayState(next);
+        })
+            .catch(() => { });
+        return () => {
+            cancelled = true;
+        };
+    }, [visible]);
+    if (!overlay?.available)
+        return null;
+    const options = [
+        { data: "off", label: t("Off") },
+        { data: "fps", label: t("FPS only") },
+        { data: "compact", label: t("Compact bar: FPS, CPU, GPU, RAM, battery") },
+        { data: "detailed", label: t("Detailed: adds clocks, temperatures, power") },
+        { data: "full", label: t("Everything") },
+    ];
+    if (overlay.level === "custom")
+        options.push({ data: "custom", label: t("Set from Steam") });
+    const change = async (level) => {
+        if (busy.current || level === "custom")
+            return;
+        busy.current = true;
+        setError("");
+        try {
+            setOverlayState(await setOverlay(level));
+        }
+        catch (err) {
+            setError(String(err));
+        }
+        finally {
+            busy.current = false;
+        }
+    };
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE OVERLAY"), children: [SP_JSX.jsx(SelectEdit, { label: t("Show on screen"), value: overlay.level, options: options, onChange: change }), SP_JSX.jsx("div", { className: "steamling-note", children: error || t("The same overlay as Steam's Performance Overlay setting; either one changes it.") })] }));
+}
+
 // Audio buffer (PULSE_LATENCY_MSEC): absorbs FEX-mixer overruns (SFX-burst crackle) at the
 // cost of audio latency — keep rhythm games on Game default.
 const audioLatencyOptions = [
@@ -1052,7 +1128,7 @@ function Games({ config, setConfig, reload }) {
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
     const showFields = editingDefault || perGameEnabled;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, SP_JSX.jsx(PerformanceOverlay, {})] }));
 }
 
 // Replaces the stock "Add a Non-Steam Game" flow: Steam's file browser cannot open a new

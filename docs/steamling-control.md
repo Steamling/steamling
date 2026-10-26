@@ -70,6 +70,13 @@ With per-game settings on, the **Config** section exports the game's settings to
 `<name>.steamling.json` file, and imports one, so a tuned setup can be passed to other Steamling
 users. Importing overwrites that game's settings.
 
+### Performance overlay
+
+Shows live numbers on top of the game: **FPS only**, a **Compact bar** (FPS, CPU, GPU, RAM and
+battery in one line along the top), **Detailed** (adds clock speeds, temperatures and power
+draw) or **Everything**. It's the same overlay as Steam's own **Performance Overlay** setting in
+the quick access menu, so changing either one changes it.
+
 ## Library
 
 ### Adding non-Steam games

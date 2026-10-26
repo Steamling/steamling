@@ -13,6 +13,7 @@ from steamling_control.device import (
 )
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
+from steamling_control.overlay import overlay_status, set_overlay
 from steamling_control.sdcard import detect_sdcard, format_sdcard
 from steamling_control.sharing import install_samba, set_share, share_status
 from steamling_control.snapshots import reboot_system, snapshot_status, start_rollback
@@ -166,3 +167,9 @@ class Plugin:
 
     async def panel_reset(self):
         return await asyncio.to_thread(panel.reset)
+
+    async def overlay_status(self):
+        return await asyncio.to_thread(overlay_status)
+
+    async def set_overlay(self, level):
+        return await asyncio.to_thread(set_overlay, str(level))

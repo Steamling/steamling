@@ -1,5 +1,5 @@
 import { call } from "@decky/api";
-import type { CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, PanelStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, Tweaks, UpdateInfo, UpdateStatus, UsbTransferStatus } from "./types";
+import type { CalibrationStatus, Config, ConfigExportResult, ConfigImportResult, ConfigPreview, DeviceInfo, LedConfig, LedSideKey, OverlayStatus, PanelStatus, SdcardInfo, ShareStatus, SnapshotStatus, SshStatus, Tweaks, UpdateInfo, UpdateStatus, UsbTransferStatus } from "./types";
 
 export const getConfig = () => call<[], Config>("get_config");
 // The setters answer with only what they changed: a full get_config re-reads the whole Steam
@@ -45,3 +45,5 @@ export const calibrationReset = () => call<[], CalibrationStatus>("calibration_r
 export const panelStatus = () => call<[], PanelStatus>("panel_status");
 export const panelCalibrate = () => call<[], PanelStatus>("panel_calibrate");
 export const panelReset = () => call<[], PanelStatus>("panel_reset");
+export const overlayStatus = () => call<[], OverlayStatus>("overlay_status");
+export const setOverlay = (level: string) => call<[string], OverlayStatus>("set_overlay", level);

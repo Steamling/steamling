@@ -197,3 +197,10 @@ export interface CalibrationStatus {
   stage?: "push" | "release";
   live?: CalibrationLive;
 }
+
+export type OverlayStatus = {
+  available: boolean;
+  /** off | fps | compact | detailed | full, or custom when Steam wrote something else */
+  level: string;
+};
+
