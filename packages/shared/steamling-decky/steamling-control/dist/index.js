@@ -46,6 +46,8 @@ const installSamba = () => call("install_samba");
 const deviceInfo = () => call("device_info");
 const sshStatus = () => call("ssh_status");
 const setSsh = (on) => call("set_ssh", on);
+const usbTransferStatus = () => call("usb_transfer_status");
+const setUsbTransfer = (on) => call("set_usb_transfer", on);
 const restartGameMode = () => call("restart_game_mode");
 const checkUpdates = () => call("check_updates");
 const startUpdate = () => call("start_update");
@@ -1379,9 +1381,62 @@ function SdCard() {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: "SD CARD", children: [SP_JSX.jsx(DFL.Field, { label: "Card", description: cardSummary(card) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.TextField, { label: "Label", value: label, disabled: busy || !!card?.bootDisk, onChange: (event) => setLabel(event.target.value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 16)) }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: !card?.present || busy || !!card?.bootDisk, onClick: confirmFormat, children: busy ? "Formatting…" : "Format SD Card" }) }), status ? SP_JSX.jsx(DFL.Field, { label: "", description: status }) : null] }));
 }
 
+function UsbTransfer() {
+    const [usb, setUsb] = SP_REACT.useState(null);
+    const [busy, setBusy] = SP_REACT.useState(false);
+    const [status, setStatus] = SP_REACT.useState("");
+    const busyRef = SP_REACT.useRef(false);
+    busyRef.current = busy;
+    const visible = useQamVisible();
+    SP_REACT.useEffect(() => {
+        if (!visible)
+            return;
+        let cancelled = false;
+        usbTransferStatus()
+            .then((next) => {
+            if (!cancelled && !busyRef.current)
+                setUsb(next);
+        })
+            .catch((error) => {
+            if (!cancelled)
+                setStatus(String(error));
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [visible]);
+    const run = async (on) => {
+        if (busyRef.current)
+            return;
+        setBusy(true);
+        setStatus("");
+        try {
+            setUsb(await setUsbTransfer(on));
+        }
+        catch (error) {
+            setStatus(String(error));
+        }
+        finally {
+            setBusy(false);
+        }
+    };
+    if (usb && !usb.available)
+        return null;
+    const summary = () => {
+        if (status)
+            return status;
+        if (!usb)
+            return "Checking…";
+        if (usb.on)
+            return "On - plug into a computer with a USB-C cable and open \"Steamling\" like a phone. Controllers and hubs on the port stop working until you turn this off.";
+        return "Off";
+    };
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: "USB FILE TRANSFER", children: [SP_JSX.jsx(DFL.Field, { label: "Transfer over USB", description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Show up on a computer", description: "Copy files over a cable, no network needed. Stays on until you restart.", checked: !!usb?.on, disabled: busy || !usb, onChange: (on) => run(on) }) })] }));
+}
+
 // SD card last: the only destructive action, kept away from the casual toggles
 function Library() {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(AddGameSection, {}), SP_JSX.jsx(FileSharing, {}), SP_JSX.jsx(RemoteAccess, {}), SP_JSX.jsx(SdCard, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(AddGameSection, {}), SP_JSX.jsx(FileSharing, {}), SP_JSX.jsx(UsbTransfer, {}), SP_JSX.jsx(RemoteAccess, {}), SP_JSX.jsx(SdCard, {})] }));
 }
 
 function About() {
