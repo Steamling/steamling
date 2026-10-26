@@ -3,7 +3,7 @@
 # Copyright (C) 2026-present ROCKNIX (https://github.com/ROCKNIX)
 #
 # steamling-panel-calibration - trim a DSI panel's refresh rate to its nominal value through the
-# panel driver's frame_len_<rate> attributes (RP6 VTDR6130, kernel 0508), and keep the result.
+# panel driver's frame_len_<rate> attributes (the RP6, the ICNA35xx panels), and keep the result.
 # Panels leave the factory a little fast or slow; emulators that pace to the display then drift
 # against their audio. The measuring loop is ROCKNIX's rocknix-panel-calibration.
 #
@@ -15,23 +15,60 @@
 # The conf keeps frame_len_<rate> (applied at boot) and default_frame_len_<rate>, the value the
 # driver had before the first calibration, so a reset needs no reboot.
 # Only the running mode is calibrated: game mode owns the display, so the mode is not switched.
+import ctypes
 import fcntl
 import glob
 import json
 import os
 import struct
+import subprocess
 import sys
 import time
 
 CONF = "/etc/steamling/panel-calibration.conf"
 DRM_IOCTL_WAIT_VBLANK = 0xC018643A
+DRM_IOCTL_MODE_GETRESOURCES = 0xC04064A0
+DRM_IOCTL_MODE_GETENCODER = 0xC01464A6
+DRM_IOCTL_MODE_GETCONNECTOR = 0xC05064A7
+MODEINFO_SIZE = 68
 STEP = 4
 
 
+def panel_output():
+    # device.conf's STEAMLING_PANEL_OUTPUT: set only on boards with two screens.
+    try:
+        out = subprocess.run(
+            ["sh", "-c", 'for f in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do '
+                         '[ -r "$f" ] && . "$f" >/dev/null 2>&1; done; printf %s "${STEAMLING_PANEL_OUTPUT:-}"'],
+            capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        out = ""
+    return out or None
+
+
 def panel():
-    for attr in sorted(glob.glob("/sys/bus/mipi-dsi/devices/*/frame_len_*")):
-        return os.path.dirname(attr)
-    return None
+    with_attrs = sorted(os.path.dirname(a) for a in glob.glob("/sys/bus/mipi-dsi/devices/*/frame_len_*"))
+    output = panel_output()
+    if output and output.startswith("DSI-") and output[4:].isdigit():
+        # msm numbers DSI connectors in DSI host order, so DSI-N is the Nth panel by host address.
+        hosts = sorted(glob.glob("/sys/bus/mipi-dsi/devices/*"))
+        n = int(output[4:]) - 1
+        if 0 <= n < len(hosts):
+            return hosts[n] if hosts[n] in with_attrs else None
+    return with_attrs[0] if with_attrs else None
+
+
+def frame_rate_ceiling(dev, rate):
+    # How far above nominal a calibrated rate may land. The ICNA3520 turns the picture grey past
+    # about 0.11% fast (measured on an Odin 3), so the ICNA35xx panels stop at 0.075%.
+    try:
+        with open(os.path.join(dev, "of_node", "compatible"), "rb") as f:
+            compatible = f.read().split(b"\0")[0].decode()
+    except OSError:
+        compatible = ""
+    if compatible.startswith("chipone,icna35"):
+        return rate * 0.00075
+    return 0.05 if rate == 60 else 0.2
 
 
 def rates(dev):
@@ -99,7 +136,54 @@ def wait(fd, pipe):
     return sec + usec / 1e6
 
 
+def address(buffer):
+    return ctypes.addressof(ctypes.c_char.from_buffer(buffer))
+
+
+def connector_pipe(output):
+    # The CRTC index driving the named connector, so a board with two screens measures the right
+    # one. None when it can't be told; the caller then takes the first pipe that ticks.
+    for path in glob.glob(f"/sys/class/drm/card*-{output}"):
+        try:
+            with open(os.path.join(path, "connector_id")) as f:
+                connector_id = int(f.read())
+        except (OSError, ValueError):
+            continue
+        fd = os.open(f"/dev/dri/{os.path.basename(path).split('-')[0]}", os.O_RDWR)
+        try:
+            # One mode slot: with none the kernel would reprobe the connector.
+            modes = bytearray(MODEINFO_SIZE)
+            buf = bytearray(struct.pack("QQQQ12I", 0, address(modes), 0, 0, 1, 0, 0, 0,
+                                        connector_id, 0, 0, 0, 0, 0, 0, 0))
+            fcntl.ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, buf)
+            encoder_id = struct.unpack_from("I", buf, 44)[0]
+            if not encoder_id:
+                raise OSError("connector off")
+            buf = bytearray(struct.pack("5I", encoder_id, 0, 0, 0, 0))
+            fcntl.ioctl(fd, DRM_IOCTL_MODE_GETENCODER, buf)
+            crtc_id = struct.unpack_from("I", buf, 8)[0]
+            buf = bytearray(struct.pack("QQQQ8I", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+            fcntl.ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, buf)
+            count = struct.unpack_from("I", buf, 36)[0]
+            crtcs = bytearray(4 * count)
+            buf = bytearray(struct.pack("QQQQ8I", 0, address(crtcs), 0, 0, 0, count, 0, 0, 0, 0, 0, 0))
+            fcntl.ioctl(fd, DRM_IOCTL_MODE_GETRESOURCES, buf)
+            ids = list(struct.unpack(f"{count}I", crtcs))
+            if crtc_id in ids:
+                pipe = ids.index(crtc_id)
+                wait(fd, pipe)
+                return fd, pipe
+        except (OSError, struct.error):
+            pass
+        os.close(fd)
+    return None
+
+
 def find_crtc():
+    output = panel_output()
+    found = connector_pipe(output) if output else None
+    if found:
+        return found
     for card in sorted(glob.glob("/dev/dri/card*")):
         fd = os.open(card, os.O_RDWR)
         for pipe in range(8):
@@ -121,7 +205,8 @@ def measure(fd, pipe, seconds=0.5):
 
 def calibrate(dev, rate, fd, pipe):
     # Nudges the frame length until the measured rate settles just at or above the nominal one.
-    tolerance, big_error = (0.05, 0.1) if rate == 60 else (0.2, 0.4)
+    tolerance = frame_rate_ceiling(dev, rate)
+    big_error = 0.1 if rate == 60 else 0.4
 
     def write(value):
         write_attr(dev, rate, value)
