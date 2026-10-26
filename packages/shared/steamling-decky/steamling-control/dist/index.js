@@ -1090,6 +1090,18 @@ function PerfFields({ values, patch }) {
     const lavdValue = perGameLavd.some((option) => option.data === String(values.lavdMode ?? "")) ? String(values.lavdMode ?? "") : "";
     return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: lavdValue, options: perGameLavd, onChange: (id) => patch({ lavdMode: id }) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: fanValue, options: perGameFan, onChange: (id) => patch({ fanMode: id }) })] }));
 }
+/** Applies live, like the touchscreen: the backend switches the pad when the game starts or stops. */
+function GamepadTypeField({ values, patch }) {
+    const options = [
+        { data: "", label: t("Steam Deck (default)") },
+        { data: "xb360", label: t("Xbox 360") },
+        { data: "xbox-series", label: t("Xbox Series") },
+        { data: "ds5", label: t("DualSense") },
+    ];
+    const stored = String(values.gamepadType ?? "");
+    const value = options.some((option) => option.data === stored) ? stored : "";
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("Controller Type"), value: value, options: options, onChange: (id) => patch({ gamepadType: id }) }), SP_JSX.jsx("div", { className: "steamling-note", children: t("What the game sees while it runs. Only matters with Steam Input turned off for the game.") })] }));
+}
 /** The per-game tweak controls, shared by the Games tab and the library context-menu modal. */
 function TweakFields({ config, appid, values, patch }) {
     // Proton pick is Steam's own per-game compat setting (see lib/compat.ts) — read live and
@@ -1132,7 +1144,7 @@ function TweakFields({ config, appid, values, patch }) {
     return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "Proton Version", value: compatValue, options: compatOptions, onChange: (name) => {
                     setCurrentTool(String(name));
                     setCompatTool(appid, String(name));
-                } }), SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: "Mesa Version", value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
+                } }), SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: "Mesa Version", value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
 function clone(obj) {

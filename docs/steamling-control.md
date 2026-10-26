@@ -57,6 +57,13 @@ Per game, either can stay on the global value.
   While it is off, touch is off everywhere, the Steam overlay and on-screen keyboard included;
   use the controls there. Unlike the other tweaks this one takes effect immediately, even
   mid-game, and it works for every game Steam launches, native and emulators included.
+- **Controller Type** (per game only): the kind of controller the game sees while it runs:
+  **Steam Deck** (the default), **Xbox 360**, **Xbox Series** or **DualSense**. This only makes a
+  difference when Steam Input is turned off for the game (the game's controller settings in
+  Steam), because with Steam Input on the game talks to Steam's virtual pad either way. Pick
+  DualSense for a game or emulator with native PlayStation support, or an Xbox pad for one that
+  can't find the controller at all. It switches when the game starts and goes back when it
+  closes.
 - **Mesa Version** (per game only): run the game on a different Turnip (GPU driver) build
   than the system default, when more than one is installed.
 - **Disable Xalia**: on by default. Xalia is Proton's controller-navigation helper and costs

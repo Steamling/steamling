@@ -11,6 +11,7 @@ from steamling_control.device import (
     ssh_status,
     usb_transfer_status,
 )
+from steamling_control.gamepad import sync_gamepad
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
 from steamling_control.overlay import overlay_status, set_overlay
@@ -40,6 +41,7 @@ class Plugin:
     async def _unload(self):
         await asyncio.to_thread(calibration.cancel)
         await asyncio.to_thread(sync_touch, None)
+        await asyncio.to_thread(sync_gamepad, None)
 
     async def game_lifetime(self, appid, running):
         appid = str(appid or "")
@@ -48,6 +50,7 @@ class Plugin:
         elif appid == self._running_appid:
             self._running_appid = None
         await asyncio.to_thread(sync_touch, self._running_appid)
+        await asyncio.to_thread(sync_gamepad, self._running_appid)
 
     async def detect_sdcard(self):
         return await asyncio.to_thread(detect_sdcard)
@@ -99,6 +102,7 @@ class Plugin:
     async def save_tweaks(self, data):
         await asyncio.to_thread(save_tweaks, data)
         await asyncio.to_thread(sync_touch, self._running_appid)
+        await asyncio.to_thread(sync_gamepad, self._running_appid)
         return {"tweaks": await asyncio.to_thread(load_tweaks)}
 
     async def export_config(self, appid, name, basename, allow_overwrite):

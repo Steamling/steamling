@@ -16,6 +16,8 @@ export interface GameTweak {
   disableXalia?: boolean;
   /** true = the touchscreen is inhibited while this game runs (steamling_control/touch.py). */
   touchDisabled?: boolean;
+  /** Virtual pad while this game runs (steamling_control/gamepad.py); "" = game mode's Steam Deck pad. */
+  gamepadType?: string;
   [key: string]: any;
 }
 

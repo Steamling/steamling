@@ -2,6 +2,7 @@ import { ButtonItem, ConfirmModal, PanelSectionRow, TextField, ToggleField, show
 import { useEffect, useState } from "react";
 import { availableCompatTools, registerForCompatTool, setCompatTool } from "../lib/compat";
 import type { CompatTool } from "../lib/compat";
+import { t } from "../i18n";
 import { SelectEdit } from "./widgets";
 import type { Config } from "../types";
 
@@ -104,6 +105,26 @@ export function PerfFields({ values, patch }: {
   );
 }
 
+/** Applies live, like the touchscreen: the backend switches the pad when the game starts or stops. */
+export function GamepadTypeField({ values, patch }: { values: Record<string, any>; patch: (patch: Record<string, any>) => void }) {
+  const options = [
+    { data: "", label: t("Steam Deck (default)") },
+    { data: "xb360", label: t("Xbox 360") },
+    { data: "xbox-series", label: t("Xbox Series") },
+    { data: "ds5", label: t("DualSense") },
+  ];
+  const stored = String(values.gamepadType ?? "");
+  const value = options.some((option) => option.data === stored) ? stored : "";
+  return (
+    <>
+      <SelectEdit label={t("Controller Type")} value={value} options={options} onChange={(id) => patch({ gamepadType: id })} />
+      <div className="steamling-note">
+        {t("What the game sees while it runs. Only matters with Steam Input turned off for the game.")}
+      </div>
+    </>
+  );
+}
+
 /** The per-game tweak controls, shared by the Games tab and the library context-menu modal. */
 export function TweakFields({ config, appid, values, patch }: {
   config: Config;
@@ -168,6 +189,7 @@ export function TweakFields({ config, appid, values, patch }: {
       <SelectEdit label="Mesa Version" value={mesaValue} options={mesaOptions} onChange={(id) => patch({ mesaVersion: id })} />
       <XaliaToggle values={values} patch={patch} />
       <TouchField values={values} patch={patch} />
+      <GamepadTypeField values={values} patch={patch} />
       <EnvVarsButton value={String(values.envVars ?? "")} onSave={(next) => patch({ envVars: next })} />
     </>
   );
