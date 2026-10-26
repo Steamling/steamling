@@ -13,6 +13,12 @@
 	qcom,board-id = <0x1001f 0x00>;
 	qcom,msm-id = <0x25b 0x20000>;
 
+	/*
+	 * Off: the Odin 2's LCD backlight, carried over from its tree. The RP6's OLED
+	 * dims through DCS on the panel's own backlight device (ae94000.dsi.0, the one
+	 * Steam drives); this PWM device sat powered off, a second "backlight" a
+	 * desktop could pick instead. The Nova turns it off the same way.
+	 */
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pmk8550_pwm 0 860000>;
@@ -23,7 +29,7 @@
 		enable-gpios = <&pmk8550_gpios 5 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pwm_backlight_default>;
-		status = "okay";
+		status = "disabled";
 	};
 
 	vdd_disp_1v8: vdd-disp-1v8-regulator {
@@ -223,8 +229,6 @@
 		avdd-supply = <&vdd_disp_2v8>;
 
 		reset-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
-
-		backlight = <&backlight>;
 
 		rotation = <270>;
 
