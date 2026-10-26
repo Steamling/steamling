@@ -1,0 +1,6 @@
+# The Pocket DS's bottom-screen Goodix touch controller shares power sequencing with the panel and
+# its regulators. With async device suspend the kernel can suspend it while those are mid-change,
+# goodix_suspend fails with -EAGAIN and the whole sleep attempt aborts. Suspending devices one at
+# a time keeps the order the devicetree implies. Costs a little suspend/resume time on this board.
+ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Goodix Capacitive TouchScreen", IMPORT{program}="/usr/lib/steamling/steamling-board-env"
+ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Goodix Capacitive TouchScreen", ENV{STEAMLING_DEVICE}=="pocketds", RUN+="/bin/sh -c 'echo 0 > /sys/power/pm_async'"
