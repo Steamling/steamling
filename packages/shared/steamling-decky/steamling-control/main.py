@@ -1,6 +1,7 @@
 import asyncio
 
 from steamling_control import calibration, panel
+from steamling_control.cache import cache_info, clear_cache
 from steamling_control.config import build_config
 from steamling_control.configio import apply_config, config_dir, export_config, read_config
 from steamling_control.device import (
@@ -172,6 +173,12 @@ class Plugin:
 
     async def panel_reset(self):
         return await asyncio.to_thread(panel.reset)
+
+    async def cache_info(self, appid):
+        return await asyncio.to_thread(cache_info, str(appid))
+
+    async def clear_cache(self, appid):
+        return await asyncio.to_thread(clear_cache, str(appid), self._running_appid)
 
     async def overlay_status(self):
         return await asyncio.to_thread(overlay_status)

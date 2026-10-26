@@ -77,6 +77,13 @@ With per-game settings on, the **Config** section exports the game's settings to
 `<name>.steamling.json` file, and imports one, so a tuned setup can be passed to other Steamling
 users. Importing overwrites that game's settings.
 
+### Shader cache
+
+With a game picked, **Clear Shader Cache** shows how much compiled shader data Steam keeps for it
+and throws it away. That fixes some graphics glitches and odd stutter after a driver or game
+update. The game builds its shaders again as it runs, so expect a little stutter the first time
+through. It's greyed out while the game is running.
+
 ### Performance overlay
 
 Shows live numbers on top of the game: **FPS only**, a **Compact bar** (FPS, CPU, GPU, RAM and

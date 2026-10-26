@@ -214,3 +214,8 @@ export interface SystemStats {
   memory: { usedMb: number; totalMb: number } | null;
   fan: { rpm: number | null; percent: number | null } | null;
 }
+
+export type CacheInfo = {
+  appid: string;
+  bytes: number;
+};

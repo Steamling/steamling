@@ -63,6 +63,8 @@ const calibrationReset = () => call("calibration_reset");
 const panelStatus = () => call("panel_status");
 const panelCalibrate = () => call("panel_calibrate");
 const panelReset = () => call("panel_reset");
+const cacheInfo = (appid) => call("cache_info", appid);
+const clearCache = (appid) => call("clear_cache", appid);
 const overlayStatus = () => call("overlay_status");
 const setOverlay = (level) => call("set_overlay", level);
 const systemStats = () => call("system_stats");
@@ -971,6 +973,72 @@ function PerformanceOverlay() {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE OVERLAY"), children: [SP_JSX.jsx(SelectEdit, { label: t("Show on screen"), value: overlay.level, options: options, onChange: change }), SP_JSX.jsx("div", { className: "steamling-note", children: error || t("The same overlay as Steam's Performance Overlay setting; either one changes it.") })] }));
 }
 
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+// Decimal units, the way Steam and file managers show sizes.
+function formatBytes(bytes) {
+    if (bytes < 1e6)
+        return `${Math.max(0, Math.round(bytes / 1e3))} KB`;
+    if (bytes < 1e9)
+        return `${Math.round(bytes / 1e6)} MB`;
+    return `${(bytes / 1e9).toFixed(1)} GB`;
+}
+
+function ShaderCache({ appid, name, running }) {
+    const [info, setInfo] = SP_REACT.useState(null);
+    const [busy, setBusy] = SP_REACT.useState(false);
+    const [error, setError] = SP_REACT.useState("");
+    const busyRef = SP_REACT.useRef(false);
+    busyRef.current = busy;
+    const visible = useQamVisible();
+    SP_REACT.useEffect(() => {
+        if (!visible || !appid)
+            return;
+        let cancelled = false;
+        setInfo(null);
+        setError("");
+        cacheInfo(appid)
+            .then((next) => {
+            if (!cancelled)
+                setInfo(next);
+        })
+            .catch((err) => {
+            if (!cancelled)
+                setError(String(err));
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [appid, visible]);
+    const clear = async () => {
+        if (busyRef.current)
+            return;
+        setBusy(true);
+        setError("");
+        try {
+            setInfo(await clearCache(appid));
+        }
+        catch (err) {
+            setError(String(err));
+        }
+        finally {
+            setBusy(false);
+        }
+    };
+    const size = info ? formatBytes(info.bytes) : "…";
+    const description = () => {
+        if (error)
+            return error;
+        if (running)
+            return t("Close the game to clear it.");
+        if (info && info.bytes === 0)
+            return t("Nothing cached yet.");
+        return t("Compiled shaders for this game. Clearing fixes some graphics glitches after a driver or game update; the game stutters a little while it rebuilds them.");
+    };
+    return (SP_JSX.jsx(DFL.PanelSection, { title: t("SHADER CACHE"), children: SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: description(), disabled: busy || running || !info || info.bytes === 0, onClick: () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Clear Shader Cache"), strDescription: t("Delete the {size} of compiled shaders kept for {name}? The game builds them again as it runs.", { size, name }), strOKButtonText: t("Clear"), onOK: clear })), children: busy ? t("Clearing…") : t("Clear Shader Cache ({size})", { size }) }) }) }));
+}
+
 const REFRESH_MS = 2000;
 const SHOW_KEY = "steamling-control.monitor";
 function remembered() {
@@ -1147,10 +1215,6 @@ function TweakFields({ config, appid, values, patch }) {
                 } }), SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: "Mesa Version", value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
-function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
 function Games({ config, setConfig, reload }) {
     const runtimeGame = config.game;
     // One app-store lookup per game: worth doing once per library change, not on every render.
@@ -1221,7 +1285,7 @@ function Games({ config, setConfig, reload }) {
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
     const showFields = editingDefault || perGameEnabled;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
 }
 
 // Replaces the stock "Add a Non-Steam Game" flow: Steam's file browser cannot open a new
