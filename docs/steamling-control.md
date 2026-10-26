@@ -19,6 +19,8 @@ Settings save automatically as you change them.
 
 ## Games
 
+![The Games tab: the Game picker, then Performance (CPU scheduler, fan curve) and Game Tweaks](images/steamling-control-games.jpeg)
+
 ### Game tweaks
 
 Tweaks can be set globally (the **Default** entry in the **Game** dropdown) or per game.
@@ -134,6 +136,8 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 
 ## Controller
 
+![The Controller tab: Calibrate Controller and the stick lights](images/steamling-control-controller.jpeg)
+
 - **Calibration**: **Calibrate Controller**, then **Start**, walks each stick and trigger to its edge and back, then
   shows live readings to check (a full push reads 100 at the edge, 0 at rest). **Save** keeps
   it across reboots, **Discard** drops it, **Reset to Defaults** returns to the driver's
@@ -148,6 +152,8 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
   The result is kept across reboots; **Reset to Factory** puts the panel's own timing back.
 
 ## Updater
+
+![The Updater tab: Check for Updates, and the last snapshot under Rollback](images/steamling-control-updater.jpeg)
 
 System updates, without leaving game mode:
 
