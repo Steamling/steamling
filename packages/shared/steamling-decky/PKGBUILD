@@ -3,9 +3,12 @@
 # The plugin frontend (dist/index.js) is prebuilt and committed — no node at package build time.
 pkgname=steamling-decky
 pkgver=0.1.0
-pkgrel=44.7
+pkgrel=44.8
 pkgdesc="Decky Loader (under FEX, namespaced binfmt) + Steamling Control QAM plugin"
 arch=('any')
+# PluginLoader is an x86_64 PyInstaller build: strip can't read it here, and on a matching host
+# it would cut off the archive PyInstaller appends to the binary.
+options=('!strip' '!debug')
 url="https://github.com/dvandenburgh/steamling"
 license=('GPL-2.0-or-later')
 # Every game's launch options name steamling-game-launch; older steamling-steam releases lack it.
