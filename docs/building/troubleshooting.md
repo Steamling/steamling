@@ -82,32 +82,15 @@ added), then run plain `make sync`.
 **`error linux-steamling-<soc> not in [steamling] — run 'make kernel' first`**
 
 `make build` packages the kernel from `make kernel`'s output. Run `sudo make kernel`, then
-`sudo make build` again. `make seed` never downloads a kernel, on purpose: the image must boot the
-kernel its modules were built with.
+`sudo make build` again.
 
 ## Packages
 
-**`make: *** No rule to make target 'seed'.  Stop.`**
-
-Your checkout predates `make seed` and `make pending`. Update it (`git pull`).
-
 **`make pending` lists `mesa`, `gamescope`, an emulator or another big package**
 
-`make build` will compile it, and under qemu that can take hours. It is listed because your checkout
-and the published repo disagree on its version: your checkout is newer or older than the last
-publish, or you changed it. Updating your checkout (`git pull`, then `sudo make seed`) usually clears
-it. If you did change that package, the compile is expected.
-
-**`error STEAMLING_REPO_URL is empty: no published repo to seed from`**
-
-`make seed` has nothing to download from: Steamling doesn't publish a package repo yet. Skip
-`make seed`; the build works without it and compiles every package (`./build.sh` already skips
-the step). If you host a repo of your own, set `STEAMLING_REPO_URL` in `config/steamling.conf`.
-
-**`error could not read <repo>/<soc>/steamling.db`**
-
-`make seed` cannot reach the repo `STEAMLING_REPO_URL` points at. Check the connection (or proxy)
-from the build host; the build itself still works without seeding, it just compiles every package.
+`make build` will compile it, and under qemu that can take hours. On a first build every package is
+listed. After that, it means the package's version changed: a `git pull` brought a newer recipe, or
+you changed it yourself. The compile is expected; it only happens once per version.
 
 **`error still mounted under .../build/pkgbuild-root-<soc>, not wiping it`**
 
@@ -137,5 +120,5 @@ WSL2 directly. On a host, check that the `loop` module is loaded (`sudo modprobe
 
 **`error must run as root (chroot/mount needed): try 'sudo make <target>'`**
 
-`seed`, `packages`, `build` and `sd-image` need root, and the docs run `kernel` with `sudo` too so
+`packages`, `build` and `sd-image` need root, and the docs run `kernel` with `sudo` too so
 everything under `build/` has one owner. `check`, `pending` and `sync` do not.

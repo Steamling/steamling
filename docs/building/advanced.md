@@ -22,13 +22,8 @@ That does **not** mean you need an ARM computer to build it:
 | SD image (`make sd-image`) | native | native: just partitioning and copying files |
 
 The emulated steps are the slow part on x86_64. Most of that cost is compiling the big packages
-(mesa, gamescope, FEX, the emulators), so the build can **skip compiling** everything you have
-not changed: `make seed` downloads the already-built packages from a published Steamling repo, and
-only your changes get compiled. With it, an x86_64 PC builds an image in a few hours instead of
-days. There's no official Steamling package repo yet (`STEAMLING_REPO_URL` in
-`config/steamling.conf` is empty), so every package compiles and `./build.sh` skips the seed step,
-unless you publish your own: [own-base.md](own-base.md) shows how, and the same repo gives your
-handhelds over-the-air updates.
+(mesa, gamescope, FEX, the emulators). Your first build compiles all of them; after that, a build
+only recompiles the packages whose recipe changed, so it is far quicker.
 
 An aarch64 host (an Arch/Fedora VM on Apple Silicon, an ARM cloud server) needs no emulation at all
 and is still the fastest way to build everything from source.
@@ -37,7 +32,7 @@ and is still the fastest way to build everything from source.
 
 1. **Kernel** - `make kernel` builds the committed kernel (`kernel/<soc>/`) into a boot image.
 2. **Packages** - `make build` first builds every Steamling package that is not already in
-   `build/localrepo/`; `make seed` fills that from the published repo so only real changes compile.
+   `build/localrepo/` at its current version, so after the first build only real changes compile.
 3. **Root filesystem** - `make build` then installs the Arch Linux ARM base and the packages into
    `build/rootfs/`, and pre-installs the ARM Steam client so first boot works offline.
 4. **Image** - `make sd-image` turns that into a flashable `build/image/<soc>/steamling-<soc>-sd.img`.
@@ -74,7 +69,6 @@ These are the steps it runs, and each is a target of its own:
 
 ```bash
 make check                                   # host lines must say ok (make host-setup fixes most)
-sudo make seed                               # optional on aarch64, strongly recommended on x86_64
 sudo make kernel
 make pending                                 # what `make build` would still compile
 sudo make build
@@ -96,14 +90,11 @@ newer ROCKNIX.
 
 ### Before `make build`: read `make pending`
 
-`make pending` lists every package `make build` would compile. `make seed` only downloads a package
-the published repo has at exactly your checkout's version, and skips any package folder with
-uncommitted changes, so after seeding the list should hold only packages you changed, plus the
-kernel package (`linux-steamling-<soc>`, which is just repackaged from your `make kernel` output). If
-it lists something big like `mesa`, `gamescope` or `dolphin-emu`, your checkout and the published
-repo disagree on that package's version - usually your checkout is older or newer than the last
-publish. Compiling it under qemu takes hours; updating your checkout (`git pull`, then
-`sudo make seed` again) is usually the better fix.
+`make pending` lists every package `make build` would compile: on a first build that is all of
+them, after that only the ones whose recipe changed since you last built them, plus the kernel
+package (`linux-steamling-<soc>`, which is just repackaged from your `make kernel` output). If it
+lists something big like `mesa`, `gamescope` or `dolphin-emu` you didn't expect, a `git pull`
+moved that package's version. Compiling it under qemu takes hours, so plan for it.
 
 ### Useful build options
 
@@ -123,7 +114,6 @@ environment (for example `make image SSH=1`, `export SSH=1` to make it the defau
 | `--jobs N` | `JOBS=N` | parallel jobs for the kernel build (default: all cores) |
 | (none) | `STEAMLING_CCACHE=off` | compile packages from scratch instead of reusing the ccache in `build/cache/ccache-pkg` (`STEAMLING_CCACHE_SIZE` sets its limit, 20G by default) |
 | `--no-sd-image` | `SD_IMAGE=off` | stop at the finished rootfs (`make rootfs`) |
-| `--no-seed` | `STEAMLING_SEED=off` | compile every package instead of downloading the published ones |
 | `--no-host-setup` | `STEAMLING_HOST_SETUP=off` | stop when host packages are missing instead of installing them |
 | `--no-status-bar` | `STEAMLING_STATUS_BAR=off` | plain output, without the status line at the bottom |
 | (none) | `STEAMLING_BASE_SNAPSHOT=live` | build straight from Arch Linux ARM's own repos and latest tarball instead of the frozen base: nothing to host or upload, but every build gets whatever ALARM has that day (put it in `config/local.conf` to keep it) | <!-- docs-check: allow -->
@@ -153,20 +143,22 @@ running device:
 
 ```bash
 sudo make packages PKG="steamling-branding"                  # -> build/localrepo/<soc|shared>/
-scp build/localrepo/shared/steamling-branding-*.pkg.tar.* root@<device>:/tmp/
-ssh root@<device> 'pacman -U /tmp/steamling-branding-*.pkg.tar.*'
+scp build/localrepo/shared/steamling-branding-*.pkg.tar.* deck@steamling:/tmp/
+ssh -t deck@steamling 'sudo pacman -U /tmp/steamling-branding-*.pkg.tar.*'
 ```
 
-A package whose build needs packages Steamling builds itself (for example `steamling-steam` needs
-`gamescope`) finds them in `build/localrepo/`, so run `sudo make seed` once first. See
+(Log in as `deck`: root can't log in over SSH.) A package whose build needs packages Steamling
+builds itself (for example `steamling-steam` needs `gamescope`) finds them in `build/localrepo/`,
+so build those first; after one full build they are all there. To send everything you rebuilt in
+one go instead of package by package, see [Updating Steamling](../updating.md). See
 [CONTRIBUTING.md](../../CONTRIBUTING.md) for how to test and submit a change.
 
 ## Space and time
 
 Plan on roughly **100 GB free** for a full build (build chroot, rootfs, kernel tree with debug info,
 caches, and the image). Rough times on a recent 8-core x86_64 PC: kernel 20-40 minutes the first
-time, `make seed` depends on your connection (several GB), `make build` one to three hours under
-qemu, `make sd-image` 10-20 minutes. An aarch64 host is faster for the package and rootfs steps.
+time, `make build` one to three hours under qemu once every package is compiled (the first time,
+compiling them all adds many hours on x86_64), `make sd-image` 10-20 minutes. An aarch64 host is faster for the package and rootfs steps.
 `make kernel` does nothing when `kernel/<soc>/` has not changed since its last build, and with
 ccache installed a small kernel change rebuilds in minutes. Packages use their own ccache inside
 the build chroot, so after the first build a version bump or a small patch only recompiles the files

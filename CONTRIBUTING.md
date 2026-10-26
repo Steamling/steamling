@@ -40,8 +40,8 @@ Especially welcome:
 3. **Tell me how to test it.** Every PR includes reproduction steps I can follow on my
    device. This is a hard requirement, see
    [What the PR must contain](#what-the-pr-must-contain).
-4. **Bump `pkgrel`** when you change what a package ships, otherwise existing users never
-   get your change through `pacman -Syu`.
+4. **Bump `pkgrel`** when you change what a package ships, otherwise a handheld updating from
+   a new build ([docs/updating.md](docs/updating.md)) never picks your change up.
 5. **Fixes go in robust locations.** A change that only survives until the next `make sync`,
    the next session restart, or the next reboot is not a fix. See
    [Where changes go](#where-changes-go).
@@ -69,8 +69,8 @@ Three rules that catch most first-time contributors:
 - **Kernel config changes go in a delta**, not in `kernel/<soc>/config` - that file is a
   synced ROCKNIX snapshot and `make sync` overwrites it. Use `kernel/<soc>/config-delta` for
   one chip, or the delta block in `scripts/build-kernel.sh` for every chip.
-- **Anything in `overlay/` or the image scripts only reaches people who reflash.** It does not
-  ship through `pacman -Syu`. If a fix needs to reach existing installs, it belongs in a
+- **Anything in `overlay/` or the image scripts only reaches people who reflash.** A handheld
+  updating from a new build with `pacman -Syu` never sees it. If a fix needs to reach existing installs, it belongs in a
   package with a bumped `pkgrel`. If it genuinely cannot, say so in the PR.
 - **Runtime state that a session or service can clobber must be re-asserted** where it will
   stick (a systemd unit, the session launch path), not set once at install time.
@@ -118,25 +118,29 @@ sudo make packages PKG="steamling-decky"    # -> build/localrepo/shared/ (per-So
 This tree builds four SoC families: `sm8550` (the Retroid Pocket 6, the reference board, and the default), `sm8250`, `sm8650` and `sm8750`. `STEAMLING_EMULATION=1`
 (`--emulation`) bakes the emulation layer into the image.
 
-Packages compress as `.pkg.tar.zst` (seeded and older ones as `.pkg.tar.xz`), so glob
-`*.pkg.tar.*`. Never sign or publish anything - releases go through the maintainer's staged
-publish flow.
+Packages compress as `.pkg.tar.zst` (older ones as `.pkg.tar.xz`), so glob `*.pkg.tar.*`.
+There's no package repo or release download: everyone builds their own image, and updates a
+handheld from their own build ([docs/updating.md](docs/updating.md)).
 
 ## Testing on a device
 
 The normal loop is **build the package, copy it over, `pacman -U`, exercise it**. You do not
 need to reflash an image for a package change. SSH is off by default: turn it on in Steamling
-Tools, or build your image with `SD_SSH=on`.
+Control (Library → Remote access) or Steamling Tools, or build your image with `--ssh`. Log in as
+`deck`; root can't log in over SSH.
 
 ```bash
 # on the build host
-scp build/localrepo/shared/steamling-decky-*.pkg.tar.* root@<device-ip>:/tmp/
+scp build/localrepo/shared/steamling-decky-*.pkg.tar.* deck@steamling:/tmp/
 
 # on the device (default password for root and deck is 'root')
-pacman -U /tmp/steamling-decky-*.pkg.tar.*
-systemctl restart <the-unit-you-touched>      # if applicable
-journalctl -b -u <the-unit-you-touched>       # check it came up clean
+sudo pacman -U /tmp/steamling-decky-*.pkg.tar.*
+sudo systemctl restart <the-unit-you-touched>      # if applicable
+journalctl -b -u <the-unit-you-touched>            # check it came up clean
 ```
+
+When you've rebuilt several packages, serving the whole build and running `sudo pacman -Syu` on the
+device is quicker: see [docs/updating.md](docs/updating.md).
 
 **Keep a rollback.** Images don't carry a copy of every package, so keep the old package
 yourself: copy it out of `build/localrepo/` before you rebuild, or build your test image with
@@ -223,8 +227,8 @@ Concretely:
 ## How to test
 
     sudo make packages PKG="steamling-decky"
-    scp build/localrepo/shared/steamling-decky-*.pkg.tar.* root@device:/tmp/
-    ssh root@device 'pacman -U /tmp/steamling-decky-*.pkg.tar.* && reboot'
+    scp build/localrepo/shared/steamling-decky-*.pkg.tar.* deck@steamling:/tmp/
+    ssh -t deck@steamling 'sudo pacman -U /tmp/steamling-decky-*.pkg.tar.* && sudo reboot'
 
 1. Boot to game mode, open the QAM, Steamling Control -> Controller -> Stick Lights.
 2. Move the Brightness slider to ~10%. Expected: the rings dim smoothly and stay the
@@ -241,10 +245,12 @@ check it, which is the single biggest reason a PR stalls.
 ## Package rules
 
 - **Bump `pkgrel`** whenever a package's shipped contents change. Without it, `pacman -Syu`
-  is a no-op for existing users and only fresh images get your work. Bump `pkgver` only for
+  from a new build is a no-op on a handheld that already runs Steamling, and only fresh images get
+  your work. Bump `pkgver` only for
   an upstream version change, and reset `pkgrel=1` when you do.
-- **Never republish an existing package filename with different contents.** In practice this
-  means: always bump, never quietly rebuild.
+- **Never ship different contents under an existing package version.** A handheld that already
+  has that version won't take the new one. In practice this means: always bump, never quietly
+  rebuild.
 - **Committed build output must be reproducible.** `packages/shared/steamling-decky/steamling-control/dist/`
   is committed and I rebuild it from your sources during review; it should come out
   byte-identical with the pinned toolchain (`npm ci && npm run build`), and `npx tsc --noEmit`
@@ -260,16 +266,15 @@ check it, which is the single biggest reason a PR stalls.
   One that repackages third-party content keeps the upstream license and names it in a
   comment on the same line (`license=('zlib')   # Valve's DXVK build, repackaged`). `make check`
   enforces both.
-- **New dependencies** should come from the Arch Linux ARM repos or `[steamling]`. Flag anything
+- **New dependencies** should come from the Arch Linux ARM repos or a package in this tree. Flag anything
   large - image size matters on a handheld.
 - **A new package name needs a `depends=` edge** from the layer metapackage that owns it
   (`steamling-core`, `steamling-{steam,desktop,emulation}-full`) or from `steamling-device-<soc>`,
   in the same PR. `pacman -Syu` never installs a name nothing depends on, so without the edge
   only fresh images get it. Renaming a package needs `replaces=` + `conflicts=` for the old
-  name. The maintainer's publish gate (`scripts/stage-check.sh`) rejects both omissions, so
-  fixing them up front saves a round trip.
+  name, or updating handhelds end up with both.
 - **A `replaces=` or `conflicts=` entry in a `packages/shared/` PKGBUILD** acts on every SoC's
-  devices in one publish (`replaces=` uninstalls the old package on `-Syu`), so each entry gets
+  devices in one update (`replaces=` uninstalls the old package on `-Syu`), so each entry gets
   a row with its reason in `scripts/shared-conflicts.allow`
   (`<package dir> :: <field>=<entry> :: <reason>`). `make check` fails on an entry without a row
   and on a row whose entry is gone.

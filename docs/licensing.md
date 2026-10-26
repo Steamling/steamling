@@ -64,7 +64,7 @@ wallpapers, avatars, and Steam Deck logo (splash and distributor icon) are not s
 
 ## Source availability
 
-Published Steamling images and the pacman repo contain GPL-licensed binaries. The
-corresponding source is this repository plus the pinned upstream sources referenced by
+Steamling images contain GPL-licensed binaries. If you share an image or packages you built,
+the corresponding source is this repository plus the pinned upstream sources referenced by
 each PKGBUILD (exact tags and hashes are in the PKGBUILDs and PATCHES.md), which
 satisfies the GPL source-offer requirement as long as this repo stays public.

@@ -90,7 +90,7 @@ Follow the [Quick start](advanced.md#quick-start). In short:
 (`make image` is the same; `./build.sh --help` lists the options), or step by step:
 
 ```bash
-sudo make seed && sudo make kernel && make pending
+sudo make kernel && make pending
 sudo make build && sudo make sd-image
 ```
 
@@ -108,5 +108,4 @@ sudo make build && sudo make sd-image
   mounted inside it (`findmnt | grep pkgbuild-root` prints nothing; on WSL, `wsl --shutdown`
   clears any leftovers), then remove only that directory:
   `sudo rm -rf build/pkgbuild-root-<soc>`. `rm -rf` follows bind mounts, so never skip the check.
-  `make clean` removes far more: the kernel build and every package in `build/localrepo/`, seeded
-  ones included.
+  `make clean` removes far more: the kernel build and every package in `build/localrepo/`.

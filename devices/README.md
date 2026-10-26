@@ -106,7 +106,7 @@ package needs no recipe of its own (`packages/soc/linux-steamling/` packages `ma
 plus `mkbootimg`; the /flash deploy is bsp-common's and needs nothing per SoC), and
 an OpenABL release with a `<SOC>/` folder for `packages/soc/steamling-bootloader/` to copy to the SD
 boot FAT. Each SoC gets its own pacman repo tree
-(`build/localrepo/<soc>`, published at `STEAMLING_REPO_URL/<soc>`): the tuned packages
+(`build/localrepo/<soc>`): the tuned packages
 (mesa, gamescope, fex-emu) share pkgnames across SoCs with different
 binaries, so the repos must not mix. They build for every SoC already (`socs` = `all`);
 a SoC-specific kernel config or a local patch delta goes in `kernel/<soc>/` (see
@@ -114,8 +114,7 @@ kernel/README.md). `make check` validates every family: required files, family a
 the models table against boards/ and the dts model lines, the consumers' fallbacks, the rendered device.conf and family.conf, and that
 the cmdline has no committed copy outside the profile. The BSP PKGBUILD installs what the
 build stages into its `./staged` (device.conf, family.conf and kernel-cmdline):
-copy an existing family's `package()`. A new tree is never published until its first
-`make stage`/`make publish`; stage-check skips it for the other SoCs until then.
+copy an existing family's `package()`.
 
 ## Boot styles (`BOOTLOADER` in profile.conf)
 

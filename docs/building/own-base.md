@@ -1,4 +1,4 @@
-# Your own base, and over-the-air updates
+# Your own base
 
 Steamling installs two kinds of packages: the ones we build (the kernel, Mesa, gamescope, our
 tools...) and everything else, which comes from Arch Linux ARM. That second set is the **base**.
@@ -10,9 +10,6 @@ on 23 October they cut a new one at the same address, and our builds moved onto 
 our settings still named the old one. This page shows how to make and host your own, so the base
 only moves when you move it.
 
-The same hosting also turns on **over-the-air updates**: once your package repo is published,
-handhelds update with a button press instead of a reflash.
-
 ## What you need
 
 - **The machine you already build on.** These steps were written for an x86_64 CachyOS laptop,
@@ -20,8 +17,7 @@ handhelds update with a button press instead of a reflash.
   [Building on a Linux host](linux-host.md)).
 - **Somewhere public to put files.** Anything [rclone](https://rclone.org) can upload to, with a
   public web address in front of it. Cloudflare R2 is what the scripts default to: its free tier
-  covers 10 GB and doesn't charge for downloads. A base is a few GB; the package repos add a few
-  more.
+  covers 10 GB and doesn't charge for downloads. A base is a few GB.
 - **Time.** The script builds everything twice. On an x86_64 machine every Arm program runs through
   qemu, so the first build takes hours.
 
@@ -54,8 +50,8 @@ STEAMLING_BASE_RCLONE_REMOTE=r2:steamling/repo/base
 STEAMLING_BASE_URL=https://pub-1234.r2.dev/repo/base
 ```
 
-The rest is optional and explained in the file: the package repo for over-the-air updates, ccache,
-and first-boot settings like Wi-Fi, SSH, the timezone and the root password.
+The rest is optional and explained in the file: ccache, and first-boot settings like Wi-Fi, SSH,
+the timezone and the root password.
 
 ## 3. Cut the base and build
 
@@ -103,57 +99,13 @@ and package rebuilds get faster. `android-tools` (adb and fastboot) is on the li
 base always hosts (`config/packages/base-extras.list`), so `sudo pacman -S android-tools` works on a
 handheld for flashing and support.
 
-## 4. Turn on over-the-air updates
-
-Your base is ready, but handhelds also need somewhere to fetch Steamling's own packages. Without
-that, a new version means flashing a new image. Here's how to publish them:
-
-1. **Make a signing key**, so handhelds only accept packages you built:
-
-   ```fish
-   gpg --quick-gen-key "Steamling repo <you@example.com>" ed25519 sign never
-   gpg --export --armor you@example.com > config/steamling-repo.asc
-   ```
-
-2. **Point the config at it.** In `config/local.conf`, uncomment and fill in: <!-- docs-check: allow -->
-
-   ```sh
-   STEAMLING_REPO_URL=https://pub-1234.r2.dev/repo
-   STEAMLING_REPO_GPG_KEY=you@example.com
-   STEAMLING_REPO_PUBKEY=config/steamling-repo.asc
-   ```
-
-   `STEAMLING_REPO_RCLONE_REMOTE` is already set to `r2:steamling/repo`; change it if your bucket is
-   called something else.
-
-3. **Build an image** (`make image`). Images built from now on trust your key and know where to look
-   for updates. Handhelds flashed before this don't know about the repo yet, so they need one
-   reflash with the new image.
-
-4. **Publish the packages for the first time.** There's nothing live to compare against yet, so the
-   first upload sends everything you've built, the shared repo once and then each chip family's:
-
-   ```fish
-   env STEAMLING_PUBLISH_FROM=localrepo make publish-shared
-   env STEAMLING_PUBLISH_FROM=localrepo make publish
-   ```
-
-From then on, publish only what you changed. Build it, name the packages, check, upload:
-
-```fish
-make stage PKG="gamescope mangohud"; and make publish
-```
-
-(`make stage-shared` and `make publish-shared` do the same for the shared repo.) Staging starts
-from what's live and swaps in only the packages you name, so a half-finished experiment in your
-build folder can't ship by accident. Handhelds pick updates up through **Steamling Control →
-Updater**, the **Steamling Updater** app in desktop mode, or `sudo pacman -Syu`.
-
-## 5. Build the image
+## 4. Build the image
 
 `make image` (or `./build.sh`, which is the same thing with friendlier output) builds the whole SD
 card image and leaves it at `build/image/steamling-sm8550-sd.img`. Write that file to a microSD card
-as an image, with balenaEtcher, Rufus or `dd`, and follow the [install guide](../install.md).
+as an image, with balenaEtcher, Rufus or `dd`, and follow the [install guide](../install.md). To
+get a later build onto a handheld that already runs Steamling, see
+[Updating Steamling](../updating.md).
 
 You don't need a separate image-making tool. Arch's own `archiso` builds live installer ISOs for
 x86_64 PCs, not SD card images for Arm handhelds. What Steamling's build does is the Arm
