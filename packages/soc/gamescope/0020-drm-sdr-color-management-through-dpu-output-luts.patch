@@ -20,10 +20,10 @@ unbound for the output LUTs before 0011's identity-LUT skip. 0023
 connects the two.
 ---
 diff --git a/src/Backends/DRMBackend.cpp b/src/Backends/DRMBackend.cpp
-index 4ff87ea1..f7f56203 100644
+index d34c120..c784624 100644
 --- a/src/Backends/DRMBackend.cpp
 +++ b/src/Backends/DRMBackend.cpp
-@@ -71,6 +71,7 @@ gamescope::ConVar<bool> cv_drm_debug_disable_regamma_tf( "drm_debug_disable_rega
+@@ -70,6 +70,7 @@ gamescope::ConVar<bool> cv_drm_debug_disable_regamma_tf( "drm_debug_disable_rega
  gamescope::ConVar<bool> cv_drm_debug_disable_output_tf( "drm_debug_disable_output_tf", false, "Force default (identity) output TF, affects other logic. Not a property directly." );
  gamescope::ConVar<bool> cv_drm_debug_disable_blend_tf( "drm_debug_disable_blend_tf", false, "Blending chicken bit. (Forces BLEND_TF to DEFAULT, does not affect other logic)" );
  gamescope::ConVar<bool> cv_drm_debug_disable_ctm( "drm_debug_disable_ctm", false, "CTM chicken bit. (Forces CTM off, does not affect other logic)" );
@@ -31,7 +31,7 @@ index 4ff87ea1..f7f56203 100644
  gamescope::ConVar<bool> cv_drm_debug_disable_color_encoding( "drm_debug_disable_color_encoding", false, "YUV Color Encoding chicken bit. (Forces COLOR_ENCODING to DEFAULT, does not affect other logic)" );
  gamescope::ConVar<bool> cv_drm_debug_disable_color_range( "drm_debug_disable_color_range", false, "YUV Color Range chicken bit. (Forces COLOR_RANGE to DEFAULT, does not affect other logic)" );
  gamescope::ConVar<bool> cv_drm_debug_disable_explicit_sync( "drm_debug_disable_explicit_sync", false, "Force disable explicit sync on the DRM backend." );
-@@ -136,6 +137,10 @@ struct drm_t {
+@@ -135,6 +136,10 @@ struct drm_t {
  	struct drm_state_t {
  		std::shared_ptr<gamescope::BackendBlob> mode_id;
  		uint32_t color_mgmt_serial;
@@ -42,7 +42,7 @@ index 4ff87ea1..f7f56203 100644
  		std::shared_ptr<gamescope::BackendBlob> lut3d_id[ EOTF_Count ];
  		std::shared_ptr<gamescope::BackendBlob> shaperlut_id[ EOTF_Count ];
  		amdgpu_transfer_function output_tf = AMDGPU_TRANSFER_FUNCTION_DEFAULT;
-@@ -358,6 +363,7 @@ namespace gamescope
+@@ -357,6 +362,7 @@ namespace gamescope
  			std::optional<CDRMAtomicProperty> GAMMA_LUT;
  			std::optional<CDRMAtomicProperty> DEGAMMA_LUT;
  			std::optional<CDRMAtomicProperty> CTM;
@@ -50,7 +50,7 @@ index 4ff87ea1..f7f56203 100644
  			std::optional<CDRMAtomicProperty> VRR_ENABLED;
  			std::optional<CDRMAtomicProperty> OUT_FENCE_PTR;
  			std::optional<CDRMAtomicProperty> AMD_CRTC_REGAMMA_TF;
-@@ -1778,6 +1784,9 @@ void finish_drm(struct drm_t *drm)
+@@ -1794,6 +1800,9 @@ void finish_drm(struct drm_t *drm)
  		if ( pCRTC->GetProperties().DEGAMMA_LUT )
  			pCRTC->GetProperties().DEGAMMA_LUT->SetPendingValue( req, 0, true );
  
@@ -60,7 +60,7 @@ index 4ff87ea1..f7f56203 100644
  		if ( pCRTC->GetProperties().CTM )
  			pCRTC->GetProperties().CTM->SetPendingValue( req, 0, true );
  
-@@ -2406,6 +2415,7 @@ namespace gamescope
+@@ -2422,6 +2431,7 @@ namespace gamescope
  			m_Props.GAMMA_LUT           = CDRMAtomicProperty::Instantiate( "GAMMA_LUT",           this, *rawProperties );
  			m_Props.DEGAMMA_LUT         = CDRMAtomicProperty::Instantiate( "DEGAMMA_LUT",         this, *rawProperties );
  			m_Props.CTM                 = CDRMAtomicProperty::Instantiate( "CTM",                 this, *rawProperties );
@@ -68,7 +68,7 @@ index 4ff87ea1..f7f56203 100644
  			m_Props.VRR_ENABLED         = CDRMAtomicProperty::Instantiate( "VRR_ENABLED",         this, *rawProperties );
  			m_Props.OUT_FENCE_PTR       = CDRMAtomicProperty::Instantiate( "OUT_FENCE_PTR",       this, *rawProperties );
  			m_Props.AMD_CRTC_REGAMMA_TF = CDRMAtomicProperty::Instantiate( "AMD_CRTC_REGAMMA_TF", this, *rawProperties );
-@@ -3316,6 +3326,29 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3305,6 +3315,29 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  			drm->needs_modeset = true;
  	}
  
@@ -98,7 +98,7 @@ index 4ff87ea1..f7f56203 100644
  	drm->m_FbIdsInRequest.clear();
  
  	bool needs_modeset = drm->needs_modeset.exchange(false);
-@@ -3347,15 +3380,14 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3336,15 +3369,14 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  
  	// We do internal refcounting with these events
  
@@ -116,7 +116,7 @@ index 4ff87ea1..f7f56203 100644
  	}
  
  	if ( !bSleep )
-@@ -3363,7 +3395,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3352,7 +3384,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  		if ( drm->pCRTC != nullptr )
  			flags |= DRM_MODE_PAGE_FLIP_EVENT;
  
@@ -125,7 +125,7 @@ index 4ff87ea1..f7f56203 100644
  			flags |= DRM_MODE_PAGE_FLIP_ASYNC;
  	}
  
-@@ -3414,6 +3446,9 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3403,6 +3435,9 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  			if ( pCRTC->GetProperties().DEGAMMA_LUT )
  				pCRTC->GetProperties().DEGAMMA_LUT->SetPendingValue( drm->req, 0, bForceInRequest );
  
@@ -135,7 +135,7 @@ index 4ff87ea1..f7f56203 100644
  			if ( pCRTC->GetProperties().CTM )
  				pCRTC->GetProperties().CTM->SetPendingValue( drm->req, 0, bForceInRequest );
  
-@@ -3447,7 +3482,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3436,7 +3471,7 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  			if ( drm->pCRTC->GetProperties().GAMMA_LUT )
  				drm->pCRTC->GetProperties().GAMMA_LUT->SetPendingValue( drm->req, 0, true );
  
@@ -144,7 +144,7 @@ index 4ff87ea1..f7f56203 100644
  				drm->pCRTC->GetProperties().DEGAMMA_LUT->SetPendingValue( drm->req, 0, true );
  
  			if ( drm->pCRTC->GetProperties().CTM )
-@@ -3476,6 +3511,14 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3465,6 +3500,14 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  
  	if ( drm->pCRTC && !bSleep )
  	{
@@ -159,7 +159,7 @@ index 4ff87ea1..f7f56203 100644
  		if ( drm->pCRTC->GetProperties().AMD_CRTC_REGAMMA_TF )
  		{
  			if ( !cv_drm_debug_disable_regamma_tf )
-@@ -3613,14 +3656,61 @@ gamescope::GamescopeScreenType drm_get_screen_type(struct drm_t *drm)
+@@ -3602,14 +3645,61 @@ gamescope::GamescopeScreenType drm_get_screen_type(struct drm_t *drm)
  	return drm->pConnector->GetScreenType();
  }
  
@@ -223,7 +223,7 @@ index 4ff87ea1..f7f56203 100644
  	drm->pending.color_mgmt_serial = g_ColorMgmt.serial;
  
  	for ( uint32_t i = 0; i < EOTF_Count; i++ )
-@@ -4020,7 +4110,8 @@ namespace gamescope
+@@ -4009,7 +4099,8 @@ namespace gamescope
  					bSupportsHardwareColorManagement,
  					pFrameInfo->outputEncodingEOTF,
  					pFrameInfo->layers.count(),
@@ -233,7 +233,7 @@ index 4ff87ea1..f7f56203 100644
  				if ( !bSupportsHardwareColorManagement )
  				{
  					// Scanout can't apply the LUT-baked backlight dim here.
-@@ -4035,6 +4126,13 @@ namespace gamescope
+@@ -4024,6 +4115,13 @@ namespace gamescope
  
  			bNeedsFullComposite |= !!(g_uCompositeDebug & CompositeDebugFlag::Heatmap);
  			bNeedsFullComposite |= g_uOutputRotation != 0; // can't rotate planes at scanout
@@ -247,7 +247,7 @@ index 4ff87ea1..f7f56203 100644
  
  			bool bDoComposite = true;
  			if ( !bNeedsFullComposite && !bWantsPartialComposite )
-@@ -4148,6 +4246,8 @@ namespace gamescope
+@@ -4144,6 +4242,8 @@ namespace gamescope
  			FrameInfo_t presentCompFrameInfo = {};
  			presentCompFrameInfo.allowVRR = pFrameInfo->allowVRR;
  			presentCompFrameInfo.outputEncodingEOTF = pFrameInfo->outputEncodingEOTF;
@@ -256,7 +256,7 @@ index 4ff87ea1..f7f56203 100644
  
  			if ( bNeedsFullComposite )
  			{
-@@ -4446,6 +4546,21 @@ namespace gamescope
+@@ -4442,6 +4542,21 @@ namespace gamescope
  			return SupportsColorManagement();
  		}
  
@@ -279,7 +279,7 @@ index 4ff87ea1..f7f56203 100644
  		{
  			drm_t *drm = &g_DRM;
 diff --git a/src/Backends/DRMComposition.h b/src/Backends/DRMComposition.h
-index 1210f78c..84d7cd9c 100644
+index 1210f78..84d7cd9 100644
 --- a/src/Backends/DRMComposition.h
 +++ b/src/Backends/DRMComposition.h
 @@ -6,18 +6,16 @@
@@ -306,7 +306,7 @@ index 1210f78c..84d7cd9c 100644
  
          return eOutputEncodingEOTF != EOTF_PQ ||
 diff --git a/src/backend.h b/src/backend.h
-index 5b4bf920..74696da6 100644
+index 1d4d572..5008de6 100644
 --- a/src/backend.h
 +++ b/src/backend.h
 @@ -342,6 +342,11 @@ namespace gamescope
@@ -322,11 +322,11 @@ index 5b4bf920..74696da6 100644
  		inline bool SupportsFormat( uint32_t uDrmFormat ) const
  		{
 diff --git a/src/rendervulkan.hpp b/src/rendervulkan.hpp
-index ceb6132b..60b42ff0 100644
+index 15f4786..4c7db50 100644
 --- a/src/rendervulkan.hpp
 +++ b/src/rendervulkan.hpp
-@@ -300,6 +300,9 @@ struct FrameInfo_t
- 	bool allowVRR;
+@@ -305,6 +305,9 @@ struct FrameInfo_t
+ 	bool bRepeatFrame;
  	bool applyOutputColorMgmt; // drm only
  	EOTF outputEncodingEOTF;
 +	// The SDR shaper + 3D LUT are left to the output (msm DPU): set only when every
@@ -336,10 +336,10 @@ index ceb6132b..60b42ff0 100644
  	// Maps output space onto the focused window's own space for absolute input.
  	// Not the base layer's transform, whose texture may already be upscaled.
 diff --git a/src/steamcompmgr.cpp b/src/steamcompmgr.cpp
-index 9b108463..db0c0ffa 100644
+index 9636280..93483c6 100644
 --- a/src/steamcompmgr.cpp
 +++ b/src/steamcompmgr.cpp
-@@ -3566,8 +3566,24 @@ paint_all( global_focus_t *pFocus, bool async )
+@@ -3573,8 +3573,24 @@ paint_all( global_focus_t *pFocus, bool async, bool bRepeatFrame )
  		frameInfo.applyOutputColorMgmt = false;
  	}
  
@@ -364,7 +364,7 @@ index 9b108463..db0c0ffa 100644
  		// With output colour mgmt off the shader skips the final encode too, so only an
  		// identity LUT pair that still ends in the output transfer function can go unbound.
  		if ( g_ColorMgmtLuts[i].HasLuts() && !( cv_color_mgmt_skip_identity_luts && frameInfo.applyOutputColorMgmt && g_ColorMgmtLuts[i].bIdentity ) )
-@@ -3673,6 +3689,17 @@ paint_all( global_focus_t *pFocus, bool async )
+@@ -3693,6 +3709,17 @@ paint_all( global_focus_t *pFocus, bool async, bool bRepeatFrame )
  
  			frameInfo.outputEncodingEOTF = bHDRScreenshot ? EOTF_PQ : EOTF_Gamma22;
  
@@ -383,7 +383,7 @@ index 9b108463..db0c0ffa 100644
  
  			if ( oScreenshotInfo->eScreenshotType != GAMESCOPE_CONTROL_SCREENSHOT_TYPE_SCREEN_BUFFER )
 diff --git a/tests/test_drm_composition.cpp b/tests/test_drm_composition.cpp
-index a08d192a..71da8503 100644
+index a08d192..71da850 100644
 --- a/tests/test_drm_composition.cpp
 +++ b/tests/test_drm_composition.cpp
 @@ -13,14 +13,22 @@ TEST_CASE("Gamma 2.2 HDR cannot direct scan without hardware color management",
