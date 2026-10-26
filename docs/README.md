@@ -4,12 +4,14 @@ User guides for Steamling. New here? Start with the [project README](../README.m
 
 - [devices.md](devices.md) - every supported handheld, what "untested port" means, and how to
   help test one
-- [install.md](install.md) - flashing the SD card, installing the bootloader (OpenABL), first boot,
-  and updating
+- [install.md](install.md) - flashing the SD card, installing the bootloader (OpenABL), and first
+  boot
+- [updating.md](updating.md) - getting a newer build onto the handheld, by reflashing or over your
+  home network
 - [known-issues.md](known-issues.md) - what does not work, or not well, yet
 - [steamling-control.md](steamling-control.md) - the in-game control panel: per-game tweaks, fan/CPU
-  modes, adding non-Steam games, file sharing, SD card formatting, controller calibration and
-  stick lights, and system updates
+  modes, adding non-Steam games, file sharing over the network or USB, SSH, SD card formatting,
+  controller calibration, stick lights, display calibration, and system updates
 - [emulation-setup.md](emulation-setup.md) - where to put ROMs, BIOS, and firmware, how to launch
   games, and how to tweak emulator settings
 - [waydroid.md](waydroid.md) - running Android apps: setup, installing apps, and app shortcuts
@@ -29,5 +31,5 @@ User guides for Steamling. New here? Start with the [project README](../README.m
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to build, test, and submit a change.
 [building/](building/README.md) walks you through a build step by step, on Linux or on Windows
 with WSL2; [building/advanced.md](building/advanced.md) has every option, and
-[building/own-base.md](building/own-base.md) covers building from live Arch Linux ARM, hosting
-your own base, and over-the-air updates.
+[building/own-base.md](building/own-base.md) covers building from live Arch Linux ARM and hosting
+your own frozen base.

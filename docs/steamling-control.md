@@ -157,11 +157,14 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 
 System updates, without leaving game mode:
 
-1. **Check for Updates** lists everything pending (kernel included, once Steamling's package
-   repo is up; until then new Steamling versions come as a fresh image).
+1. **Check for Updates** lists everything pending from the repos the handheld knows about.
 2. **Install Updates** downloads and installs the lot. Keep the device powered; a running
    game may stutter while it installs.
 3. Restart when it finishes to apply everything (**Restart Now** appears right there).
+
+Steamling has no package server of its own, so on a fresh image this only covers the Arch Linux
+ARM side. Steamling's own packages come from building it yourself: point the handheld at your
+build PC as [Updating Steamling](updating.md) shows, and this button installs your new build too.
 
 The update keeps running even if you close the Quick Access menu - reopen the tab to check
 on progress. If you prefer, the same update is just `sudo pacman -Syu` in a terminal, or the

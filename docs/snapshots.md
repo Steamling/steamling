@@ -10,6 +10,9 @@ If the update brought a new kernel, the old kernel comes back too.
 If your storage is nearly full, the snapshot is skipped. The update still installs, you just
 can't undo that one.
 
+That covers every update, whichever way you install it: the Updater tab, Steamling Updater,
+`sudo pacman -Syu`, or a new build from your PC ([Updating Steamling](updating.md)).
+
 ## Rolling back
 
 There are three ways to do it. They all do the same thing, so use whichever one still works:
