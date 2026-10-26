@@ -10,9 +10,9 @@ tapping the icons:
 
 | Tab | What it does |
 |---|---|
-| 🎮 Games | Fan curve, CPU scheduler and game tweaks, globally or per game |
+| 🎮 Games | Fan curve, CPU scheduler and game tweaks, globally or per game; suggested settings, shader cache, the performance overlay and a live system monitor |
 | 📚 Library | Add non-Steam games, share your files over the network or a USB cable, turn SSH on or off, format a microSD card for Steam |
-| 🕹️ Controller | Stick and trigger calibration, stick lights, display refresh calibration |
+| 🕹️ Controller | Stick and trigger calibration, stick dead zone and full tilt, back paddles, rumble, stick lights, display refresh calibration |
 | 🔄 Updater | Check for and install system updates, roll back the last update, see your versions, restart game mode |
 
 Settings save automatically as you change them.
