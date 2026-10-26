@@ -203,6 +203,9 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
   it across reboots, **Discard** drops it, **Reset to Defaults** returns to the driver's
   values. The controller is paused for Steam while it runs, so **Cancel** works by touch.
   Boards whose gamepad driver cannot be calibrated say so.
+- **Rumble**: **Enable rumble** switches vibration on or off for every game, and **Strength**
+  sets it to 25, 50, 75 or 100%. Each shows only on handhelds whose drivers support it (the
+  Retroid Pocket 6 has both). The choice is kept across reboots.
 - **Stick Lights** (boards with stick LEDs): **Enable**, **Link Left & Right** to give both
   sticks one colour, **Side Lights** to match the side lighting to the sticks, then colour and
   brightness per stick.

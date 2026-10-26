@@ -16,6 +16,7 @@ from steamling_control.gamepad import sync_gamepad
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
 from steamling_control.overlay import overlay_status, set_overlay
+from steamling_control.rumble import restore_rumble, rumble_status, set_rumble
 from steamling_control.sdcard import detect_sdcard, format_sdcard
 from steamling_control.sharing import install_samba, set_share, share_status
 from steamling_control.snapshots import reboot_system, snapshot_status, start_rollback
@@ -36,6 +37,7 @@ class Plugin:
 
     async def _main(self):
         await asyncio.to_thread(restore_led)
+        await asyncio.to_thread(restore_rumble)
         await asyncio.to_thread(calibration.recover)
         await asyncio.to_thread(sync_touch, self._running_appid)
 
@@ -179,6 +181,12 @@ class Plugin:
 
     async def clear_cache(self, appid):
         return await asyncio.to_thread(clear_cache, str(appid), self._running_appid)
+
+    async def rumble_status(self):
+        return await asyncio.to_thread(rumble_status)
+
+    async def set_rumble(self, enabled, strength):
+        return await asyncio.to_thread(set_rumble, bool(enabled), int(strength))
 
     async def overlay_status(self):
         return await asyncio.to_thread(overlay_status)

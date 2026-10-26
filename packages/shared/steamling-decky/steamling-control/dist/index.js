@@ -65,6 +65,8 @@ const panelCalibrate = () => call("panel_calibrate");
 const panelReset = () => call("panel_reset");
 const cacheInfo = (appid) => call("cache_info", appid);
 const clearCache = (appid) => call("clear_cache", appid);
+const rumbleStatus = () => call("rumble_status");
+const setRumble = (enabled, strength) => call("set_rumble", enabled, strength);
 const overlayStatus = () => call("overlay_status");
 const setOverlay = (level) => call("set_overlay", level);
 const systemStats = () => call("system_stats");
@@ -489,6 +491,60 @@ function PanelCalibration() {
     return (SP_JSX.jsxs(DFL.PanelSection, { title: "DISPLAY", children: [SP_JSX.jsx(DFL.Field, { label: "Refresh rate", description: status.saved ? "Calibrated" : "Factory timing" }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(PanelModal, { initial: status, onChange: setStatus })), children: "Calibrate Display" }) })] }));
 }
 
+// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
+// text in the code, so it needs no catalog.
+const catalogs = {};
+
+function language() {
+    try {
+        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
+        const raw = String(steam || navigator.language || "en").toLowerCase();
+        return raw.split(/[-_]/)[0];
+    }
+    catch (error) {
+        return "en";
+    }
+}
+let cached;
+function catalog() {
+    if (cached === undefined)
+        cached = catalogs[language()] || null;
+    return cached;
+}
+function t(text, vars) {
+    let out = catalog()?.[text] ?? text;
+    if (vars) {
+        for (const [key, value] of Object.entries(vars))
+            out = out.split(`{${key}}`).join(String(value));
+    }
+    return out;
+}
+
+const STRENGTHS = [25, 50, 75, 100];
+function Rumble() {
+    const [rumble, setRumbleState] = SP_REACT.useState(null);
+    const [error, setError] = SP_REACT.useState("");
+    const timer = SP_REACT.useRef(undefined);
+    SP_REACT.useEffect(() => {
+        rumbleStatus().then(setRumbleState).catch((err) => setError(String(err)));
+    }, []);
+    if (!rumble || (!rumble.canSwitch && !rumble.canScale))
+        return null;
+    // Shown at once, written once the slider settles: dragging it fires onChange per notch.
+    const save = (enabled, strength) => {
+        setError("");
+        setRumbleState({ ...rumble, enabled, strength });
+        window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(() => {
+            setRumble(enabled, strength)
+                .then(setRumbleState)
+                .catch((err) => setError(String(err)));
+        }, 300);
+    };
+    const index = Math.max(0, STRENGTHS.indexOf(rumble.strength));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("RUMBLE"), children: [rumble.canSwitch ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Enable rumble"), checked: rumble.enabled, onChange: (on) => save(on, rumble.strength) }) })) : null, rumble.canScale ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Strength"), value: index, min: 0, max: STRENGTHS.length - 1, step: 1, notchCount: STRENGTHS.length, notchLabels: STRENGTHS.map((pct, i) => ({ notchIndex: i, label: `${pct}%` })), notchTicksVisible: true, disabled: rumble.canSwitch && !rumble.enabled, onChange: (i) => save(rumble.enabled, STRENGTHS[i] ?? 100) }) })) : null, error ? SP_JSX.jsx("div", { className: "steamling-note", children: error }) : null] }));
+}
+
 function hsvToRgb(h, s, v) {
     const hh = ((h % 360) + 360) % 360;
     const ss = Math.max(0, Math.min(100, s)) / 100;
@@ -547,7 +603,7 @@ function sideHsv(side) {
     return rgbToHsv(side.r, side.g, side.b);
 }
 function Controller(props) {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
 }
 function StickLights({ config, setConfig, reload }) {
     const led = config.led;
@@ -893,35 +949,6 @@ function ConfigSection({ game, reload }) {
         }
     };
     return (SP_JSX.jsxs(DFL.PanelSection, { title: "CONFIG", children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doExport, children: "Export Game Config" }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doImport, children: "Import Game Config" }) }), SP_JSX.jsx("div", { className: "steamling-note", children: "Per-game tweaks and Proton pick; fan settings and defaults stay local" })] }));
-}
-
-// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
-// text in the code, so it needs no catalog.
-const catalogs = {};
-
-function language() {
-    try {
-        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
-        const raw = String(steam || navigator.language || "en").toLowerCase();
-        return raw.split(/[-_]/)[0];
-    }
-    catch (error) {
-        return "en";
-    }
-}
-let cached;
-function catalog() {
-    if (cached === undefined)
-        cached = catalogs[language()] || null;
-    return cached;
-}
-function t(text, vars) {
-    let out = catalog()?.[text] ?? text;
-    if (vars) {
-        for (const [key, value] of Object.entries(vars))
-            out = out.split(`{${key}}`).join(String(value));
-    }
-    return out;
 }
 
 function PerformanceOverlay() {

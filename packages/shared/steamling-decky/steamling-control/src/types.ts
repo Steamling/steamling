@@ -230,3 +230,13 @@ export type CacheInfo = {
   appid: string;
   bytes: number;
 };
+
+export type RumbleStatus = {
+  /** a gamepad driver with a rumble on/off switch is loaded */
+  canSwitch: boolean;
+  /** a vibration motor whose strength can be set is present */
+  canScale: boolean;
+  enabled: boolean;
+  /** percent: 25, 50, 75 or 100 */
+  strength: number;
+};

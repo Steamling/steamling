@@ -4,6 +4,7 @@ import { setLed, setLedEnabled, setLedLinked, setLedSides } from "../backend";
 import { Calibration } from "../components/Calibration";
 import { ColorControls } from "../components/ColorControls";
 import { PanelCalibration } from "../components/PanelCalibration";
+import { Rumble } from "../components/Rumble";
 import { hsvToRgb, rgbToHsv } from "../lib/rgb";
 import type { Config, LedSide, LedSideKey } from "../types";
 
@@ -30,6 +31,7 @@ export function Controller(props: TabProps) {
   return (
     <>
       <Calibration />
+      <Rumble />
       {props.config.led.available && <StickLights {...props} />}
       <PanelCalibration />
     </>
