@@ -77,3 +77,6 @@ friendly_name = "Snapdragon 8 Gen 2 handheld"
 # Leaves the slot for steamling-perfd, which only allows schedutil.
 [cpu_scaling]
 driver = "none"
+
+# No [battery_charge_limit]: the RP6's battery firmware times out on a charge_control_end_threshold
+# write (measured), so Steam would offer a limit that never applies.

@@ -26,6 +26,9 @@ Open an [issue on GitHub](https://github.com/dvandenburgh/steamling/issues).
 
 ## Hardware
 
+- **No battery charge limit on the Retroid Pocket 6.** Its battery firmware refuses a charge
+  limit (the request times out), so Steam doesn't offer the setting and the battery always charges
+  to 100%. Other handhelds that support one, like the Odin 3, get the setting in Steam.
 - **Gyro does not work yet.** The motion sensors are not wired up, so games and emulators that
   use gyro aim or tilt controls see no input.
 
