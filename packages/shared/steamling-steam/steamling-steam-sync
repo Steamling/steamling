@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-# steamling-steam-sync — writes ES-DE plus every starred ES-DE favorite into Steam's
-# shortcuts.vdf, per logged-in account, as `steamling-play <system> "<rom>"` entries.
+# steamling-steam-sync — writes ES-DE, every starred ES-DE favorite and Heroic into Steam's
+# shortcuts.vdf, per logged-in account (favorites as `steamling-play <system> "<rom>"` entries).
 # MUST run while Steam is DOWN: Steam rewrites shortcuts.vdf wholesale on exit.
 # Entries carry DevkitGameID="steamling" and each run replaces exactly that owned subset,
 # so a user's own shortcuts survive.
@@ -158,14 +158,19 @@ def sync(cfgdir: str, desired: list[dict]) -> None:
         f.write(blob)
     os.replace(tmp, path)
     print(f"[steamling-steam-sync] {os.path.basename(os.path.dirname(cfgdir))}: "
-          f"{len(desired)} steamling entries ({len(desired) - 1} favorite(s)) + {len(kept)} untouched")
+          f"{len(desired)} steamling entries + {len(kept)} untouched")
+
+
+HEROIC = "/usr/bin/heroic"
 
 
 def main() -> None:
-    # No ES-DE = the emulation layer is gone: an empty desired set prunes our tiles.
+    # What's installed decides the tiles: a removed layer's entries are pruned with it.
     desired = []
     if os.path.exists("/usr/bin/es-de") and os.path.exists(PLAY):
         desired = [make_entry("ES-DE", '"/usr/bin/es-de"', LAUNCH)] + favorites()
+    if os.path.exists(HEROIC):
+        desired.append(make_entry("Heroic Games Launcher", f'"{HEROIC}"'))
     for cfgdir in glob.glob(os.path.join(HOME, ".local/share/Steam/userdata/*/config")):
         if os.path.basename(os.path.dirname(cfgdir)) == "0":
             continue  # anonymous placeholder account
