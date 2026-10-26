@@ -1,5 +1,6 @@
 import { gamepadSliderClasses, PanelSectionRow, SliderField } from "@decky/ui";
 import { useEffect, useRef, useState } from "react";
+import { t } from "../i18n";
 
 // SliderField has only onChange, so commits are debounced. The pending value lives in
 // a ref so the unmount flush always sees the latest edit, not a stale first-render one.
@@ -67,7 +68,7 @@ export function ColorControls({ zone, hsv, brightness, onCommit }: ColorControls
     <>
       <PanelSectionRow>
         <SliderField
-          label="Hue"
+          label={t("Hue")}
           value={localH}
           min={0}
           max={359}
@@ -82,7 +83,7 @@ export function ColorControls({ zone, hsv, brightness, onCommit }: ColorControls
       </PanelSectionRow>
       <PanelSectionRow>
         <SliderField
-          label="Saturation"
+          label={t("Saturation")}
           value={localS}
           min={0}
           max={100}
@@ -97,7 +98,7 @@ export function ColorControls({ zone, hsv, brightness, onCommit }: ColorControls
       </PanelSectionRow>
       <PanelSectionRow>
         <SliderField
-          label="Brightness"
+          label={t("Brightness")}
           value={briToPercent(localBri)}
           min={0}
           max={100}

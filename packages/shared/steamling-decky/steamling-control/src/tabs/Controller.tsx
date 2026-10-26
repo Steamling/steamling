@@ -9,6 +9,7 @@ import { Rumble } from "../components/Rumble";
 import { StickResponse } from "../components/StickResponse";
 import { hsvToRgb, rgbToHsv } from "../lib/rgb";
 import type { Config, LedSide, LedSideKey } from "../types";
+import { t } from "../i18n";
 
 // Stored RGB holds the full-value color; the kernel multicolor class scales each
 // channel by brightness/max_brightness, so dimming is linear and the color survives.
@@ -53,10 +54,10 @@ function StickLights({ config, setConfig, reload }: TabProps) {
 
   return (
     <>
-      <PanelSection title="STICK LIGHTS">
+      <PanelSection title={t("STICK LIGHTS")}>
         <PanelSectionRow>
           <ToggleField
-            label="Enable"
+            label={t("Enable")}
             checked={led.enabled}
             onChange={(value) =>
               setLedEnabled(value)
@@ -67,8 +68,8 @@ function StickLights({ config, setConfig, reload }: TabProps) {
         </PanelSectionRow>
         <PanelSectionRow>
           <ToggleField
-            label="Link Left & Right"
-            description="Match both sticks to the same color."
+            label={t("Link Left & Right")}
+            description={t("Match both sticks to the same color.")}
             checked={led.linked}
             disabled={!led.enabled}
             onChange={(value) =>
@@ -81,8 +82,8 @@ function StickLights({ config, setConfig, reload }: TabProps) {
         {led.sidesAvailable && (
           <PanelSectionRow>
             <ToggleField
-              label="Side Lights"
-              description="Match the side lighting to the sticks."
+              label={t("Side Lights")}
+              description={t("Match the side lighting to the sticks.")}
               checked={led.sides}
               disabled={!led.enabled}
               onChange={(value) =>
@@ -97,15 +98,15 @@ function StickLights({ config, setConfig, reload }: TabProps) {
 
       {led.enabled && (
         led.linked ? (
-          <PanelSection title="BOTH STICKS">
+          <PanelSection title={t("BOTH STICKS")}>
             <ColorControls zone="both" hsv={leftHsv} brightness={led.left.brightness} onCommit={commitBoth} />
           </PanelSection>
         ) : (
           <>
-            <PanelSection title="LEFT STICK">
+            <PanelSection title={t("LEFT STICK")}>
               <ColorControls zone="left" hsv={leftHsv} brightness={led.left.brightness} onCommit={commitLeft} />
             </PanelSection>
-            <PanelSection title="RIGHT STICK">
+            <PanelSection title={t("RIGHT STICK")}>
               <ColorControls zone="right" hsv={rightHsv} brightness={led.right.brightness} onCommit={commitRight} />
             </PanelSection>
           </>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { detectSdcard, formatSdcard } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { SdcardInfo } from "../types";
+import { t } from "../i18n";
 
 function cardSummary(card: SdcardInfo | null) {
   if (!card) return "Checking…";
@@ -30,7 +31,7 @@ function FormatConfirmModal({ summary, onConfirm, closeModal }: { summary: strin
   };
   return (
     <ConfirmModal
-      strTitle="Format SD Card"
+      strTitle={t("Format SD Card")}
       strDescription={
         running
           ? "Formatting… This can take a minute. Do not remove the card."
@@ -107,11 +108,11 @@ export function SdCard() {
   const confirmFormat = () => showModal(<FormatConfirmModal summary={cardSummary(card)} onConfirm={runFormat} />);
 
   return (
-    <PanelSection title="SD CARD">
-      <Field label="Card" description={cardSummary(card)} />
+    <PanelSection title={t("SD CARD")}>
+      <Field label={t("Card")} description={cardSummary(card)} />
       <PanelSectionRow>
         <TextField
-          label="Label"
+          label={t("Label")}
           value={label}
           disabled={busy || !!card?.bootDisk}
           onChange={(event) => setLabel(event.target.value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 16))}

@@ -4,6 +4,7 @@ import { About } from "../components/About";
 import { checkUpdates, rebootSystem, snapshotStatus, startRollback, startUpdate, updateStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { SnapshotStatus, UpdateInfo, UpdateStatus } from "../types";
+import { t } from "../i18n";
 
 const SHOWN_UPDATES = 8;
 
@@ -91,9 +92,9 @@ export function Updater() {
   const confirmStart = () =>
     showModal(
       <ConfirmModal
-        strTitle="Install Updates"
-        strDescription="Downloads and installs all available system updates. Keep the device powered; a running game may stutter. Restart after it finishes."
-        strOKButtonText="Install"
+        strTitle={t("Install Updates")}
+        strDescription={t("Downloads and installs all available system updates. Keep the device powered; a running game may stutter. Restart after it finishes.")}
+        strOKButtonText={t("Install")}
         onOK={start}
       />
     );
@@ -120,7 +121,7 @@ export function Updater() {
     if (!lastSnapshot) return;
     showModal(
       <ConfirmModal
-        strTitle="Roll Back Last Update"
+        strTitle={t("Roll Back Last Update")}
         strDescription={
           `Restores the system to before the update of ${fmtDate(lastSnapshot.created)}` +
           (lastSnapshot.targets ? ` (${lastSnapshot.targets})` : "") +
@@ -128,7 +129,7 @@ export function Updater() {
           (lastSnapshot.kernel ? " The previous kernel is restored too." : "") +
           ` Reboot after it completes.`
         }
-        strOKButtonText="Roll Back"
+        strOKButtonText={t("Roll Back")}
         onOK={rollBack}
       />
     );
@@ -144,8 +145,8 @@ export function Updater() {
 
   return (
     <>
-      <PanelSection title="SYSTEM UPDATES">
-        {!running ? <Field label="Status" description={summary} /> : null}
+      <PanelSection title={t("SYSTEM UPDATES")}>
+        {!running ? <Field label={t("Status")} description={summary} /> : null}
         {!running && updates && updates.length > 0 ? (
           <div className="steamling-note">
             {updates.slice(0, SHOWN_UPDATES).map((update) => (
@@ -161,10 +162,10 @@ export function Updater() {
         </PanelSectionRow>
         {!running && updates && updates.length > 0 ? (
           <PanelSectionRow>
-            <ButtonItem layout="below" disabled={busyRef.current} onClick={confirmStart}>Install Updates</ButtonItem>
+            <ButtonItem layout="below" disabled={busyRef.current} onClick={confirmStart}>{t("Install Updates")}</ButtonItem>
           </PanelSectionRow>
         ) : null}
-        {running ? <Field label="Updating…" description="Safe to close this menu. Do not power off." /> : null}
+        {running ? <Field label={t("Updating…")} description={t("Safe to close this menu. Do not power off.")} /> : null}
         {finished ? (
           <Field
             label={status!.exitCode === 0 ? "Update complete" : `Update failed (code ${status!.exitCode})`}
@@ -173,32 +174,32 @@ export function Updater() {
         ) : null}
         {finished && status!.exitCode === 0 ? (
           <PanelSectionRow>
-            <ButtonItem layout="below" onClick={reboot}>Restart Now</ButtonItem>
+            <ButtonItem layout="below" onClick={reboot}>{t("Restart Now")}</ButtonItem>
           </PanelSectionRow>
         ) : null}
         {(running || (finished && status!.exitCode !== 0)) && status?.log ? (
           <div className="steamling-note steamling-log">{status.log}</div>
         ) : null}
-        {error ? <Field label="Error" description={error} /> : null}
+        {error ? <Field label={t("Error")} description={error} /> : null}
       </PanelSection>
       {snap?.supported ? (
-        <PanelSection title="ROLLBACK">
+        <PanelSection title={t("ROLLBACK")}>
           {snap.rolledBack && !rollbackDone ? (
             <Field
-              label="System was rolled back"
+              label={t("System was rolled back")}
               description={`Restored from snapshot ${snap.rolledBack.fromSnapshot} (${fmtDate(snap.rolledBack.ts)}).${onLastSnapshot ? " Rollback will be available again after the next update." : ""}`}
             />
           ) : null}
           {rollbackDone ? (
             <>
-              <Field label="Rolled back" description="Reboot to finish switching to the restored system." />
+              <Field label={t("Rolled back")} description={t("Reboot to finish switching to the restored system.")} />
               <PanelSectionRow>
-                <ButtonItem layout="below" onClick={reboot}>Reboot Now</ButtonItem>
+                <ButtonItem layout="below" onClick={reboot}>{t("Reboot Now")}</ButtonItem>
               </PanelSectionRow>
             </>
           ) : onLastSnapshot ? null : lastSnapshot ? (
             <>
-              <Field label="Last snapshot" description={`${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}`} />
+              <Field label={t("Last snapshot")} description={`${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}`} />
               <PanelSectionRow>
                 <ButtonItem layout="below" disabled={busyRef.current} onClick={confirmRollback}>
                   {rollingBack ? "Rolling back…" : "Roll Back Last Update"}
@@ -206,11 +207,11 @@ export function Updater() {
               </PanelSectionRow>
             </>
           ) : (
-            <Field label="No snapshots yet" description="A snapshot is taken automatically before every update." />
+            <Field label={t("No snapshots yet")} description={t("A snapshot is taken automatically before every update.")} />
           )}
-          {rollbackError ? <Field label="Rollback error" description={rollbackError} /> : null}
+          {rollbackError ? <Field label={t("Rollback error")} description={rollbackError} /> : null}
           <Field
-            label="Storage"
+            label={t("Storage")}
             description={`${gib(snap.freeBytes)} GB free${snap.lowSpace ? " — LOW: snapshots may be skipped" : ""}`}
           />
         </PanelSection>

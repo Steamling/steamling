@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { deviceInfo, restartGameMode } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { DeviceInfo } from "../types";
+import { t } from "../i18n";
 
 export function About() {
   const [info, setInfo] = useState<DeviceInfo | null>(null);
@@ -28,22 +29,22 @@ export function About() {
   const confirmRestart = () =>
     showModal(
       <ConfirmModal
-        strTitle="Restart Game Mode"
-        strDescription="Closes Steam and any running game, then brings game mode back up. Unsaved progress in a running game is lost. Useful when Steam or the screen gets stuck."
-        strOKButtonText="Restart"
+        strTitle={t("Restart Game Mode")}
+        strDescription={t("Closes Steam and any running game, then brings game mode back up. Unsaved progress in a running game is lost. Useful when Steam or the screen gets stuck.")}
+        strOKButtonText={t("Restart")}
         onOK={() => restartGameMode().catch((err) => setError(String(err)))}
       />
     );
 
   return (
-    <PanelSection title="ABOUT">
-      <Field label="Steamling OS" description={info?.osVersion ?? "…"} />
-      <Field label="Kernel" description={info?.kernel ?? "…"} />
-      {info?.bootloader ? <Field label="Bootloader" description={info.bootloader} /> : null}
+    <PanelSection title={t("ABOUT")}>
+      <Field label={t("Steamling OS")} description={info?.osVersion ?? "…"} />
+      <Field label={t("Kernel")} description={info?.kernel ?? "…"} />
+      {info?.bootloader ? <Field label={t("Bootloader")} description={info.bootloader} /> : null}
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={confirmRestart}>Restart Game Mode</ButtonItem>
+        <ButtonItem layout="below" onClick={confirmRestart}>{t("Restart Game Mode")}</ButtonItem>
       </PanelSectionRow>
-      {error ? <Field label="Error" description={error} /> : null}
+      {error ? <Field label={t("Error")} description={error} /> : null}
     </PanelSection>
   );
 }

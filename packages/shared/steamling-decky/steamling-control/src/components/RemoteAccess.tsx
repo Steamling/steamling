@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { setSsh, sshStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { SshStatus } from "../types";
+import { t } from "../i18n";
 
 // Same warning the Steamling Tools menu shows: every image ships the same default password.
 function SshConfirmModal({ onConfirm, closeModal }: { onConfirm: () => Promise<void>; closeModal?: () => void }) {
@@ -17,7 +18,7 @@ function SshConfirmModal({ onConfirm, closeModal }: { onConfirm: () => Promise<v
   };
   return (
     <ConfirmModal
-      strTitle="Allow SSH Logins"
+      strTitle={t("Allow SSH Logins")}
       strDescription={
         running
           ? "Starting…"
@@ -84,12 +85,12 @@ export function RemoteAccess() {
   };
 
   return (
-    <PanelSection title="REMOTE ACCESS">
-      <Field label="SSH" description={summary()} />
+    <PanelSection title={t("REMOTE ACCESS")}>
+      <Field label={t("SSH")} description={summary()} />
       <PanelSectionRow>
         <ToggleField
-          label="Allow SSH logins"
-          description="Log in from another computer's terminal"
+          label={t("Allow SSH logins")}
+          description={t("Log in from another computer's terminal")}
           checked={!!ssh?.on}
           disabled={busy || !ssh}
           onChange={(on: boolean) => {

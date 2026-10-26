@@ -417,7 +417,7 @@ function Bar({ label, value, signed }) {
 function LiveBars({ live }) {
     if (!live)
         return null;
-    return (SP_JSX.jsxs("div", { style: { margin: "8px 0" }, children: [SP_JSX.jsx(Bar, { label: "Left stick X", value: live.lx, signed: true }), SP_JSX.jsx(Bar, { label: "Left stick Y", value: live.ly, signed: true }), SP_JSX.jsx(Bar, { label: "Right stick X", value: live.rx, signed: true }), SP_JSX.jsx(Bar, { label: "Right stick Y", value: live.ry, signed: true }), SP_JSX.jsx(Bar, { label: "Left trigger", value: live.lt }), SP_JSX.jsx(Bar, { label: "Right trigger", value: live.rt })] }));
+    return (SP_JSX.jsxs("div", { style: { margin: "8px 0" }, children: [SP_JSX.jsx(Bar, { label: t("Left stick X"), value: live.lx, signed: true }), SP_JSX.jsx(Bar, { label: t("Left stick Y"), value: live.ly, signed: true }), SP_JSX.jsx(Bar, { label: t("Right stick X"), value: live.rx, signed: true }), SP_JSX.jsx(Bar, { label: t("Right stick Y"), value: live.ry, signed: true }), SP_JSX.jsx(Bar, { label: t("Left trigger"), value: live.lt }), SP_JSX.jsx(Bar, { label: t("Right trigger"), value: live.rt })] }));
 }
 function CalibrationModal({ closeModal }) {
     const [status, setStatus] = SP_REACT.useState(null);
@@ -472,10 +472,10 @@ function CalibrationModal({ closeModal }) {
     };
     const phase = status?.phase || "idle";
     const error = message || status?.error || "";
-    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: phase === "capture" ? undefined : closeModal, bDisableBackgroundDismiss: phase !== "idle", children: [SP_JSX.jsx("div", { style: { fontWeight: 600, fontSize: "18px", marginBottom: "8px" }, children: "Controller Calibration" }), !status ? (SP_JSX.jsx("div", { children: "Loading\u2026" })) : !status.available ? (SP_JSX.jsx("div", { children: "This device's gamepad driver does not support calibration." })) : phase === "capture" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { style: { fontSize: "12px", opacity: 0.7 }, children: ["Step ", status.step + 1, " of ", status.steps, " \u00B7 the controller is paused for Steam until this finishes"] }), SP_JSX.jsx("div", { style: { fontSize: "20px", margin: "16px 0" }, children: instruction(status) }), SP_JSX.jsx(DFL.ProgressBar, { nProgress: Math.round(status.progress * 100), nTransitionSec: 0 }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsx(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: SP_JSX.jsx(DFL.DialogButton, { onClick: () => run(calibrationCancel), children: "Cancel (touch)" }) })] })) : phase === "review" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx("div", { children: "Calibration applied. Check the sticks and triggers below: a full push should read 100 at the edge and 0 at rest. Save keeps it across reboots." }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationSave), children: "Save" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationCancel), children: "Discard" })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { children: [status.saved ? "A saved calibration is in use." : "Using the driver defaults.", " Start walks each stick and trigger to its edge and back. The controller is paused for Steam while it runs; Cancel works by touch."] }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationStart), children: "Start" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationReset), children: "Reset to Defaults" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => closeModal?.(), children: "Close" })] })] })), error ? SP_JSX.jsx("div", { style: { marginTop: "8px", color: "#ff8080" }, children: error }) : null] }));
+    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: phase === "capture" ? undefined : closeModal, bDisableBackgroundDismiss: phase !== "idle", children: [SP_JSX.jsx("div", { style: { fontWeight: 600, fontSize: "18px", marginBottom: "8px" }, children: t("Controller Calibration") }), !status ? (SP_JSX.jsx("div", { children: t("Loading…") })) : !status.available ? (SP_JSX.jsx("div", { children: t("This device's gamepad driver does not support calibration.") })) : phase === "capture" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { style: { fontSize: "12px", opacity: 0.7 }, children: ["Step ", status.step + 1, " of ", status.steps, " \u00B7 the controller is paused for Steam until this finishes"] }), SP_JSX.jsx("div", { style: { fontSize: "20px", margin: "16px 0" }, children: instruction(status) }), SP_JSX.jsx(DFL.ProgressBar, { nProgress: Math.round(status.progress * 100), nTransitionSec: 0 }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsx(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: SP_JSX.jsx(DFL.DialogButton, { onClick: () => run(calibrationCancel), children: t("Cancel (touch)") }) })] })) : phase === "review" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx("div", { children: t("Calibration applied. Check the sticks and triggers below: a full push should read 100 at the edge and 0 at rest. Save keeps it across reboots.") }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationSave), children: t("Save") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationCancel), children: t("Discard") })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { children: [status.saved ? "A saved calibration is in use." : "Using the driver defaults.", " Start walks each stick and trigger to its edge and back. The controller is paused for Steam while it runs; Cancel works by touch."] }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationStart), children: t("Start") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationReset), children: t("Reset to Defaults") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => closeModal?.(), children: t("Close") })] })] })), error ? SP_JSX.jsx("div", { style: { marginTop: "8px", color: "#ff8080" }, children: error }) : null] }));
 }
 function Calibration() {
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "CALIBRATION", children: [SP_JSX.jsx(DFL.Field, { label: "Sticks and triggers", description: "Stick centre and range, trigger travel" }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(CalibrationModal, {})), children: "Calibrate Controller" }) })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("CALIBRATION"), children: [SP_JSX.jsx(DFL.Field, { label: t("Sticks and triggers"), description: t("Stick centre and range, trigger travel") }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(CalibrationModal, {})), children: t("Calibrate Controller") }) })] }));
 }
 
 // SliderField has only onChange, so commits are debounced. The pending value lives in
@@ -526,7 +526,7 @@ function ColorControls({ zone, hsv, brightness, onCommit }) {
     const setHue = (h) => schedule(h, localS, localBri);
     const setSaturation = (s) => schedule(localH, s, localBri);
     const setBrightness = (b) => schedule(localH, localS, b);
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: "Hue", value: localH, min: 0, max: 359, step: 1, showValue: true, validValues: "range", valueSuffix: "\u00B0", bottomSeparator: "thick", className: `steamling-led-${zone}-h`, onChange: setHue }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: "Saturation", value: localS, min: 0, max: 100, step: 1, showValue: true, validValues: "range", valueSuffix: "%", bottomSeparator: "thick", className: `steamling-led-${zone}-s`, onChange: setSaturation }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: "Brightness", value: briToPercent(localBri), min: 0, max: 100, step: 1, showValue: true, validValues: "range", valueSuffix: "%", bottomSeparator: "thick", className: `steamling-led-${zone}-v`, onChange: (percent) => setBrightness(percentToBri(percent)) }) }), SP_JSX.jsx("style", { children: `
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Hue"), value: localH, min: 0, max: 359, step: 1, showValue: true, validValues: "range", valueSuffix: "\u00B0", bottomSeparator: "thick", className: `steamling-led-${zone}-h`, onChange: setHue }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Saturation"), value: localS, min: 0, max: 100, step: 1, showValue: true, validValues: "range", valueSuffix: "%", bottomSeparator: "thick", className: `steamling-led-${zone}-s`, onChange: setSaturation }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.SliderField, { label: t("Brightness"), value: briToPercent(localBri), min: 0, max: 100, step: 1, showValue: true, validValues: "range", valueSuffix: "%", bottomSeparator: "thick", className: `steamling-led-${zone}-v`, onChange: (percent) => setBrightness(percentToBri(percent)) }) }), SP_JSX.jsx("style", { children: `
         .steamling-led-${zone}-h .${DFL.gamepadSliderClasses.SliderTrack} {
           background: linear-gradient(to right,
             hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%),
@@ -574,9 +574,9 @@ function PanelModal({ initial, onChange, closeModal }) {
         }
     };
     const result = status.result;
-    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: busy ? undefined : closeModal, bDisableBackgroundDismiss: busy, children: [SP_JSX.jsx("div", { style: { fontSize: "20px", fontWeight: "bold", marginBottom: "8px" }, children: "Display Refresh Calibration" }), SP_JSX.jsx("div", { children: busy
+    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: busy ? undefined : closeModal, bDisableBackgroundDismiss: busy, children: [SP_JSX.jsx("div", { style: { fontSize: "20px", fontWeight: "bold", marginBottom: "8px" }, children: t("Display Refresh Calibration") }), SP_JSX.jsx("div", { children: busy
                     ? "Measuring… this takes up to a minute. Leave the device on this screen until it finishes."
-                    : `${status.saved ? "A saved calibration is in use." : "Using the panel's factory timing."} Calibrate measures the refresh rate and trims it to exactly the nominal rate, which keeps emulator audio and video in step.` }), result && !busy ? (SP_JSX.jsx("div", { style: { marginTop: "8px" }, children: `${result.rate} Hz: measured ${result.before.toFixed(2)} Hz, now ${result.after.toFixed(2)} Hz.` })) : null, SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(panelCalibrate), children: busy ? "Calibrating…" : "Calibrate" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy || !status.saved, onClick: () => run(panelReset), children: "Reset to Factory" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => closeModal?.(), children: "Close" })] }), error ? SP_JSX.jsx("div", { style: { marginTop: "8px", color: "#ff8080" }, children: error }) : null] }));
+                    : `${status.saved ? "A saved calibration is in use." : "Using the panel's factory timing."} Calibrate measures the refresh rate and trims it to exactly the nominal rate, which keeps emulator audio and video in step.` }), result && !busy ? (SP_JSX.jsx("div", { style: { marginTop: "8px" }, children: `${result.rate} Hz: measured ${result.before.toFixed(2)} Hz, now ${result.after.toFixed(2)} Hz.` })) : null, SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(panelCalibrate), children: busy ? "Calibrating…" : "Calibrate" }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy || !status.saved, onClick: () => run(panelReset), children: t("Reset to Factory") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => closeModal?.(), children: t("Close") })] }), error ? SP_JSX.jsx("div", { style: { marginTop: "8px", color: "#ff8080" }, children: error }) : null] }));
 }
 function PanelCalibration() {
     const [status, setStatus] = SP_REACT.useState(null);
@@ -594,7 +594,7 @@ function PanelCalibration() {
     }, [visible]);
     if (!status?.available)
         return null;
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "DISPLAY", children: [SP_JSX.jsx(DFL.Field, { label: "Refresh rate", description: status.saved ? "Calibrated" : "Factory timing" }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(PanelModal, { initial: status, onChange: setStatus })), children: "Calibrate Display" }) })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("DISPLAY"), children: [SP_JSX.jsx(DFL.Field, { label: t("Refresh rate"), description: status.saved ? "Calibrated" : "Factory timing" }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(PanelModal, { initial: status, onChange: setStatus })), children: t("Calibrate Display") }) })] }));
 }
 
 const STRENGTHS = [25, 50, 75, 100];
@@ -721,13 +721,13 @@ function StickLights({ config, setConfig, reload }) {
     const commitLeft = (hsv, brightness) => commit("left", hsv, brightness, setConfig, reload);
     const commitRight = (hsv, brightness) => commit("right", hsv, brightness, setConfig, reload);
     const commitBoth = (hsv, brightness) => commit("both", hsv, brightness, setConfig, reload);
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "STICK LIGHTS", children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Enable", checked: led.enabled, onChange: (value) => setLedEnabled(value)
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: t("STICK LIGHTS"), children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Enable"), checked: led.enabled, onChange: (value) => setLedEnabled(value)
                                 .then((next) => setConfig((cur) => (cur ? { ...cur, led: next } : cur)))
-                                .catch(() => reload()) }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Link Left & Right", description: "Match both sticks to the same color.", checked: led.linked, disabled: !led.enabled, onChange: (value) => setLedLinked(value)
+                                .catch(() => reload()) }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Link Left & Right"), description: t("Match both sticks to the same color."), checked: led.linked, disabled: !led.enabled, onChange: (value) => setLedLinked(value)
                                 .then((next) => setConfig((cur) => (cur ? { ...cur, led: next } : cur)))
-                                .catch(() => reload()) }) }), led.sidesAvailable && (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Side Lights", description: "Match the side lighting to the sticks.", checked: led.sides, disabled: !led.enabled, onChange: (value) => setLedSides(value)
+                                .catch(() => reload()) }) }), led.sidesAvailable && (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Side Lights"), description: t("Match the side lighting to the sticks."), checked: led.sides, disabled: !led.enabled, onChange: (value) => setLedSides(value)
                                 .then((next) => setConfig((cur) => (cur ? { ...cur, led: next } : cur)))
-                                .catch(() => reload()) }) }))] }), led.enabled && (led.linked ? (SP_JSX.jsx(DFL.PanelSection, { title: "BOTH STICKS", children: SP_JSX.jsx(ColorControls, { zone: "both", hsv: leftHsv, brightness: led.left.brightness, onCommit: commitBoth }) })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.PanelSection, { title: "LEFT STICK", children: SP_JSX.jsx(ColorControls, { zone: "left", hsv: leftHsv, brightness: led.left.brightness, onCommit: commitLeft }) }), SP_JSX.jsx(DFL.PanelSection, { title: "RIGHT STICK", children: SP_JSX.jsx(ColorControls, { zone: "right", hsv: rightHsv, brightness: led.right.brightness, onCommit: commitRight }) })] })))] }));
+                                .catch(() => reload()) }) }))] }), led.enabled && (led.linked ? (SP_JSX.jsx(DFL.PanelSection, { title: t("BOTH STICKS"), children: SP_JSX.jsx(ColorControls, { zone: "both", hsv: leftHsv, brightness: led.left.brightness, onCommit: commitBoth }) })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.PanelSection, { title: t("LEFT STICK"), children: SP_JSX.jsx(ColorControls, { zone: "left", hsv: leftHsv, brightness: led.left.brightness, onCommit: commitLeft }) }), SP_JSX.jsx(DFL.PanelSection, { title: t("RIGHT STICK"), children: SP_JSX.jsx(ColorControls, { zone: "right", hsv: rightHsv, brightness: led.right.brightness, onCommit: commitRight }) })] })))] }));
 }
 
 // Every Steam game and every non-Steam shortcut (emulator tiles, ROM managers, a Windows .exe on
@@ -975,11 +975,11 @@ function ExportNameModal({ game, base, onDone, closeModal }) {
             onDone(result.path);
         }
         catch (error) {
-            toaster.toast({ title: "Export failed", body: String(error) });
+            toaster.toast({ title: t("Export failed"), body: String(error) });
         }
         closeModal?.();
     };
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Config Already Exists", strDescription: `${base}.steamling.json exists. Change the name to save a new config (e.g. ${base}-2 or ${base}-fast), or keep it to overwrite.`, strOKButtonText: busy ? "Saving…" : overwriting ? "Overwrite" : "Save New", bOKDisabled: busy || !value.trim(), onCancel: () => closeModal?.(), onOK: submit, children: SP_JSX.jsx(DFL.TextField, { label: "Name", value: value, disabled: busy, onChange: (event) => setValue(event.target.value) }) }));
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Config Already Exists"), strDescription: `${base}.steamling.json exists. Change the name to save a new config (e.g. ${base}-2 or ${base}-fast), or keep it to overwrite.`, strOKButtonText: busy ? "Saving…" : overwriting ? "Overwrite" : "Save New", bOKDisabled: busy || !value.trim(), onCancel: () => closeModal?.(), onOK: submit, children: SP_JSX.jsx(DFL.TextField, { label: t("Name"), value: value, disabled: busy, onChange: (event) => setValue(event.target.value) }) }));
 }
 function ImportModal({ path, preview, game, onDone, closeModal }) {
     const profiles = preview.games;
@@ -999,22 +999,22 @@ function ImportModal({ path, preview, game, onDone, closeModal }) {
                 if (resolved.tool) {
                     setCompatTool(game.appid, resolved.tool);
                     if (resolved.fallback) {
-                        toaster.toast({ title: "Proton fallback", body: `${result.protonTool} not available, using ${resolved.tool}` });
+                        toaster.toast({ title: t("Proton fallback"), body: `${result.protonTool} not available, using ${resolved.tool}` });
                     }
                 }
                 else {
-                    toaster.toast({ title: "Proton pick skipped", body: `${result.protonTool} not available here` });
+                    toaster.toast({ title: t("Proton pick skipped"), body: `${result.protonTool} not available here` });
                 }
             }
-            toaster.toast({ title: "Config applied", body: game.name || game.appid });
+            toaster.toast({ title: t("Config applied"), body: game.name || game.appid });
         }
         catch (error) {
-            toaster.toast({ title: "Import failed", body: String(error) });
+            toaster.toast({ title: t("Import failed"), body: String(error) });
         }
         closeModal?.();
         onDone();
     };
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Import Game Config", strDescription: (from ? `Exported from ${from}. ` : "") + `Settings for ${game.name || game.appid} will be overwritten.`, strOKButtonText: busy ? "Applying…" : "Apply", bOKDisabled: busy || !source, onCancel: () => closeModal?.(), onOK: submit, children: profiles.length > 1 ? (SP_JSX.jsx(SelectEdit, { label: "Profile", value: source, options: profileOptions, onChange: (id) => setSource(String(id)) })) : (SP_JSX.jsxs("div", { className: "steamling-note", children: ["Profile: ", profiles[0]?.name || profiles[0]?.appid] })) }));
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Import Game Config"), strDescription: (from ? `Exported from ${from}. ` : "") + `Settings for ${game.name || game.appid} will be overwritten.`, strOKButtonText: busy ? "Applying…" : "Apply", bOKDisabled: busy || !source, onCancel: () => closeModal?.(), onOK: submit, children: profiles.length > 1 ? (SP_JSX.jsx(SelectEdit, { label: t("Profile"), value: source, options: profileOptions, onChange: (id) => setSource(String(id)) })) : (SP_JSX.jsxs("div", { className: "steamling-note", children: ["Profile: ", profiles[0]?.name || profiles[0]?.appid] })) }));
 }
 /** Per-game config export/import; rendered only when a game's per-game settings are enabled. */
 function ConfigSection({ game, reload }) {
@@ -1022,13 +1022,13 @@ function ConfigSection({ game, reload }) {
         try {
             const result = await exportConfig(game.appid, game.name || "", "", false);
             if (result.exists) {
-                DFL.showModal(SP_JSX.jsx(ExportNameModal, { game: { appid: game.appid, name: game.name || "" }, base: result.base, onDone: (path) => toaster.toast({ title: "Game config exported", body: path }) }));
+                DFL.showModal(SP_JSX.jsx(ExportNameModal, { game: { appid: game.appid, name: game.name || "" }, base: result.base, onDone: (path) => toaster.toast({ title: t("Game config exported"), body: path }) }));
                 return;
             }
-            toaster.toast({ title: "Game config exported", body: result.path });
+            toaster.toast({ title: t("Game config exported"), body: result.path });
         }
         catch (error) {
-            toaster.toast({ title: "Export failed", body: String(error) });
+            toaster.toast({ title: t("Export failed"), body: String(error) });
         }
     };
     const doImport = async () => {
@@ -1049,10 +1049,10 @@ function ConfigSection({ game, reload }) {
             DFL.showModal(SP_JSX.jsx(ImportModal, { path: path, preview: preview, game: game, onDone: reload }));
         }
         catch (error) {
-            toaster.toast({ title: "Import failed", body: String(error) });
+            toaster.toast({ title: t("Import failed"), body: String(error) });
         }
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "CONFIG", children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doExport, children: "Export Game Config" }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doImport, children: "Import Game Config" }) }), SP_JSX.jsx("div", { className: "steamling-note", children: "Per-game tweaks and Proton pick; fan settings and defaults stay local" })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("CONFIG"), children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doExport, children: t("Export Game Config") }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: doImport, children: t("Import Game Config") }) }), SP_JSX.jsx("div", { className: "steamling-note", children: t("Per-game tweaks and Proton pick; fan settings and defaults stay local") })] }));
 }
 
 function PerformanceOverlay() {
@@ -1173,37 +1173,37 @@ function ShaderCache({ appid, name, running }) {
 // Audio buffer (PULSE_LATENCY_MSEC): absorbs FEX-mixer overruns (SFX-burst crackle) at the
 // cost of audio latency — keep rhythm games on Game default.
 const audioLatencyOptions = [
-    { data: "", label: "Game default" },
-    { data: "60", label: "60 ms" },
-    { data: "90", label: "90 ms" },
-    { data: "120", label: "120 ms" },
+    { data: "", label: t("Game default") },
+    { data: "60", label: t("60 ms") },
+    { data: "90", label: t("90 ms") },
+    { data: "120", label: t("120 ms") },
 ];
 const fanOptions = [
-    { data: "quiet", label: "Quiet" },
-    { data: "moderate", label: "Moderate" },
-    { data: "performance", label: "Performance" },
+    { data: "quiet", label: t("Quiet") },
+    { data: "moderate", label: t("Moderate") },
+    { data: "performance", label: t("Performance") },
 ];
 const lavdOptions = [
-    { data: "autopilot", label: "Autopilot" },
-    { data: "performance", label: "Performance" },
+    { data: "autopilot", label: t("Autopilot") },
+    { data: "performance", label: t("Performance") },
 ];
-const globalChoice = { data: "", label: "Use global" };
+const globalChoice = { data: "", label: t("Use global") };
 function EnvVarsModal({ initial, onSave, closeModal }) {
     const [value, setValue] = SP_REACT.useState(initial);
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Environment Variables", strDescription: 'Space-separated KEY=VALUE pairs; quote values with spaces, e.g. DXVK_CONFIG="dxgi.customDeviceDesc = GTX 480". Steam launch options win over these.', strOKButtonText: "Save", onCancel: () => closeModal?.(), onOK: () => {
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Environment Variables"), strDescription: 'Space-separated KEY=VALUE pairs; quote values with spaces, e.g. DXVK_CONFIG="dxgi.customDeviceDesc = GTX 480". Steam launch options win over these.', strOKButtonText: t("Save"), onCancel: () => closeModal?.(), onOK: () => {
             onSave(value.trim());
             closeModal?.();
-        }, children: SP_JSX.jsx(DFL.TextField, { label: "Variables", value: value, onChange: (event) => setValue(event.target.value) }) }));
+        }, children: SP_JSX.jsx(DFL.TextField, { label: t("Variables"), value: value, onChange: (event) => setValue(event.target.value) }) }));
 }
 function EnvVarsButton({ value, onSave }) {
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: value ? value : "None set", onClick: () => DFL.showModal(SP_JSX.jsx(EnvVarsModal, { initial: value, onSave: onSave })), children: "Environment Variables" }) }));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: value ? value : "None set", onClick: () => DFL.showModal(SP_JSX.jsx(EnvVarsModal, { initial: value, onSave: onSave })), children: t("Environment Variables") }) }));
 }
 function XaliaToggle({ values, patch }) {
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Disable Xalia", description: "Proton's controller-navigation helper; costs CPU in every game", checked: values.disableXalia !== false, onChange: (checked) => patch({ disableXalia: checked }) }) }));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Disable Xalia"), description: t("Proton's controller-navigation helper; costs CPU in every game"), checked: values.disableXalia !== false, onChange: (checked) => patch({ disableXalia: checked }) }) }));
 }
 /** Applies live: the backend re-syncs the running game's touchscreen on every save. */
 function TouchField({ values, patch }) {
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Disable Touchscreen", description: "While the game is running, to stop stray touches", checked: values.touchDisabled === true, onChange: (on) => patch({ touchDisabled: on }) }) }));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Disable Touchscreen"), description: t("While the game is running, to stop stray touches"), checked: values.touchDisabled === true, onChange: (on) => patch({ touchDisabled: on }) }) }));
 }
 /** Per-game fan/scheduler overrides ("" = follow the global mode). */
 function PerfFields({ values, patch }) {
@@ -1211,7 +1211,7 @@ function PerfFields({ values, patch }) {
     const perGameLavd = [globalChoice, ...lavdOptions];
     const fanValue = perGameFan.some((option) => option.data === String(values.fanMode ?? "")) ? String(values.fanMode ?? "") : "";
     const lavdValue = perGameLavd.some((option) => option.data === String(values.lavdMode ?? "")) ? String(values.lavdMode ?? "") : "";
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: lavdValue, options: perGameLavd, onChange: (id) => patch({ lavdMode: id }) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: fanValue, options: perGameFan, onChange: (id) => patch({ fanMode: id }) })] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: lavdValue, options: perGameLavd, onChange: (id) => patch({ lavdMode: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: fanValue, options: perGameFan, onChange: (id) => patch({ fanMode: id }) })] }));
 }
 /** Applies live, like the touchscreen: the backend switches the pad when the game starts or stops. */
 function GamepadTypeField({ values, patch }) {
@@ -1251,7 +1251,7 @@ function TweakFields({ config, appid, values, patch }) {
         };
     }, [appid]);
     const compatOptions = [
-        { data: "", label: "Steam default" },
+        { data: "", label: t("Steam default") },
         ...compatTools.map((tool) => ({ data: tool.name, label: tool.label })),
     ];
     const compatValue = compatOptions.some((option) => option.data === currentTool) ? currentTool : "";
@@ -1261,13 +1261,13 @@ function TweakFields({ config, appid, values, patch }) {
     const fexOptions = Object.entries(presets).map(([id, profile]) => ({ data: id, label: profile.label }));
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
-    const mesaOptions = [{ data: "", label: "System default" }, ...(config.mesaVersions || [])];
+    const mesaOptions = [{ data: "", label: t("System default") }, ...(config.mesaVersions || [])];
     const storedMesa = String(values.mesaVersion ?? "");
     const mesaValue = mesaOptions.some((option) => option.data === storedMesa) ? storedMesa : "";
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "Proton Version", value: compatValue, options: compatOptions, onChange: (name) => {
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("Proton Version"), value: compatValue, options: compatOptions, onChange: (name) => {
                     setCurrentTool(String(name));
                     setCompatTool(appid, String(name));
-                } }), SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: "Mesa Version", value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
+                } }), SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Mesa Version"), value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
 function describe(config, suggestion) {
@@ -1472,7 +1472,7 @@ function Games({ config, setConfig, reload }) {
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
     const showFields = editingDefault || perGameEnabled;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "PERFORMANCE & GAME TWEAKS", children: [SP_JSX.jsx(SelectEdit, { label: "Game", value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), !editingDefault ? SP_JSX.jsx(Suggestion, { config: config, appid: game.appid, apply: applySuggestion }) : null, showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: "PERFORMANCE", children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "CPU Scheduler", value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: "Fan Curve", value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: "GAME TWEAKS", children: [SP_JSX.jsx("div", { className: "steamling-note", children: "Changes apply on next game launch" }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: "FEX Preset", value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: "Audio Buffer", value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE & GAME TWEAKS"), children: [SP_JSX.jsx(SelectEdit, { label: t("Game"), value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: t("Use Per-Game Settings"), checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), !editingDefault ? SP_JSX.jsx(Suggestion, { config: config, appid: game.appid, apply: applySuggestion }) : null, showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: t("PERFORMANCE"), children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: t("GAME TWEAKS"), children: [SP_JSX.jsx("div", { className: "steamling-note", children: t("Changes apply on next game launch") }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
 }
 
 // Replaces the stock "Add a Non-Steam Game" flow: Steam's file browser cannot open a new
@@ -1516,15 +1516,15 @@ function AddGameModal({ path, closeModal }) {
         setBusy(true);
         try {
             await addShortcut(name.trim(), path, proton);
-            toaster.toast({ title: "Added to library", body: name.trim() });
+            toaster.toast({ title: t("Added to library"), body: name.trim() });
             closeModal?.();
         }
         catch (error) {
-            toaster.toast({ title: "Could not add game", body: String(error) });
+            toaster.toast({ title: t("Could not add game"), body: String(error) });
             setBusy(false);
         }
     };
-    return (SP_JSX.jsxs(DFL.ConfirmModal, { strTitle: "Add Non-Steam Game", strDescription: path, strOKButtonText: busy ? "Adding…" : "Add to Library", bOKDisabled: busy || !name.trim(), onCancel: () => closeModal?.(), onOK: submit, children: [SP_JSX.jsx(DFL.TextField, { label: "Name", value: name, disabled: busy, onChange: (event) => setName(event.target.value) }), SP_JSX.jsx(DFL.ToggleField, { label: "Launch with Proton", description: "Needed for Windows games (.exe)", checked: proton, disabled: busy, onChange: setProton })] }));
+    return (SP_JSX.jsxs(DFL.ConfirmModal, { strTitle: t("Add Non-Steam Game"), strDescription: path, strOKButtonText: busy ? "Adding…" : "Add to Library", bOKDisabled: busy || !name.trim(), onCancel: () => closeModal?.(), onOK: submit, children: [SP_JSX.jsx(DFL.TextField, { label: t("Name"), value: name, disabled: busy, onChange: (event) => setName(event.target.value) }), SP_JSX.jsx(DFL.ToggleField, { label: t("Launch with Proton"), description: t("Needed for Windows games (.exe)"), checked: proton, disabled: busy, onChange: setProton })] }));
 }
 function AddGameSection() {
     const pick = async () => {
@@ -1538,7 +1538,7 @@ function AddGameSection() {
             // Picker closed without a selection.
         }
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "LIBRARY", children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: pick, children: "Add Non-Steam Game" }) }), SP_JSX.jsx("div", { className: "steamling-note", children: "Pick an executable to add it to your Steam library" })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("LIBRARY"), children: [SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: pick, children: t("Add Non-Steam Game") }) }), SP_JSX.jsx("div", { className: "steamling-note", children: t("Pick an executable to add it to your Steam library") })] }));
 }
 
 // The share is guest-writable and covers the whole home folder, so the trade is spelled out
@@ -1554,7 +1554,7 @@ function ShareConfirmModal({ onConfirm, closeModal }) {
         await onConfirm();
         closeModal?.();
     };
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Share Files Over The Network", strDescription: running
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Share Files Over The Network"), strDescription: running
             ? "Starting…"
             : "Anyone on the same network can read and write every file in your home folder - games, saves and emulator settings, but also your Steam login and SSH keys. There is no password. Only turn this on at home.", strOKButtonText: running ? "Starting…" : "Turn On Sharing", bDestructiveWarning: true, bOKDisabled: running, bCancelDisabled: running, bDisableBackgroundDismiss: true, onCancel: () => {
             if (!runningRef.current)
@@ -1619,7 +1619,7 @@ function FileSharing() {
             return "On - open smb://steamling.local and connect as Guest";
         return "Off - your home folder is not shared";
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "FILE SHARING", children: [SP_JSX.jsx(DFL.Field, { label: "Network share", description: summary() }), share && !share.installed ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busy, onClick: () => run(installSamba), children: busy ? "Installing…" : "Install Samba" }) })) : (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Share my home folder", description: "Drag files straight onto the device from another computer", checked: !!share?.on, disabled: busy || !share?.installed, onChange: (on) => {
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("FILE SHARING"), children: [SP_JSX.jsx(DFL.Field, { label: t("Network share"), description: summary() }), share && !share.installed ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busy, onClick: () => run(installSamba), children: busy ? "Installing…" : "Install Samba" }) })) : (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Share my home folder"), description: t("Drag files straight onto the device from another computer"), checked: !!share?.on, disabled: busy || !share?.installed, onChange: (on) => {
                         if (busyRef.current)
                             return;
                         if (on)
@@ -1641,7 +1641,7 @@ function SshConfirmModal({ onConfirm, closeModal }) {
         await onConfirm();
         closeModal?.();
     };
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Allow SSH Logins", strDescription: running
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Allow SSH Logins"), strDescription: running
             ? "Starting…"
             : "Anyone on the same network can then log in with an account password, and Steamling ships a well-known default one. If you have not changed it yet, do that first: open Konsole in desktop mode and run passwd. It stays on, across reboots, until you turn it off here.", strOKButtonText: running ? "Starting…" : "Turn On SSH", bDestructiveWarning: true, bOKDisabled: running, bCancelDisabled: running, bDisableBackgroundDismiss: true, onCancel: () => {
             if (!runningRef.current)
@@ -1701,7 +1701,7 @@ function RemoteAccess() {
             return "On - connect to Wi-Fi to reach it";
         return `On - ${ssh.addresses.map((a) => `ssh deck@${a}`).join(" or ")}`;
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "REMOTE ACCESS", children: [SP_JSX.jsx(DFL.Field, { label: "SSH", description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Allow SSH logins", description: "Log in from another computer's terminal", checked: !!ssh?.on, disabled: busy || !ssh, onChange: (on) => {
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("REMOTE ACCESS"), children: [SP_JSX.jsx(DFL.Field, { label: t("SSH"), description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Allow SSH logins"), description: t("Log in from another computer's terminal"), checked: !!ssh?.on, disabled: busy || !ssh, onChange: (on) => {
                         if (busyRef.current)
                             return;
                         if (on)
@@ -1738,7 +1738,7 @@ function FormatConfirmModal({ summary, onConfirm, closeModal }) {
         await onConfirm();
         closeModal?.();
     };
-    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Format SD Card", strDescription: running
+    return (SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Format SD Card"), strDescription: running
             ? "Formatting… This can take a minute. Do not remove the card."
             : `This erases ALL data on the card (${summary}) and formats it for Steam. Type "format" and press Enter to confirm.`, strOKButtonText: running ? "Formatting…" : "Erase and Format", bDestructiveWarning: true, bOKDisabled: !armedRef.current || running, bCancelDisabled: running, bDisableBackgroundDismiss: true, bHideCloseIcon: true, onCancel: () => {
             if (!runningRef.current)
@@ -1798,7 +1798,7 @@ function SdCard() {
         }
     };
     const confirmFormat = () => DFL.showModal(SP_JSX.jsx(FormatConfirmModal, { summary: cardSummary(card), onConfirm: runFormat }));
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "SD CARD", children: [SP_JSX.jsx(DFL.Field, { label: "Card", description: cardSummary(card) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.TextField, { label: "Label", value: label, disabled: busy || !!card?.bootDisk, onChange: (event) => setLabel(event.target.value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 16)) }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: !card?.present || busy || !!card?.bootDisk, onClick: confirmFormat, children: busy ? "Formatting…" : "Format SD Card" }) }), status ? SP_JSX.jsx(DFL.Field, { label: "", description: status }) : null] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("SD CARD"), children: [SP_JSX.jsx(DFL.Field, { label: t("Card"), description: cardSummary(card) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.TextField, { label: t("Label"), value: label, disabled: busy || !!card?.bootDisk, onChange: (event) => setLabel(event.target.value.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 16)) }) }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: !card?.present || busy || !!card?.bootDisk, onClick: confirmFormat, children: busy ? "Formatting…" : "Format SD Card" }) }), status ? SP_JSX.jsx(DFL.Field, { label: "", description: status }) : null] }));
 }
 
 function UsbTransfer() {
@@ -1851,7 +1851,7 @@ function UsbTransfer() {
             return "On - plug into a computer with a USB-C cable and open \"Steamling\" like a phone. Controllers and hubs on the port stop working until you turn this off.";
         return "Off";
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "USB FILE TRANSFER", children: [SP_JSX.jsx(DFL.Field, { label: "Transfer over USB", description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: "Show up on a computer", description: "Copy files over a cable, no network needed. Stays on until you restart.", checked: !!usb?.on, disabled: busy || !usb, onChange: (on) => run(on) }) })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("USB FILE TRANSFER"), children: [SP_JSX.jsx(DFL.Field, { label: t("Transfer over USB"), description: summary() }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Show up on a computer"), description: t("Copy files over a cable, no network needed. Stays on until you restart."), checked: !!usb?.on, disabled: busy || !usb, onChange: (on) => run(on) }) })] }));
 }
 
 // SD card last: the only destructive action, kept away from the casual toggles
@@ -1881,8 +1881,8 @@ function About() {
             cancelled = true;
         };
     }, [visible]);
-    const confirmRestart = () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Restart Game Mode", strDescription: "Closes Steam and any running game, then brings game mode back up. Unsaved progress in a running game is lost. Useful when Steam or the screen gets stuck.", strOKButtonText: "Restart", onOK: () => restartGameMode().catch((err) => setError(String(err))) }));
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: "ABOUT", children: [SP_JSX.jsx(DFL.Field, { label: "Steamling OS", description: info?.osVersion ?? "…" }), SP_JSX.jsx(DFL.Field, { label: "Kernel", description: info?.kernel ?? "…" }), info?.bootloader ? SP_JSX.jsx(DFL.Field, { label: "Bootloader", description: info.bootloader }) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: confirmRestart, children: "Restart Game Mode" }) }), error ? SP_JSX.jsx(DFL.Field, { label: "Error", description: error }) : null] }));
+    const confirmRestart = () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Restart Game Mode"), strDescription: t("Closes Steam and any running game, then brings game mode back up. Unsaved progress in a running game is lost. Useful when Steam or the screen gets stuck."), strOKButtonText: t("Restart"), onOK: () => restartGameMode().catch((err) => setError(String(err))) }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("ABOUT"), children: [SP_JSX.jsx(DFL.Field, { label: t("Steamling OS"), description: info?.osVersion ?? "…" }), SP_JSX.jsx(DFL.Field, { label: t("Kernel"), description: info?.kernel ?? "…" }), info?.bootloader ? SP_JSX.jsx(DFL.Field, { label: t("Bootloader"), description: info.bootloader }) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: confirmRestart, children: t("Restart Game Mode") }) }), error ? SP_JSX.jsx(DFL.Field, { label: t("Error"), description: error }) : null] }));
 }
 
 const SHOWN_UPDATES = 8;
@@ -1971,7 +1971,7 @@ function Updater() {
             setError(String(err));
         }
     };
-    const confirmStart = () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Install Updates", strDescription: "Downloads and installs all available system updates. Keep the device powered; a running game may stutter. Restart after it finishes.", strOKButtonText: "Install", onOK: start }));
+    const confirmStart = () => DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Install Updates"), strDescription: t("Downloads and installs all available system updates. Keep the device powered; a running game may stutter. Restart after it finishes."), strOKButtonText: t("Install"), onOK: start }));
     const lastSnapshot = snap?.supported && snap.snapshots.length > 0 ? snap.snapshots[snap.snapshots.length - 1] : null;
     // Already rolled back onto the latest snapshot: another rollback would be a no-op,
     // so hide the button until the next update (which clears the marker + snapshots anew).
@@ -1995,11 +1995,11 @@ function Updater() {
     const confirmRollback = () => {
         if (!lastSnapshot)
             return;
-        DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: "Roll Back Last Update", strDescription: `Restores the system to before the update of ${fmtDate(lastSnapshot.created)}` +
+        DFL.showModal(SP_JSX.jsx(DFL.ConfirmModal, { strTitle: t("Roll Back Last Update"), strDescription: `Restores the system to before the update of ${fmtDate(lastSnapshot.created)}` +
                 (lastSnapshot.targets ? ` (${lastSnapshot.targets})` : "") +
                 `. Games, saves and settings are kept.` +
                 (lastSnapshot.kernel ? " The previous kernel is restored too." : "") +
-                ` Reboot after it completes.`, strOKButtonText: "Roll Back", onOK: rollBack }));
+                ` Reboot after it completes.`, strOKButtonText: t("Roll Back"), onOK: rollBack }));
     };
     const reboot = () => rebootSystem().catch((err) => setError(String(err)));
     const finished = !running && status?.exitCode !== null && status?.exitCode !== undefined;
@@ -2008,7 +2008,7 @@ function Updater() {
         : updates.length === 0
             ? "System is up to date"
             : `${updates.length} update${updates.length === 1 ? "" : "s"} available`;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: "SYSTEM UPDATES", children: [!running ? SP_JSX.jsx(DFL.Field, { label: "Status", description: summary }) : null, !running && updates && updates.length > 0 ? (SP_JSX.jsxs("div", { className: "steamling-note", children: [updates.slice(0, SHOWN_UPDATES).map((update) => (SP_JSX.jsx("div", { children: `${update.name} ${update.current} → ${update.latest}` }, update.name))), updates.length > SHOWN_UPDATES ? SP_JSX.jsx("div", { children: `… and ${updates.length - SHOWN_UPDATES} more` }) : null] })) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: check, children: checking ? "Checking…" : "Check for Updates" }) }), !running && updates && updates.length > 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmStart, children: "Install Updates" }) })) : null, running ? SP_JSX.jsx(DFL.Field, { label: "Updating\u2026", description: "Safe to close this menu. Do not power off." }) : null, finished ? (SP_JSX.jsx(DFL.Field, { label: status.exitCode === 0 ? "Update complete" : `Update failed (code ${status.exitCode})`, description: status.exitCode === 0 ? "Restart to finish applying updates." : "See the log below." })) : null, finished && status.exitCode === 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Restart Now" }) })) : null, (running || (finished && status.exitCode !== 0)) && status?.log ? (SP_JSX.jsx("div", { className: "steamling-note steamling-log", children: status.log })) : null, error ? SP_JSX.jsx(DFL.Field, { label: "Error", description: error }) : null] }), snap?.supported ? (SP_JSX.jsxs(DFL.PanelSection, { title: "ROLLBACK", children: [snap.rolledBack && !rollbackDone ? (SP_JSX.jsx(DFL.Field, { label: "System was rolled back", description: `Restored from snapshot ${snap.rolledBack.fromSnapshot} (${fmtDate(snap.rolledBack.ts)}).${onLastSnapshot ? " Rollback will be available again after the next update." : ""}` })) : null, rollbackDone ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Rolled back", description: "Reboot to finish switching to the restored system." }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: "Reboot Now" }) })] })) : onLastSnapshot ? null : lastSnapshot ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: "Last snapshot", description: `${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}` }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmRollback, children: rollingBack ? "Rolling back…" : "Roll Back Last Update" }) })] })) : (SP_JSX.jsx(DFL.Field, { label: "No snapshots yet", description: "A snapshot is taken automatically before every update." })), rollbackError ? SP_JSX.jsx(DFL.Field, { label: "Rollback error", description: rollbackError }) : null, SP_JSX.jsx(DFL.Field, { label: "Storage", description: `${gib(snap.freeBytes)} GB free${snap.lowSpace ? " — LOW: snapshots may be skipped" : ""}` })] })) : null, SP_JSX.jsx(About, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: t("SYSTEM UPDATES"), children: [!running ? SP_JSX.jsx(DFL.Field, { label: t("Status"), description: summary }) : null, !running && updates && updates.length > 0 ? (SP_JSX.jsxs("div", { className: "steamling-note", children: [updates.slice(0, SHOWN_UPDATES).map((update) => (SP_JSX.jsx("div", { children: `${update.name} ${update.current} → ${update.latest}` }, update.name))), updates.length > SHOWN_UPDATES ? SP_JSX.jsx("div", { children: `… and ${updates.length - SHOWN_UPDATES} more` }) : null] })) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: check, children: checking ? "Checking…" : "Check for Updates" }) }), !running && updates && updates.length > 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmStart, children: t("Install Updates") }) })) : null, running ? SP_JSX.jsx(DFL.Field, { label: t("Updating…"), description: t("Safe to close this menu. Do not power off.") }) : null, finished ? (SP_JSX.jsx(DFL.Field, { label: status.exitCode === 0 ? "Update complete" : `Update failed (code ${status.exitCode})`, description: status.exitCode === 0 ? "Restart to finish applying updates." : "See the log below." })) : null, finished && status.exitCode === 0 ? (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: t("Restart Now") }) })) : null, (running || (finished && status.exitCode !== 0)) && status?.log ? (SP_JSX.jsx("div", { className: "steamling-note steamling-log", children: status.log })) : null, error ? SP_JSX.jsx(DFL.Field, { label: t("Error"), description: error }) : null] }), snap?.supported ? (SP_JSX.jsxs(DFL.PanelSection, { title: t("ROLLBACK"), children: [snap.rolledBack && !rollbackDone ? (SP_JSX.jsx(DFL.Field, { label: t("System was rolled back"), description: `Restored from snapshot ${snap.rolledBack.fromSnapshot} (${fmtDate(snap.rolledBack.ts)}).${onLastSnapshot ? " Rollback will be available again after the next update." : ""}` })) : null, rollbackDone ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: t("Rolled back"), description: t("Reboot to finish switching to the restored system.") }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: reboot, children: t("Reboot Now") }) })] })) : onLastSnapshot ? null : lastSnapshot ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.Field, { label: t("Last snapshot"), description: `${fmtDate(lastSnapshot.created)}${lastSnapshot.targets ? ` — ${lastSnapshot.targets}` : ""}` }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", disabled: busyRef.current, onClick: confirmRollback, children: rollingBack ? "Rolling back…" : "Roll Back Last Update" }) })] })) : (SP_JSX.jsx(DFL.Field, { label: t("No snapshots yet"), description: t("A snapshot is taken automatically before every update.") })), rollbackError ? SP_JSX.jsx(DFL.Field, { label: t("Rollback error"), description: rollbackError }) : null, SP_JSX.jsx(DFL.Field, { label: t("Storage"), description: `${gib(snap.freeBytes)} GB free${snap.lowSpace ? " — LOW: snapshots may be skipped" : ""}` })] })) : null, SP_JSX.jsx(About, {})] }));
 }
 
 // A loader whose API lacks the hook gets the old behaviour (always treated as open) instead of
@@ -2109,7 +2109,7 @@ function GameSettingsModal({ appid, name, closeModal }) {
             .catch(() => closeModal?.());
     }, []);
     if (!config)
-        return SP_JSX.jsx(DFL.ModalRoot, { closeModal: closeModal, children: "Loading\u2026" });
+        return SP_JSX.jsx(DFL.ModalRoot, { closeModal: closeModal, children: t("Loading…") });
     const gameSettings = config.tweaks.games[appid] || {};
     const enabled = gameSettings.enabled === true;
     const values = enabled ? { ...config.tweaks.global, ...gameSettings } : config.tweaks.global;
@@ -2123,7 +2123,7 @@ function GameSettingsModal({ appid, name, closeModal }) {
         const existing = next.tweaks.games[appid] || {};
         next.tweaks.games[appid] = { ...existing, enabled: true, name, ...fields };
     });
-    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: closeModal, children: [SP_JSX.jsx("div", { style: { fontWeight: 600, marginBottom: "8px" }, children: name || `App ${appid}` }), SP_JSX.jsx(DFL.ToggleField, { label: "Use Per-Game Settings", checked: enabled, onChange: (on) => {
+    return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: closeModal, children: [SP_JSX.jsx("div", { style: { fontWeight: 600, marginBottom: "8px" }, children: name || `App ${appid}` }), SP_JSX.jsx(DFL.ToggleField, { label: t("Use Per-Game Settings"), checked: enabled, onChange: (on) => {
                     update((next) => {
                         next.tweaks.games[appid] = { ...(next.tweaks.games[appid] || {}), enabled: on, name };
                     });

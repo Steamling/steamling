@@ -2,6 +2,7 @@ import { openFilePicker, toaster } from "@decky/api";
 import { ButtonItem, ConfirmModal, PanelSection, PanelSectionRow, TextField, ToggleField, showModal } from "@decky/ui";
 import { useState } from "react";
 import { addShortcut, defaultShortcutName, isWindowsExe } from "../lib/shortcuts";
+import { t } from "../i18n";
 
 function AddGameModal({ path, closeModal }: { path: string; closeModal?: () => void }) {
   const [name, setName] = useState(defaultShortcutName(path));
@@ -12,26 +13,26 @@ function AddGameModal({ path, closeModal }: { path: string; closeModal?: () => v
     setBusy(true);
     try {
       await addShortcut(name.trim(), path, proton);
-      toaster.toast({ title: "Added to library", body: name.trim() });
+      toaster.toast({ title: t("Added to library"), body: name.trim() });
       closeModal?.();
     } catch (error) {
-      toaster.toast({ title: "Could not add game", body: String(error) });
+      toaster.toast({ title: t("Could not add game"), body: String(error) });
       setBusy(false);
     }
   };
   return (
     <ConfirmModal
-      strTitle="Add Non-Steam Game"
+      strTitle={t("Add Non-Steam Game")}
       strDescription={path}
       strOKButtonText={busy ? "Adding…" : "Add to Library"}
       bOKDisabled={busy || !name.trim()}
       onCancel={() => closeModal?.()}
       onOK={submit}
     >
-      <TextField label="Name" value={name} disabled={busy} onChange={(event) => setName(event.target.value)} />
+      <TextField label={t("Name")} value={name} disabled={busy} onChange={(event) => setName(event.target.value)} />
       <ToggleField
-        label="Launch with Proton"
-        description="Needed for Windows games (.exe)"
+        label={t("Launch with Proton")}
+        description={t("Needed for Windows games (.exe)")}
         checked={proton}
         disabled={busy}
         onChange={setProton}
@@ -51,11 +52,11 @@ export function AddGameSection() {
     }
   };
   return (
-    <PanelSection title="LIBRARY">
+    <PanelSection title={t("LIBRARY")}>
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={pick}>Add Non-Steam Game</ButtonItem>
+        <ButtonItem layout="below" onClick={pick}>{t("Add Non-Steam Game")}</ButtonItem>
       </PanelSectionRow>
-      <div className="steamling-note">Pick an executable to add it to your Steam library</div>
+      <div className="steamling-note">{t("Pick an executable to add it to your Steam library")}</div>
     </PanelSection>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { setUsbTransfer, usbTransferStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { UsbTransferStatus } from "../types";
+import { t } from "../i18n";
 
 export function UsbTransfer() {
   const [usb, setUsb] = useState<UsbTransferStatus | null>(null);
@@ -50,12 +51,12 @@ export function UsbTransfer() {
   };
 
   return (
-    <PanelSection title="USB FILE TRANSFER">
-      <Field label="Transfer over USB" description={summary()} />
+    <PanelSection title={t("USB FILE TRANSFER")}>
+      <Field label={t("Transfer over USB")} description={summary()} />
       <PanelSectionRow>
         <ToggleField
-          label="Show up on a computer"
-          description="Copy files over a cable, no network needed. Stays on until you restart."
+          label={t("Show up on a computer")}
+          description={t("Copy files over a cable, no network needed. Stays on until you restart.")}
           checked={!!usb?.on}
           disabled={busy || !usb}
           onChange={(on: boolean) => run(on)}

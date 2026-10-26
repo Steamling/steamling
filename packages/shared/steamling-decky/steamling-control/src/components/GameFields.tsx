@@ -9,37 +9,37 @@ import type { Config } from "../types";
 // Audio buffer (PULSE_LATENCY_MSEC): absorbs FEX-mixer overruns (SFX-burst crackle) at the
 // cost of audio latency — keep rhythm games on Game default.
 export const audioLatencyOptions = [
-  { data: "", label: "Game default" },
-  { data: "60", label: "60 ms" },
-  { data: "90", label: "90 ms" },
-  { data: "120", label: "120 ms" },
+  { data: "", label: t("Game default") },
+  { data: "60", label: t("60 ms") },
+  { data: "90", label: t("90 ms") },
+  { data: "120", label: t("120 ms") },
 ];
 
 export const fanOptions = [
-  { data: "quiet", label: "Quiet" },
-  { data: "moderate", label: "Moderate" },
-  { data: "performance", label: "Performance" },
+  { data: "quiet", label: t("Quiet") },
+  { data: "moderate", label: t("Moderate") },
+  { data: "performance", label: t("Performance") },
 ];
 export const lavdOptions = [
-  { data: "autopilot", label: "Autopilot" },
-  { data: "performance", label: "Performance" },
+  { data: "autopilot", label: t("Autopilot") },
+  { data: "performance", label: t("Performance") },
 ];
-const globalChoice = { data: "", label: "Use global" };
+const globalChoice = { data: "", label: t("Use global") };
 
 export function EnvVarsModal({ initial, onSave, closeModal }: { initial: string; onSave: (value: string) => void; closeModal?: () => void }) {
   const [value, setValue] = useState(initial);
   return (
     <ConfirmModal
-      strTitle="Environment Variables"
+      strTitle={t("Environment Variables")}
       strDescription={'Space-separated KEY=VALUE pairs; quote values with spaces, e.g. DXVK_CONFIG="dxgi.customDeviceDesc = GTX 480". Steam launch options win over these.'}
-      strOKButtonText="Save"
+      strOKButtonText={t("Save")}
       onCancel={() => closeModal?.()}
       onOK={() => {
         onSave(value.trim());
         closeModal?.();
       }}
     >
-      <TextField label="Variables" value={value} onChange={(event) => setValue(event.target.value)} />
+      <TextField label={t("Variables")} value={value} onChange={(event) => setValue(event.target.value)} />
     </ConfirmModal>
   );
 }
@@ -52,7 +52,7 @@ export function EnvVarsButton({ value, onSave }: { value: string; onSave: (next:
         description={value ? value : "None set"}
         onClick={() => showModal(<EnvVarsModal initial={value} onSave={onSave} />)}
       >
-        Environment Variables
+        {t("Environment Variables")}
       </ButtonItem>
     </PanelSectionRow>
   );
@@ -65,8 +65,8 @@ export function XaliaToggle({ values, patch }: {
   return (
     <PanelSectionRow>
       <ToggleField
-        label="Disable Xalia"
-        description="Proton's controller-navigation helper; costs CPU in every game"
+        label={t("Disable Xalia")}
+        description={t("Proton's controller-navigation helper; costs CPU in every game")}
         checked={values.disableXalia !== false}
         onChange={(checked) => patch({ disableXalia: checked })}
       />
@@ -79,8 +79,8 @@ export function TouchField({ values, patch }: { values: Record<string, any>; pat
   return (
     <PanelSectionRow>
       <ToggleField
-        label="Disable Touchscreen"
-        description="While the game is running, to stop stray touches"
+        label={t("Disable Touchscreen")}
+        description={t("While the game is running, to stop stray touches")}
         checked={values.touchDisabled === true}
         onChange={(on) => patch({ touchDisabled: on })}
       />
@@ -99,8 +99,8 @@ export function PerfFields({ values, patch }: {
   const lavdValue = perGameLavd.some((option) => option.data === String(values.lavdMode ?? "")) ? String(values.lavdMode ?? "") : "";
   return (
     <>
-      <SelectEdit label="CPU Scheduler" value={lavdValue} options={perGameLavd} onChange={(id) => patch({ lavdMode: id })} />
-      <SelectEdit label="Fan Curve" value={fanValue} options={perGameFan} onChange={(id) => patch({ fanMode: id })} />
+      <SelectEdit label={t("CPU Scheduler")} value={lavdValue} options={perGameLavd} onChange={(id) => patch({ lavdMode: id })} />
+      <SelectEdit label={t("Fan Curve")} value={fanValue} options={perGameFan} onChange={(id) => patch({ fanMode: id })} />
     </>
   );
 }
@@ -153,7 +153,7 @@ export function TweakFields({ config, appid, values, patch }: {
     };
   }, [appid]);
   const compatOptions = [
-    { data: "", label: "Steam default" },
+    { data: "", label: t("Steam default") },
     ...compatTools.map((tool) => ({ data: tool.name, label: tool.label })),
   ];
   const compatValue = compatOptions.some((option) => option.data === currentTool) ? currentTool : "";
@@ -164,14 +164,14 @@ export function TweakFields({ config, appid, values, patch }: {
   const fexOptions = Object.entries(presets).map(([id, profile]) => ({ data: id, label: profile.label }));
   const storedLatency = String(values.audioLatency ?? "");
   const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
-  const mesaOptions = [{ data: "", label: "System default" }, ...(config.mesaVersions || [])];
+  const mesaOptions = [{ data: "", label: t("System default") }, ...(config.mesaVersions || [])];
   const storedMesa = String(values.mesaVersion ?? "");
   const mesaValue = mesaOptions.some((option) => option.data === storedMesa) ? storedMesa : "";
 
   return (
     <>
       <SelectEdit
-        label="Proton Version"
+        label={t("Proton Version")}
         value={compatValue}
         options={compatOptions}
         onChange={(name) => {
@@ -180,13 +180,13 @@ export function TweakFields({ config, appid, values, patch }: {
         }}
       />
       <SelectEdit
-        label="FEX Preset"
+        label={t("FEX Preset")}
         value={fexValue}
         options={fexOptions}
         onChange={(id) => patch({ fexProfile: id })}
       />
-      <SelectEdit label="Audio Buffer" value={audioValue} options={audioLatencyOptions} onChange={(id) => patch({ audioLatency: id })} />
-      <SelectEdit label="Mesa Version" value={mesaValue} options={mesaOptions} onChange={(id) => patch({ mesaVersion: id })} />
+      <SelectEdit label={t("Audio Buffer")} value={audioValue} options={audioLatencyOptions} onChange={(id) => patch({ audioLatency: id })} />
+      <SelectEdit label={t("Mesa Version")} value={mesaValue} options={mesaOptions} onChange={(id) => patch({ mesaVersion: id })} />
       <XaliaToggle values={values} patch={patch} />
       <TouchField values={values} patch={patch} />
       <GamepadTypeField values={values} patch={patch} />

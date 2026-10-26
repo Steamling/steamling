@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { installSamba, setShare, shareStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { ShareStatus } from "../types";
+import { t } from "../i18n";
 
 // The share is guest-writable and covers the whole home folder, so the trade is spelled out
 // rather than buried: same warning the Steamling Tools menu shows before it flips the switch.
@@ -18,7 +19,7 @@ function ShareConfirmModal({ onConfirm, closeModal }: { onConfirm: () => Promise
   };
   return (
     <ConfirmModal
-      strTitle="Share Files Over The Network"
+      strTitle={t("Share Files Over The Network")}
       strDescription={
         running
           ? "Starting…"
@@ -88,8 +89,8 @@ export function FileSharing() {
   };
 
   return (
-    <PanelSection title="FILE SHARING">
-      <Field label="Network share" description={summary()} />
+    <PanelSection title={t("FILE SHARING")}>
+      <Field label={t("Network share")} description={summary()} />
       {share && !share.installed ? (
         <PanelSectionRow>
           <ButtonItem layout="below" disabled={busy} onClick={() => run(installSamba)}>
@@ -99,8 +100,8 @@ export function FileSharing() {
       ) : (
         <PanelSectionRow>
           <ToggleField
-            label="Share my home folder"
-            description="Drag files straight onto the device from another computer"
+            label={t("Share my home folder")}
+            description={t("Drag files straight onto the device from another computer")}
             checked={!!share?.on}
             disabled={busy || !share?.installed}
             onChange={(on: boolean) => {

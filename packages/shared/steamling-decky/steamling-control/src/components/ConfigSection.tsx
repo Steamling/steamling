@@ -5,6 +5,7 @@ import { applyConfig, configDir, exportConfig, readConfig } from "../backend";
 import { availableCompatTools, resolveCompatTool, setCompatTool } from "../lib/compat";
 import { SelectEdit } from "./widgets";
 import type { ConfigPreview } from "../types";
+import { t } from "../i18n";
 
 function ExportNameModal({ game, base, onDone, closeModal }: {
   game: { appid: string; name: string };
@@ -22,20 +23,20 @@ function ExportNameModal({ game, base, onDone, closeModal }: {
       const result = await exportConfig(game.appid, game.name, value.trim(), true);
       onDone(result.path);
     } catch (error) {
-      toaster.toast({ title: "Export failed", body: String(error) });
+      toaster.toast({ title: t("Export failed"), body: String(error) });
     }
     closeModal?.();
   };
   return (
     <ConfirmModal
-      strTitle="Config Already Exists"
+      strTitle={t("Config Already Exists")}
       strDescription={`${base}.steamling.json exists. Change the name to save a new config (e.g. ${base}-2 or ${base}-fast), or keep it to overwrite.`}
       strOKButtonText={busy ? "Saving…" : overwriting ? "Overwrite" : "Save New"}
       bOKDisabled={busy || !value.trim()}
       onCancel={() => closeModal?.()}
       onOK={submit}
     >
-      <TextField label="Name" value={value} disabled={busy} onChange={(event) => setValue(event.target.value)} />
+      <TextField label={t("Name")} value={value} disabled={busy} onChange={(event) => setValue(event.target.value)} />
     </ConfirmModal>
   );
 }
@@ -63,22 +64,22 @@ function ImportModal({ path, preview, game, onDone, closeModal }: {
         if (resolved.tool) {
           setCompatTool(game.appid, resolved.tool);
           if (resolved.fallback) {
-            toaster.toast({ title: "Proton fallback", body: `${result.protonTool} not available, using ${resolved.tool}` });
+            toaster.toast({ title: t("Proton fallback"), body: `${result.protonTool} not available, using ${resolved.tool}` });
           }
         } else {
-          toaster.toast({ title: "Proton pick skipped", body: `${result.protonTool} not available here` });
+          toaster.toast({ title: t("Proton pick skipped"), body: `${result.protonTool} not available here` });
         }
       }
-      toaster.toast({ title: "Config applied", body: game.name || game.appid });
+      toaster.toast({ title: t("Config applied"), body: game.name || game.appid });
     } catch (error) {
-      toaster.toast({ title: "Import failed", body: String(error) });
+      toaster.toast({ title: t("Import failed"), body: String(error) });
     }
     closeModal?.();
     onDone();
   };
   return (
     <ConfirmModal
-      strTitle="Import Game Config"
+      strTitle={t("Import Game Config")}
       strDescription={(from ? `Exported from ${from}. ` : "") + `Settings for ${game.name || game.appid} will be overwritten.`}
       strOKButtonText={busy ? "Applying…" : "Apply"}
       bOKDisabled={busy || !source}
@@ -86,7 +87,7 @@ function ImportModal({ path, preview, game, onDone, closeModal }: {
       onOK={submit}
     >
       {profiles.length > 1 ? (
-        <SelectEdit label="Profile" value={source} options={profileOptions} onChange={(id) => setSource(String(id))} />
+        <SelectEdit label={t("Profile")} value={source} options={profileOptions} onChange={(id) => setSource(String(id))} />
       ) : (
         <div className="steamling-note">Profile: {profiles[0]?.name || profiles[0]?.appid}</div>
       )}
@@ -107,14 +108,14 @@ export function ConfigSection({ game, reload }: {
           <ExportNameModal
             game={{ appid: game.appid, name: game.name || "" }}
             base={result.base}
-            onDone={(path) => toaster.toast({ title: "Game config exported", body: path })}
+            onDone={(path) => toaster.toast({ title: t("Game config exported"), body: path })}
           />,
         );
         return;
       }
-      toaster.toast({ title: "Game config exported", body: result.path });
+      toaster.toast({ title: t("Game config exported"), body: result.path });
     } catch (error) {
-      toaster.toast({ title: "Export failed", body: String(error) });
+      toaster.toast({ title: t("Export failed"), body: String(error) });
     }
   };
   const doImport = async () => {
@@ -132,18 +133,18 @@ export function ConfigSection({ game, reload }: {
       const preview = await readConfig(path);
       showModal(<ImportModal path={path} preview={preview} game={game} onDone={reload} />);
     } catch (error) {
-      toaster.toast({ title: "Import failed", body: String(error) });
+      toaster.toast({ title: t("Import failed"), body: String(error) });
     }
   };
   return (
-    <PanelSection title="CONFIG">
+    <PanelSection title={t("CONFIG")}>
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={doExport}>Export Game Config</ButtonItem>
+        <ButtonItem layout="below" onClick={doExport}>{t("Export Game Config")}</ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={doImport}>Import Game Config</ButtonItem>
+        <ButtonItem layout="below" onClick={doImport}>{t("Import Game Config")}</ButtonItem>
       </PanelSectionRow>
-      <div className="steamling-note">Per-game tweaks and Proton pick; fan settings and defaults stay local</div>
+      <div className="steamling-note">{t("Per-game tweaks and Proton pick; fan settings and defaults stay local")}</div>
     </PanelSection>
   );
 }

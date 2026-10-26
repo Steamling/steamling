@@ -13,6 +13,7 @@ import { SelectEdit } from "../components/widgets";
 import { availableGames, editTargetOptions } from "../lib/games";
 import { clone } from "../lib/util";
 import type { Config } from "../types";
+import { t } from "../i18n";
 
 export function Games({ config, setConfig, reload }: {
   config: Config;
@@ -102,17 +103,17 @@ export function Games({ config, setConfig, reload }: {
   const showFields = editingDefault || perGameEnabled;
   return (
     <>
-      <PanelSection title="PERFORMANCE & GAME TWEAKS">
-        <SelectEdit label="Game" value={game?.appid || ""} options={targetOptions} onChange={setSelectedGame} />
-        {!editingDefault ? <ToggleField label="Use Per-Game Settings" checked={perGameEnabled} onChange={setPerGameEnabled} /> : null}
+      <PanelSection title={t("PERFORMANCE & GAME TWEAKS")}>
+        <SelectEdit label={t("Game")} value={game?.appid || ""} options={targetOptions} onChange={setSelectedGame} />
+        {!editingDefault ? <ToggleField label={t("Use Per-Game Settings")} checked={perGameEnabled} onChange={setPerGameEnabled} /> : null}
       </PanelSection>
       {!editingDefault ? <Suggestion config={config} appid={game!.appid} apply={applySuggestion} /> : null}
       {showFields ? (
-        <PanelSection title="PERFORMANCE">
+        <PanelSection title={t("PERFORMANCE")}>
           {editingDefault ? (
             <>
-              <SelectEdit label="CPU Scheduler" value={config.lavdMode} options={lavdOptions} onChange={(mode) => applyMode(setLavdMode, mode)} />
-              <SelectEdit label="Fan Curve" value={config.fanMode} options={fanOptions} onChange={(mode) => applyMode(setFanMode, mode)} />
+              <SelectEdit label={t("CPU Scheduler")} value={config.lavdMode} options={lavdOptions} onChange={(mode) => applyMode(setLavdMode, mode)} />
+              <SelectEdit label={t("Fan Curve")} value={config.fanMode} options={fanOptions} onChange={(mode) => applyMode(setFanMode, mode)} />
             </>
           ) : (
             <PerfFields values={values} patch={patchSettings} />
@@ -120,17 +121,17 @@ export function Games({ config, setConfig, reload }: {
         </PanelSection>
       ) : null}
       {showFields ? (
-        <PanelSection title="GAME TWEAKS">
-          <div className="steamling-note">Changes apply on next game launch</div>
+        <PanelSection title={t("GAME TWEAKS")}>
+          <div className="steamling-note">{t("Changes apply on next game launch")}</div>
           {editingDefault ? (
             <>
               <SelectEdit
-                label="FEX Preset"
+                label={t("FEX Preset")}
                 value={fexValue}
                 options={fexOptions}
                 onChange={(id) => patchSettings({ fexProfile: id })}
               />
-              <SelectEdit label="Audio Buffer" value={audioValue} options={audioLatencyOptions} onChange={(id) => patchSettings({ audioLatency: id })} />
+              <SelectEdit label={t("Audio Buffer")} value={audioValue} options={audioLatencyOptions} onChange={(id) => patchSettings({ audioLatency: id })} />
               <XaliaToggle values={values} patch={patchSettings} />
               <TouchField values={values} patch={patchSettings} />
               <EnvVarsButton value={String(values.envVars ?? "")} onSave={(next) => patchSettings({ envVars: next })} />

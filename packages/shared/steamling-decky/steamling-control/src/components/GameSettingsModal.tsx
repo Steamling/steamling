@@ -5,6 +5,7 @@ import { clone } from "../lib/util";
 import type { Config } from "../types";
 import { ConfigSection } from "./ConfigSection";
 import { PerfFields, TweakFields } from "./GameFields";
+import { t } from "../i18n";
 
 /** Standalone per-game settings, opened from the library context menu. Saves on each change
  *  (no QAM debounce lifecycle here; the modal has an explicit close). */
@@ -15,7 +16,7 @@ export function GameSettingsModal({ appid, name, closeModal }: { appid: string; 
       .then(setConfig)
       .catch(() => closeModal?.());
   }, []);
-  if (!config) return <ModalRoot closeModal={closeModal}>Loading…</ModalRoot>;
+  if (!config) return <ModalRoot closeModal={closeModal}>{t("Loading…")}</ModalRoot>;
 
   const gameSettings = config.tweaks.games[appid] || {};
   const enabled = gameSettings.enabled === true;
@@ -36,7 +37,7 @@ export function GameSettingsModal({ appid, name, closeModal }: { appid: string; 
     <ModalRoot closeModal={closeModal}>
       <div style={{ fontWeight: 600, marginBottom: "8px" }}>{name || `App ${appid}`}</div>
       <ToggleField
-        label="Use Per-Game Settings"
+        label={t("Use Per-Game Settings")}
         checked={enabled}
         onChange={(on) => {
           update((next) => {

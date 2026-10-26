@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { panelCalibrate, panelReset, panelStatus } from "../backend";
 import { useQamVisible } from "../hooks/useQamVisible";
 import type { PanelStatus } from "../types";
+import { t } from "../i18n";
 
 // Panels leave the factory a touch fast or slow, and emulators that pace to the display drift
 // against their audio. steamling-panel-calibration measures the running refresh rate and trims the
@@ -32,7 +33,7 @@ function PanelModal({ initial, onChange, closeModal }: { initial: PanelStatus; o
   const result = status.result;
   return (
     <ModalRoot closeModal={busy ? undefined : closeModal} bDisableBackgroundDismiss={busy}>
-      <div style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "8px" }}>Display Refresh Calibration</div>
+      <div style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "8px" }}>{t("Display Refresh Calibration")}</div>
       <div>
         {busy
           ? "Measuring… this takes up to a minute. Leave the device on this screen until it finishes."
@@ -45,8 +46,8 @@ function PanelModal({ initial, onChange, closeModal }: { initial: PanelStatus; o
       ) : null}
       <Focusable style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
         <DialogButton disabled={busy} onClick={() => run(panelCalibrate)}>{busy ? "Calibrating…" : "Calibrate"}</DialogButton>
-        <DialogButton disabled={busy || !status.saved} onClick={() => run(panelReset)}>Reset to Factory</DialogButton>
-        <DialogButton disabled={busy} onClick={() => closeModal?.()}>Close</DialogButton>
+        <DialogButton disabled={busy || !status.saved} onClick={() => run(panelReset)}>{t("Reset to Factory")}</DialogButton>
+        <DialogButton disabled={busy} onClick={() => closeModal?.()}>{t("Close")}</DialogButton>
       </Focusable>
       {error ? <div style={{ marginTop: "8px", color: "#ff8080" }}>{error}</div> : null}
     </ModalRoot>
@@ -69,11 +70,11 @@ export function PanelCalibration() {
 
   if (!status?.available) return null;
   return (
-    <PanelSection title="DISPLAY">
-      <Field label="Refresh rate" description={status.saved ? "Calibrated" : "Factory timing"} />
+    <PanelSection title={t("DISPLAY")}>
+      <Field label={t("Refresh rate")} description={status.saved ? "Calibrated" : "Factory timing"} />
       <PanelSectionRow>
         <ButtonItem layout="below" onClick={() => showModal(<PanelModal initial={status} onChange={setStatus} />)}>
-          Calibrate Display
+          {t("Calibrate Display")}
         </ButtonItem>
       </PanelSectionRow>
     </PanelSection>

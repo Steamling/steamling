@@ -2,6 +2,7 @@ import { ButtonItem, DialogButton, Field, Focusable, ModalRoot, PanelSection, Pa
 import { useEffect, useRef, useState } from "react";
 import { calibrationCancel, calibrationReset, calibrationSave, calibrationStart, calibrationStatus } from "../backend";
 import type { CalibrationLive, CalibrationStatus } from "../types";
+import { t } from "../i18n";
 
 function instruction(s: CalibrationStatus) {
   if (s.kind === "trigger") {
@@ -33,12 +34,12 @@ function LiveBars({ live }: { live?: CalibrationLive }) {
   if (!live) return null;
   return (
     <div style={{ margin: "8px 0" }}>
-      <Bar label="Left stick X" value={live.lx} signed />
-      <Bar label="Left stick Y" value={live.ly} signed />
-      <Bar label="Right stick X" value={live.rx} signed />
-      <Bar label="Right stick Y" value={live.ry} signed />
-      <Bar label="Left trigger" value={live.lt} />
-      <Bar label="Right trigger" value={live.rt} />
+      <Bar label={t("Left stick X")} value={live.lx} signed />
+      <Bar label={t("Left stick Y")} value={live.ly} signed />
+      <Bar label={t("Right stick X")} value={live.rx} signed />
+      <Bar label={t("Right stick Y")} value={live.ry} signed />
+      <Bar label={t("Left trigger")} value={live.lt} />
+      <Bar label={t("Right trigger")} value={live.rt} />
     </div>
   );
 }
@@ -92,11 +93,11 @@ function CalibrationModal({ closeModal }: { closeModal?: () => void }) {
   const error = message || status?.error || "";
   return (
     <ModalRoot closeModal={phase === "capture" ? undefined : closeModal} bDisableBackgroundDismiss={phase !== "idle"}>
-      <div style={{ fontWeight: 600, fontSize: "18px", marginBottom: "8px" }}>Controller Calibration</div>
+      <div style={{ fontWeight: 600, fontSize: "18px", marginBottom: "8px" }}>{t("Controller Calibration")}</div>
       {!status ? (
-        <div>Loading…</div>
+        <div>{t("Loading…")}</div>
       ) : !status.available ? (
-        <div>This device's gamepad driver does not support calibration.</div>
+        <div>{t("This device's gamepad driver does not support calibration.")}</div>
       ) : phase === "capture" ? (
         <>
           <div style={{ fontSize: "12px", opacity: 0.7 }}>
@@ -106,19 +107,18 @@ function CalibrationModal({ closeModal }: { closeModal?: () => void }) {
           <ProgressBar nProgress={Math.round(status.progress * 100)} nTransitionSec={0} />
           <LiveBars live={status.live} />
           <Focusable style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-            <DialogButton onClick={() => run(calibrationCancel)}>Cancel (touch)</DialogButton>
+            <DialogButton onClick={() => run(calibrationCancel)}>{t("Cancel (touch)")}</DialogButton>
           </Focusable>
         </>
       ) : phase === "review" ? (
         <>
           <div>
-            Calibration applied. Check the sticks and triggers below: a full push should read 100 at
-            the edge and 0 at rest. Save keeps it across reboots.
+            {t("Calibration applied. Check the sticks and triggers below: a full push should read 100 at the edge and 0 at rest. Save keeps it across reboots.")}
           </div>
           <LiveBars live={status.live} />
           <Focusable style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-            <DialogButton disabled={busy} onClick={() => run(calibrationSave)}>Save</DialogButton>
-            <DialogButton disabled={busy} onClick={() => run(calibrationCancel)}>Discard</DialogButton>
+            <DialogButton disabled={busy} onClick={() => run(calibrationSave)}>{t("Save")}</DialogButton>
+            <DialogButton disabled={busy} onClick={() => run(calibrationCancel)}>{t("Discard")}</DialogButton>
           </Focusable>
         </>
       ) : (
@@ -129,9 +129,9 @@ function CalibrationModal({ closeModal }: { closeModal?: () => void }) {
           </div>
           <LiveBars live={status.live} />
           <Focusable style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-            <DialogButton disabled={busy} onClick={() => run(calibrationStart)}>Start</DialogButton>
-            <DialogButton disabled={busy} onClick={() => run(calibrationReset)}>Reset to Defaults</DialogButton>
-            <DialogButton disabled={busy} onClick={() => closeModal?.()}>Close</DialogButton>
+            <DialogButton disabled={busy} onClick={() => run(calibrationStart)}>{t("Start")}</DialogButton>
+            <DialogButton disabled={busy} onClick={() => run(calibrationReset)}>{t("Reset to Defaults")}</DialogButton>
+            <DialogButton disabled={busy} onClick={() => closeModal?.()}>{t("Close")}</DialogButton>
           </Focusable>
         </>
       )}
@@ -142,11 +142,11 @@ function CalibrationModal({ closeModal }: { closeModal?: () => void }) {
 
 export function Calibration() {
   return (
-    <PanelSection title="CALIBRATION">
-      <Field label="Sticks and triggers" description="Stick centre and range, trigger travel" />
+    <PanelSection title={t("CALIBRATION")}>
+      <Field label={t("Sticks and triggers")} description={t("Stick centre and range, trigger travel")} />
       <PanelSectionRow>
         <ButtonItem layout="below" onClick={() => showModal(<CalibrationModal />)}>
-          Calibrate Controller
+          {t("Calibrate Controller")}
         </ButtonItem>
       </PanelSectionRow>
     </PanelSection>
