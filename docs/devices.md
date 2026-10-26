@@ -84,6 +84,9 @@ covers the model-specific bits for every handheld above, and the same steps appl
 
 Back up your stock bootloader (the guide shows how) before you flash anything. It's your way back.
 
+To open the OpenABL menu, hold **Volume −** while powering on, as on the RP6. The AYANEO Pocket
+DMG is the exception: hold the **...** button above the volume wheel instead.
+
 ## Help test a device
 
 If you try Steamling on one of the untested handhelds, please
@@ -92,6 +95,11 @@ If you try Steamling on one of the untested handhelds, please
 - which handheld, and which panel version if it has more than one
 - whether it booted to Steam, and how far it got if it didn't
 - what works and what doesn't: screen and touch, controls, sound, Wi-Fi, sleep, fan
+- the file `steamling-diag.txt`, if it's there. About a minute after every boot Steamling writes
+  this report to the small partition on the SD card (the one with the `KERNEL` file), so you can
+  pull the card and read it on your PC, even if the screen stayed black. It says which board
+  settings were picked and what the controls, sound, Wi-Fi, battery and screen look like to the
+  system.
 - if you can get to a terminal (desktop mode or SSH), the output of `journalctl -b` saved to a file
 
 A short "it booted, controls work, no sound" report is already useful. Fixes are even better:
