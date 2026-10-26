@@ -120,9 +120,9 @@ devices plugged into that port won't work.
 
 Formats a microSD card so Steam can use it as game storage.
 
-On a Steam Deck this lives in Steam itself (**Settings → Storage → Format SD Card**). Steam's
-native format button can work on these devices too, but I have not figured out how to wire it
-up yet, so Steamling Control provides the option here in the meantime.
+Steam's own button does the same job (**Settings → Storage**, pick the card, **Format SD Card**),
+just like on a Steam Deck. This section is another way to get there, and it shows the card's
+current filesystem before you wipe it.
 
 The section shows the detected card (label, size, current filesystem); set a label if you like
 and press **Format SD Card**.
