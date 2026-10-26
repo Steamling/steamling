@@ -427,6 +427,50 @@ for _soc in $(cd "${STEAMLING_ROOT}" && ls -d kernel/*/kernel.conf devices/*/pro
   if [ -z "${_bad}" ]; then note "family: ${_soc}" "ok"; else note "family: ${_soc}" "${_bad}"; fail=1; fi
 done
 
+# HDR on these EDID-less panels needs two halves that must agree: the board's
+# STEAMLING_PANEL_HDR_NITS (gamescope's target, Steam's HDR switch) and a gamescope panel profile
+# in steamling-bsp-common matching its STEAMLING_DEVICE with the same max_content_light_level.
+# Either half alone gives no HDR or a wrong peak, silently.
+hdr_profiles() {  # prints "<device_id> <max_content_light_level> <lua>" for every profile match
+  local lua n id
+  for lua in "${STEAMLING_ROOT}"/packages/shared/steamling-bsp-common/*.lua; do
+    n="$(sed -n 's/.*max_content_light_level *= *\([0-9][0-9]*\).*/\1/p' "${lua}" | head -1)"
+    for id in $(grep -o 'device_id *== *"[^"]*"' "${lua}" | sed 's/.*"\(.*\)"/\1/'); do
+      echo "${id} ${n:-0} ${lua##*/}"
+    done
+  done
+}
+check_hdr() {
+  local profiles soc t b dev nits row seen=""
+  profiles="$(hdr_profiles)"
+  for soc in $(cd "${STEAMLING_ROOT}/devices" && ls -d */ | tr -d /); do
+    [ -d "${STEAMLING_ROOT}/devices/${soc}/packages/steamling-bsp-${soc}/boards" ] || continue
+    t="$(stage_boards "${STEAMLING_ROOT}/devices/${soc}/packages/steamling-bsp-${soc}/boards" "${soc}")" || continue
+    for b in "${t}"/*.conf; do
+      case "${b##*/}" in family.conf|device.conf) continue ;; esac
+      read -r dev nits < <(env -i bash -c '. "$1" >/dev/null 2>&1; printf "%s %s\n" "${STEAMLING_DEVICE:-}" "${STEAMLING_PANEL_HDR_NITS:-0}"' sh "${b}")
+      [ -n "${dev}" ] || continue
+      seen="${seen} ${dev}"
+      row="$(awk -v d="${dev}" '$1 == d' <<< "${profiles}" | head -1)"
+      if [ "${nits:-0}" != 0 ]; then
+        if [ -z "${row}" ]; then echo "${dev}: HDR_NITS=${nits} but no panel profile matches it"
+        elif [ "$(cut -d' ' -f2 <<< "${row}")" != "${nits}" ]; then
+          echo "${dev}: HDR_NITS=${nits}, its profile $(cut -d' ' -f3 <<< "${row}") says $(cut -d' ' -f2 <<< "${row}")"
+        fi
+      elif [ -n "${row}" ]; then
+        echo "${dev}: profile $(cut -d' ' -f3 <<< "${row}") says HDR, but the board sets no HDR_NITS"
+      fi
+    done
+    rm -rf "${t}"
+  done
+  while read -r dev _ lua; do
+    [ -n "${dev}" ] || continue
+    case " ${seen} " in *" ${dev} "*) ;; *) echo "${lua} matches '${dev}', which no board is" ;; esac
+  done <<< "${profiles}"
+}
+_bad="$(check_hdr | paste -sd ';' -)"
+if [ -z "${_bad}" ]; then note "HDR panel profiles" "ok"; else note "HDR panel profiles" "${_bad}"; fail=1; fi
+
 # A board nothing selects never loads, so check_boards must flag one: a copy of a family's
 # boards/ plus a stray board has to fail.
 _t="$(mktemp -d)"
