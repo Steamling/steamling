@@ -5,6 +5,7 @@ import { setFanMode, setLavdMode } from "../backend";
 import type { Modes } from "../backend";
 import { ConfigSection } from "../components/ConfigSection";
 import { PerformanceOverlay } from "../components/PerformanceOverlay";
+import { SystemMonitor } from "../components/SystemMonitor";
 import { EnvVarsButton, PerfFields, TouchField, TweakFields, XaliaToggle, audioLatencyOptions, fanOptions, lavdOptions } from "../components/GameFields";
 import { SelectEdit } from "../components/widgets";
 import { availableGames, editTargetOptions } from "../lib/games";
@@ -125,6 +126,7 @@ export function Games({ config, setConfig, reload }: {
         <ConfigSection game={{ appid: game!.appid, name: game!.name || "" }} reload={reload} />
       ) : null}
       <PerformanceOverlay />
+      <SystemMonitor />
     </>
   );
 }

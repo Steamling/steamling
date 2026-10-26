@@ -17,6 +17,7 @@ from steamling_control.overlay import overlay_status, set_overlay
 from steamling_control.sdcard import detect_sdcard, format_sdcard
 from steamling_control.sharing import install_samba, set_share, share_status
 from steamling_control.snapshots import reboot_system, snapshot_status, start_rollback
+from steamling_control.stats import system_stats
 from steamling_control.touch import sync_touch
 from steamling_control.tweaks import load_tweaks, save_tweaks
 from steamling_control.updates import check_updates, start_update, update_status
@@ -173,3 +174,6 @@ class Plugin:
 
     async def set_overlay(self, level):
         return await asyncio.to_thread(set_overlay, str(level))
+
+    async def system_stats(self):
+        return await asyncio.to_thread(system_stats)

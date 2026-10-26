@@ -77,6 +77,14 @@ battery in one line along the top), **Detailed** (adds clock speeds, temperature
 draw) or **Everything**. It's the same overlay as Steam's own **Performance Overlay** setting in
 the quick access menu, so changing either one changes it.
 
+### System monitor
+
+Turn on **Show live readings** to see what the handheld is doing while the menu is open: how busy
+the CPU is and each core cluster's clock, the GPU clock, CPU, GPU and battery temperatures, the
+battery level and how much power it's drawing or taking in, memory use and the fan. It reads
+every 2 seconds and only while switched on and the menu is open, so it costs nothing otherwise.
+For numbers on top of the game itself, use the performance overlay above.
+
 ## Library
 
 ### Adding non-Steam games

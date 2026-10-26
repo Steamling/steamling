@@ -204,3 +204,11 @@ export type OverlayStatus = {
   level: string;
 };
 
+export interface SystemStats {
+  cpu: { load: number | null; clusters: { cpus: string; mhz: number; maxMhz: number }[] };
+  gpu: { mhz: number; maxMhz: number } | null;
+  temps: { cpu?: number; gpu?: number };
+  battery: { percent: number | null; status: string; watts: number | null; tempC: number | null } | null;
+  memory: { usedMb: number; totalMb: number } | null;
+  fan: { rpm: number | null; percent: number | null } | null;
+}
