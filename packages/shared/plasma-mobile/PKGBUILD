@@ -5,7 +5,7 @@
 # libplasma this build can't load instead of installing it.
 pkgname=plasma-mobile
 pkgver=6.8.1
-pkgrel=1.1
+pkgrel=1.2
 _commit=31477b8d72aba7df6ef13cb45548cea3d27ba696  # v6.8.1
 pkgdesc='Plasma shell and components targeted for phones'
 arch=('aarch64')
@@ -26,10 +26,24 @@ source=("plasma-mobile::git+https://github.com/KDE/plasma-mobile.git#commit=${_c
 sha256sums=('SKIP')
 
 build() {
+  # Inside the full package build (arm64 under qemu), CMake's search for Qt's module configs
+  # comes back empty: it lists /usr/lib/cmake and never sees the Qt6Gui/ folder that is right
+  # there, though the same configure run by hand finds it. Point the Qt modules at their folders
+  # by name, so nothing depends on listing that directory (a shell glob would list it too).
+  local qt_dirs=() m
+  for m in Core CoreTools Gui GuiTools OpenGL OpenGLWidgets Widgets WidgetsTools DBus DBusTools \
+           Network Concurrent Xml Svg Sql PrintSupport Test Core5Compat ShaderTools Sensors \
+           Positioning Multimedia Qml QmlTools QmlModels QmlMeta QmlIntegration QmlWorkerScript \
+           Quick QuickTools QuickControls2 QuickTemplates2 QuickLayouts QuickShapes QuickDialogs2 \
+           WaylandClient WaylandCompositor WaylandScannerTools WaylandGlobalPrivate LinguistTools \
+           ToolsTools; do
+    [ -d "/usr/lib/cmake/Qt6${m}" ] && qt_dirs+=("-DQt6${m}_DIR=/usr/lib/cmake/Qt6${m}")
+  done
   cmake -B build -S plasma-mobile \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LIBEXECDIR=lib \
-    -DBUILD_TESTING=OFF
+    -DBUILD_TESTING=OFF \
+    "${qt_dirs[@]}"
   cmake --build build
 }
 
