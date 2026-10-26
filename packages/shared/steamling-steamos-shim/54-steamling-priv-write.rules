@@ -1,0 +1,9 @@
+// Promptless pkexec of steamos-priv-write for wheel: Steam's brightness slider goes through it on
+// boards with two screens. The helper serves backlight writes only.
+polkit.addRule(function(action, subject) {
+    if (!subject.isInGroup("wheel")) { return; }
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/bin/steamos-polkit-helpers/steamos-priv-write") {
+        return polkit.Result.YES;
+    }
+});

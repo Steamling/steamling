@@ -1,0 +1,35 @@
+#!/bin/bash
+# steamos-priv-write <path> <value> - the SteamOS helper Steam falls back to when it can't write a
+# sysfs file itself. Only the brightness slider is served: on a board with two screens Steam
+# adjusts the first backlight it finds, which can be the second screen, so steamling-bsp-common's
+# udev rule keeps every backlight read-only for the session there, Steam lands here, and the
+# write goes to the main panel's backlight (device.conf STEAMLING_PANEL_BACKLIGHT), rescaled to
+# its range. Anything else is refused, as it would be with no helper at all.
+set -euo pipefail
+
+path="${1:-}" value="${2:-}"
+[ -n "${path}" ] || { echo "usage: steamos-priv-write <path> <value>" >&2; exit 2; }
+[ "$(id -u)" -eq 0 ] || exec pkexec --disable-internal-agent "$0" "$@"
+
+if [[ "${path}" =~ ^/sys/class/backlight/([A-Za-z0-9_:-][A-Za-z0-9_.:-]*)/brightness$ ]]; then
+  src="/sys/class/backlight/${BASH_REMATCH[1]}"
+  [[ "${value}" =~ ^[0-9]+$ ]] || { echo "steamos-priv-write: not a brightness: ${value}" >&2; exit 1; }
+  [ -e "${src}/brightness" ] || exit 1
+  for _dc in /usr/lib/steamling/device.conf /etc/steamling/device.conf; do
+    [ -r "${_dc}" ] && . "${_dc}"
+  done
+  dst="${src}"
+  [ -z "${STEAMLING_PANEL_BACKLIGHT:-}" ] || dst="/sys/class/backlight/${STEAMLING_PANEL_BACKLIGHT}"
+  [ -e "${dst}/brightness" ] || { echo "steamos-priv-write: no backlight ${dst}" >&2; exit 1; }
+  if [ "${dst}" != "${src}" ]; then
+    src_max="$(cat "${src}/max_brightness")"; dst_max="$(cat "${dst}/max_brightness")"
+    if [ "${src_max}" -gt 0 ] && [ "${src_max}" -ne "${dst_max}" ]; then
+      value=$(( value * dst_max / src_max ))
+    fi
+  fi
+  echo "${value}" > "${dst}/brightness"
+  exit 0
+fi
+
+echo "steamos-priv-write: refusing ${path}" >&2
+exit 1
