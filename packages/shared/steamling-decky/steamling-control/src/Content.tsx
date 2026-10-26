@@ -7,6 +7,7 @@ import { useDebouncedSave } from "./hooks/useDebouncedSave";
 import { QamVisible } from "./hooks/useQamVisible";
 import { tabIcons } from "./icons";
 import { currentGame } from "./lib/games";
+import { onGameLifetime } from "./lib/touch";
 import { styles } from "./styles";
 import { Controller } from "./tabs/Controller";
 import { Games } from "./tabs/Games";
@@ -52,8 +53,9 @@ export function Content() {
     if (current && JSON.stringify(current.tweaks) !== savedTweaksSnapshot.current) return;
     load();
   }, [visible, load]);
-  // Track the running game so opening the QAM mid-game edits that game's profile; only while
-  // the menu is open, since nothing reads it otherwise.
+  // Track the running game so opening the QAM mid-game edits that game's profile: read on every
+  // open, then on Steam's own start/stop notifications rather than by polling. The router may
+  // update a moment after the notification, hence the short delay.
   useEffect(() => {
     if (!config || !visible) return;
     let cancelled = false;
@@ -69,11 +71,16 @@ export function Content() {
       } catch (error) {
       }
     };
-    const timer = window.setInterval(refreshRuntime, 2000);
+    let timer: number | undefined;
+    const unsubscribe = onGameLifetime(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(refreshRuntime, 500);
+    });
     refreshRuntime();
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
+      window.clearTimeout(timer);
+      unsubscribe();
     };
   }, [!!config, visible]);
   useDebouncedSave({ config, field: "tweaks", snapshot: savedTweaksSnapshot, save: saveTweaks, setConfig, onError: load });

@@ -228,6 +228,40 @@ function currentGame() {
     return { appid: id, name: name || `App ${id}` };
 }
 
+// Anything else in the panel that cares when a game starts or stops listens here, instead of
+// polling for it.
+const listeners = new Set();
+function onGameLifetime(listener) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+}
+// Reports game start/stop to the backend, which owns the touchscreen tweak (touch.py). Covers
+// every Steam launch, Proton or not, since the appid comes from Steam itself. Shortcut appids
+// are unsigned above 2^31, hence the >>> 0 (see nonSteamShortcuts).
+function registerTouchLifetime() {
+    const report = (appid, running) => gameLifetime(appid, running).catch(() => { });
+    // A plugin reload mid-game misses the start notification.
+    const running = currentGame();
+    if (running)
+        report(running.appid, true);
+    try {
+        const handle = window.SteamClient?.GameSessions?.RegisterForAppLifetimeNotifications?.((update) => {
+            report(String(Number(update?.unAppID) >>> 0), !!update?.bRunning);
+            for (const listener of listeners) {
+                try {
+                    listener();
+                }
+                catch (error) {
+                }
+            }
+        });
+        return () => handle?.unregister?.();
+    }
+    catch (error) {
+        return () => { };
+    }
+}
+
 // The panel fills whatever width the quick access menu has. It used to be pinned to the Deck's
 // 316px with position: fixed, which broke on screens where Steam lays the menu out at another
 // scale (the RP6: oversized text, controls cut off). Armada fixed the same container this way.
@@ -2017,8 +2051,9 @@ function Content() {
             return;
         load();
     }, [visible, load]);
-    // Track the running game so opening the QAM mid-game edits that game's profile; only while
-    // the menu is open, since nothing reads it otherwise.
+    // Track the running game so opening the QAM mid-game edits that game's profile: read on every
+    // open, then on Steam's own start/stop notifications rather than by polling. The router may
+    // update a moment after the notification, hence the short delay.
     SP_REACT.useEffect(() => {
         if (!config || !visible)
             return;
@@ -2039,11 +2074,16 @@ function Content() {
             catch (error) {
             }
         };
-        const timer = window.setInterval(refreshRuntime, 2000);
+        let timer;
+        const unsubscribe = onGameLifetime(() => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(refreshRuntime, 500);
+        });
         refreshRuntime();
         return () => {
             cancelled = true;
-            window.clearInterval(timer);
+            window.clearTimeout(timer);
+            unsubscribe();
         };
     }, [!!config, visible]);
     useDebouncedSave({ config, field: "tweaks", snapshot: savedTweaksSnapshot, save: saveTweaks, setConfig, onError: load });
@@ -2141,26 +2181,6 @@ function patchLibraryContextMenu() {
             return ret;
         });
         return () => patch.unpatch();
-    }
-    catch (error) {
-        return () => { };
-    }
-}
-
-// Reports game start/stop to the backend, which owns the touchscreen tweak (touch.py). Covers
-// every Steam launch, Proton or not, since the appid comes from Steam itself. Shortcut appids
-// are unsigned above 2^31, hence the >>> 0 (see nonSteamShortcuts).
-function registerTouchLifetime() {
-    const report = (appid, running) => gameLifetime(appid, running).catch(() => { });
-    // A plugin reload mid-game misses the start notification.
-    const running = currentGame();
-    if (running)
-        report(running.appid, true);
-    try {
-        const handle = window.SteamClient?.GameSessions?.RegisterForAppLifetimeNotifications?.((update) => {
-            report(String(Number(update?.unAppID) >>> 0), !!update?.bRunning);
-        });
-        return () => handle?.unregister?.();
     }
     catch (error) {
         return () => { };
