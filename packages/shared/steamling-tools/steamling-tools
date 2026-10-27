@@ -50,7 +50,7 @@ do_abl() {
     return 0
   fi
   kdialog --title "$TITLE" --warningcontinuecancel \
-    "Replace the device bootloader (ABL) with the ROCKNIX ${ver} build Steamling ships?\n\nThis rewrites both bootloader slots on internal storage. If it is interrupted the device will not boot and needs a PC to recover.\n\nKeep it plugged in. The current bootloader is backed up to the boot partition first, and each slot is verified after writing.\n\nYou will be asked to type FLASH in a terminal to confirm." \
+    "Replace the device bootloader (ABL) with the OpenABL ${ver} build Steamling ships?\n\nThis rewrites both bootloader slots on internal storage. If it is interrupted the device will not boot and needs a PC to recover.\n\nKeep it plugged in. The current bootloader is backed up to the boot partition first, and each slot is verified after writing.\n\nYou will be asked to type FLASH in a terminal to confirm." \
     || return 0
   konsole_run "/usr/bin/steamling-update-abl"
 }
