@@ -29,3 +29,10 @@ linux.git:retroid           https://github.com/RetroidPocket/linux.git          
 retroid-audioreach-topology.git https://github.com/RetroidPocket/audioreach-topology.git    full
 retroid-alsa-ucm-conf.git   https://github.com/RetroidPocket/alsa-ucm-conf.git              full
 umtp-responder.git          https://github.com/viveris/uMTP-Responder.git                   full
+# Valve's Steam Deck sources as evlaV republishes them: SteamOS (holo) packaging, the Steam Frame
+# (deckard) packaging, and two kernel trees that ride in linux.git like Retroid's: Valve's
+# Steam Deck kernel (linux-integration) and the Frame's SM8650 kernel (deckard-linux-no-oopsies).
+holo.git                    https://github.com/evlaV/holo.git                               blobless
+deckard.git                 https://github.com/evlaV/deckard.git                            blobless
+linux.git:valve             https://github.com/evlaV/linux-integration.git                  blobless
+linux.git:deckard           https://github.com/evlaV/deckard-linux-no-oopsies.git           blobless
