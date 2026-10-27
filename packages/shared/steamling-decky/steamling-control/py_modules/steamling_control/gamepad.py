@@ -1,4 +1,5 @@
 import threading
+from pathlib import Path
 
 from .system import run_cmd
 from .tweaks import load_tweaks
@@ -7,6 +8,8 @@ from .tweaks import load_tweaks
 # Steam Deck pad (steamling-steam); a game can ask for another one, which matters when Steam
 # Input is turned off for it and the game reads the pad directly.
 TARGET_TOOL = "/usr/bin/steamling-gamepad-target"
+# Where steamling-gamepad-target records the last pad anyone asked for.
+STATE = Path("/run/steamling/gamepad-target")
 SESSION_DEFAULT = "deck-uhid"
 GAME_TYPES = ("xb360", "xbox-series", "ds5")
 
@@ -34,11 +37,23 @@ def _switch(kind):
     return proc is not None and proc.returncode == 0
 
 
-def sync_gamepad(running_appid, switch=_switch, tweaks=None):
+def _recorded(state=STATE):
+    try:
+        return state.read_text().strip()
+    except OSError:
+        return ""
+
+
+def sync_gamepad(running_appid, switch=_switch, tweaks=None, state=STATE):
     want = gamepad_for(tweaks if tweaks is not None else load_tweaks(), running_appid)
     with _lock:
         current = _applied["kind"]
         if not want and current is None:
+            return None
+        # Someone else has picked a pad since (desktop mode asks for xb360 on the way in): the
+        # game's pick is gone, and putting the Deck pad back would take the desktop's away.
+        if not want and _recorded(state) != current:
+            _applied["kind"] = None
             return None
         kind = want or SESSION_DEFAULT
         if kind == current:
