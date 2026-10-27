@@ -104,10 +104,11 @@ function t(text, vars) {
     return out;
 }
 
-// Steam draws the quick access menu 348px wide: a 48px tab strip plus a 300px page. Its
-// placeholder is 854px wide and shifted right by 506px, so making the placeholder wider (it is
-// anchored to the right edge) shows more of it without touching the slide-in transform. The
-// friends list's expanded view resizes itself and is left alone.
+// Steam draws the quick access menu 348px wide: a 48px tab strip plus a 300px page. The menu is
+// its own window, sized and placed from a placeholder in Steam's main window that is 854px wide
+// and shifted right by 506px, so 348px of it is on screen. Making the placeholder wider (it is
+// anchored to the right edge) brings more of the menu on screen without touching the slide-in
+// transform. The friends list's expanded view resizes itself and is left alone.
 const WIDTHS = { standard: 0, wide: 100, wider: 200 };
 const KEY = "steamling-control.menu-width";
 const DEFAULT = "wide";
@@ -135,23 +136,65 @@ function onMenuWidth(listener) {
     listeners$1.add(listener);
     return () => listeners$1.delete(listener);
 }
-function menuWidthCss(width) {
+// Steam's hashed class names, looked up by the names its own code uses. The placeholder lives in
+// Steam's main window; the panel inside it is a separate window (the menu's own document).
+const viewClasses = (DFL.findClassModule((m) => m.ViewPlaceholder && m.Expanded) || DFL.quickAccessMenuClasses);
+const panelClasses = (DFL.findClassModule((m) => m.TabGroupPanel && m.HeaderContainer && m.Footer) || DFL.quickAccessMenuClasses);
+function cls(map, key) {
+    return map?.[key] ? `.${map[key].split(" ")[0]}` : "";
+}
+/** For Steam's main window: the placeholder sets the size and position of the menu's window. */
+function placeholderCss(width) {
     const extra = WIDTHS[width];
-    const c = DFL.quickAccessMenuClasses;
-    const cls = (key) => (c?.[key] ? `.${c[key].split(" ")[0]}` : "");
-    const placeholder = cls("ViewPlaceholder");
+    const placeholder = cls(viewClasses, "ViewPlaceholder");
     if (!extra || !placeholder)
         return "";
-    const expanded = cls("Expanded");
+    const expanded = cls(viewClasses, "Expanded");
     const open = expanded ? `${placeholder}:not(${expanded})` : placeholder;
-    const rules = [`${open} { width: ${854 + extra}px !important; }`];
-    if (cls("TabGroupPanel"))
-        rules.push(`${open} ${cls("TabGroupPanel")}:not(.tab_Friends) { max-width: ${300 + extra}px !important; }`);
-    if (cls("HeaderContainer"))
-        rules.push(`${open} ${cls("HeaderContainer")} { max-width: ${348 + extra}px !important; }`);
-    if (cls("Footer"))
-        rules.push(`${open} ${cls("Footer")} { width: ${348 + extra}px !important; }`);
+    return `${open} { width: ${854 + extra}px !important; }`;
+}
+/** For the menu's own window: let the page, header and footer fill the extra room. */
+function panelCss(width) {
+    const extra = WIDTHS[width];
+    if (!extra)
+        return "";
+    const expanded = cls(viewClasses, "Expanded");
+    const notExpanded = expanded ? `:not(${expanded} *)` : "";
+    const rules = [];
+    const panel = cls(panelClasses, "TabGroupPanel");
+    const header = cls(panelClasses, "HeaderContainer");
+    const footer = cls(panelClasses, "Footer");
+    if (panel)
+        rules.push(`${panel}:not(.tab_Friends) { max-width: ${300 + extra}px !important; }`);
+    if (header)
+        rules.push(`${header}${notExpanded} { max-width: ${348 + extra}px !important; }`);
+    if (footer)
+        rules.push(`${footer}${notExpanded} { width: ${348 + extra}px !important; }`);
     return rules.join("\n");
+}
+const STYLE_ID = "steamling-control-menu-width";
+/** Puts the placeholder rule into Steam's main window, or takes it out again. */
+function applyToSteamWindow(width) {
+    let doc;
+    try {
+        doc = DFL.findSP()?.document;
+    }
+    catch (error) {
+    }
+    if (!doc)
+        return;
+    const css = width ? placeholderCss(width) : "";
+    let style = doc.getElementById(STYLE_ID);
+    if (!css) {
+        style?.remove();
+        return;
+    }
+    if (!style) {
+        style = doc.createElement("style");
+        style.id = STYLE_ID;
+        doc.head.appendChild(style);
+    }
+    style.textContent = css;
 }
 
 function SelectEdit({ label, value, options, onChange }) {
@@ -159,11 +202,13 @@ function SelectEdit({ label, value, options, onChange }) {
     return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
 }
 
-/** The stylesheet itself: mounted once by Content, which stays rendered for the whole session. */
+/** Mounted once by Content, which stays rendered for the whole session. The panel rules render
+ * here, in the menu's window; the placeholder rule goes into Steam's main window. */
 function MenuWidthStyle() {
     const [width, setWidth] = SP_REACT.useState(getMenuWidth);
     SP_REACT.useEffect(() => onMenuWidth(setWidth), []);
-    const css = menuWidthCss(width);
+    SP_REACT.useEffect(() => applyToSteamWindow(width), [width]);
+    const css = panelCss(width);
     return css ? SP_JSX.jsx("style", { children: css }) : null;
 }
 function MenuWidthSetting() {
@@ -2291,6 +2336,8 @@ var index = definePlugin(() => {
     const unpatchContextMenu = patchLibraryContextMenu();
     const unregisterTouch = registerTouchLifetime();
     const unregisterDownloads = registerDownloadWrapper((appid) => isGame(appid));
+    // Wider from the first time the menu opens, not only once this plugin's page has been shown.
+    applyToSteamWindow(getMenuWidth());
     getConfig()
         .then((config) => wrapAllGames(installedSteamGames(config)))
         .then(() => wrapShortcuts(nonSteamShortcuts().map((shortcut) => shortcut.appid)))
@@ -2304,6 +2351,7 @@ var index = definePlugin(() => {
             unpatchContextMenu();
             unregisterTouch();
             unregisterDownloads();
+            applyToSteamWindow(null);
         },
     };
 });

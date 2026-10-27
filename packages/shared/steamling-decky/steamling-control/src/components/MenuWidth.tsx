@@ -1,15 +1,17 @@
 import { PanelSection } from "@decky/ui";
 import { useEffect, useState } from "react";
 import { t } from "../i18n";
-import { getMenuWidth, menuWidthCss, onMenuWidth, setMenuWidth } from "../lib/menuWidth";
+import { applyToSteamWindow, getMenuWidth, onMenuWidth, panelCss, setMenuWidth } from "../lib/menuWidth";
 import type { MenuWidth as Width } from "../lib/menuWidth";
 import { SelectEdit } from "./widgets";
 
-/** The stylesheet itself: mounted once by Content, which stays rendered for the whole session. */
+/** Mounted once by Content, which stays rendered for the whole session. The panel rules render
+ * here, in the menu's window; the placeholder rule goes into Steam's main window. */
 export function MenuWidthStyle() {
   const [width, setWidth] = useState<Width>(getMenuWidth);
   useEffect(() => onMenuWidth(setWidth), []);
-  const css = menuWidthCss(width);
+  useEffect(() => applyToSteamWindow(width), [width]);
+  const css = panelCss(width);
   return css ? <style>{css}</style> : null;
 }
 
