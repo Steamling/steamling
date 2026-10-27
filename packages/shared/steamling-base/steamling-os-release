@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Bump at each image cut.
-STEAMLING_VERSION=0.4.0
+STEAMLING_VERSION=0.1.0
 
 osr=/usr/lib/os-release
 lock=/usr/share/steamling/steamling-base.lock
