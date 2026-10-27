@@ -2,7 +2,7 @@
 # which live here rather than in the image overlay so fixes reach fielded SDs on -Syu (#34).
 pkgname=steamling-tools
 pkgver=0.1.0
-pkgrel=20.12
+pkgrel=20.13
 pkgdesc="Steamling maintenance app: snapshot rollback, base mode switch, internal install, SSH, file sharing and USB file transfer toggles, emulation layer, desktop picker, first-boot diagnostics and root expansion"
 arch=('any')
 url="https://github.com/dvandenburgh/steamling"
@@ -17,12 +17,11 @@ source=('steamling-tools' 'steamling-tools.desktop' 'steamling-installer-gui'
         'steamling-share' '55-steamling-share.rules' 'smb.conf' 'steamling-smb.service'
         'steamling-layer' '56-steamling-layer.rules'
         'steamling-diag' 'steamling-diag.service' 'steamling-expand-root' 'steamling-expand-root.service'
-        'steamling-mtp' 'steamling-mtp.service' 'kwinrulesrc')
+        'steamling-mtp' 'steamling-mtp.service')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 backup=('etc/ssh/sshd_config.d/10-steamling-no-root-login.conf'
-        'etc/samba/smb.conf'
-        'etc/xdg/kwinrulesrc')
+        'etc/samba/smb.conf')
 
 package() {
   install -Dm755 "${srcdir}/steamling-tools" "${pkgdir}/usr/bin/steamling-tools"
@@ -41,8 +40,6 @@ package() {
   install -Dm755 "${srcdir}/steamling-ssh" "${pkgdir}/usr/bin/steamling-ssh"
   install -Dm644 "${srcdir}/steamling-tools.desktop" \
     "${pkgdir}/usr/share/applications/steamling-tools.desktop"
-  # System-wide KWin window rule: Steamling Tools and the installer open maximized.
-  install -Dm644 "${srcdir}/kwinrulesrc" "${pkgdir}/etc/xdg/kwinrulesrc"
   install -Dm644 "${srcdir}/53-steamling-ssh.rules" \
     "${pkgdir}/usr/share/polkit-1/rules.d/53-steamling-ssh.rules"
   install -Dm644 "${srcdir}/10-steamling-no-root-login.conf" \

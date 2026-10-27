@@ -12,6 +12,26 @@ command -v kdialog >/dev/null 2>&1 || { echo "kdialog not installed" >&2; exit 1
 
 gui_err() { kdialog --title "$TITLE" --error "$1" || true; }
 
+# KWin opens kdialog windows at their minimum size, too small to read on a handheld screen, so a
+# window rule opens these (and the installer's) maximized, still resizable. It has to go in the
+# user's own rules file: kwin owns /etc/xdg/kwinrulesrc. Added once, so deleting it in System
+# Settings sticks.
+add_window_rule() {
+  local stamp="${HOME}/.local/state/steamling/tools-window-rule" group=steamling-tools-maximized
+  [ -e "${stamp}" ] && return 0
+  command -v kwriteconfig6 >/dev/null 2>&1 || return 0
+  set -- Description "Steamling Tools opens maximized" \
+    wmclass kdialog wmclassmatch 2 wmclasscomplete false title Steamling titlematch 2 \
+    maximizehoriz true maximizehorizrule 3 maximizevert true maximizevertrule 3
+  while [ $# -ge 2 ]; do
+    kwriteconfig6 --file kwinrulesrc --group "${group}" --key "$1" "$2" || return 0
+    shift 2
+  done
+  # Picked up now rather than at the next login.
+  busctl --user call org.kde.KWin /KWin org.kde.KWin reconfigure >/dev/null 2>&1 || true
+  mkdir -p "${stamp%/*}" && : > "${stamp}" || true
+}
+
 base_mode() {
   if grep -q '^\[pocknix-base\]' /etc/pacman.conf 2>/dev/null; then echo locked
   elif grep -q '^\[core\]' /etc/pacman.conf 2>/dev/null; then echo rolling
@@ -270,6 +290,8 @@ do_status() {
     | fold -s -w 96 | sed 's/$/<br>/')"
   kdialog --title "$TITLE" --msgbox "<html>${status}<pre>${list}</pre></html>" || true
 }
+
+add_window_rule
 
 while :; do
   mode="$(base_mode)"
