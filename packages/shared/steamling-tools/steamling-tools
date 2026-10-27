@@ -275,7 +275,8 @@ while :; do
   mode="$(base_mode)"
   # a missed tap returns the FIRST row: keep the read-only item there
   items=(status "Show system status")
-  items+=(rollback "Roll back the last update...")
+  # Snapshots need a btrfs root; an older ext4 install has nothing to roll back to.
+  [ "$(findmnt -no FSTYPE / 2>/dev/null)" = btrfs ] && items+=(rollback "Roll back the last update...")
   internal_candidate && items+=(rollback-internal "Roll back the INTERNAL install...")
   case "${mode}" in
     locked)  items+=(mode "Switch to rolling mode (not recommended)...") ;;
@@ -283,8 +284,11 @@ while :; do
   esac
   items+=(installer "Install or remove internal Steamling...")
   abl_label="$(abl_item_label "$(abl_status)")" && items+=(abl "${abl_label}")
-  if [ "$(ssh_state)" = on ]; then items+=(ssh "Remote access (SSH) is ON - turn it off")
-  else items+=(ssh "Remote access (SSH) is off - turn it on..."); fi
+  # No SSH server installed, nothing to switch on.
+  if [ -x /usr/bin/sshd ]; then
+    if [ "$(ssh_state)" = on ]; then items+=(ssh "Remote access (SSH) is ON - turn it off")
+    else items+=(ssh "Remote access (SSH) is off - turn it on..."); fi
+  fi
   if [ "$(share_state)" = on ]; then items+=(share "File sharing (SMB) is ON - turn it off")
   else items+=(share "File sharing (SMB) is off - turn it on..."); fi
   if layer_installed; then items+=(emulation "Emulation layer is installed - remove it...")
