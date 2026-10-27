@@ -32,7 +32,7 @@ usage() { echo "usage: steamling-gamepad-target <kind>|--apply" >&2; exit 2; }
 
 PROFILE=/etc/steamling/gamepad-profile.json
 
-# Steamling Control's back-paddle mapping is an InputPlumber profile, and InputPlumber starts
+# Governor's back-paddle mapping is an InputPlumber profile, and InputPlumber starts
 # every composite on its stock one, so it is loaded again here.
 load_profile() {
   [ -r "${PROFILE}" ] || return 0

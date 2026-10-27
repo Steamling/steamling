@@ -53,7 +53,7 @@ package() {
   install -Dm644 "${srcdir}/steamling-smb.service" \
     "${pkgdir}/etc/avahi/services/steamling-smb.service"
 
-  # Started on request only (Steamling Control), never enabled: see the unit.
+  # Started on request only (Governor), never enabled: see the unit.
   install -Dm755 "${srcdir}/steamling-mtp" "${pkgdir}/usr/bin/steamling-mtp"
   install -Dm644 "${srcdir}/steamling-mtp.service" \
     "${pkgdir}/usr/lib/systemd/system/steamling-mtp.service"

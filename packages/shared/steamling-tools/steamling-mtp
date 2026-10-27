@@ -2,7 +2,7 @@
 # steamling-mtp — USB file transfer. "on" makes the USB-C port a media device a PC opens like a
 # phone (home folder, plus the microSD card when booted from internal storage) until shutdown or
 # "off"; it never persists, since while it's on the port can't host a controller or a hub.
-# status is unprivileged; on/off need root (Steamling Control runs as root).
+# status is unprivileged; on/off need root (Governor runs as root).
 # setup/bind/unbind/teardown are steamling-mtp.service's own steps.
 set -euo pipefail
 

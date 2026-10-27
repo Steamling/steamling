@@ -1,4 +1,4 @@
-# steamling-gamepad-calibration: replays Steamling Control's saved calibration into the gamepad
+# steamling-gamepad-calibration: replays Governor's saved calibration into the gamepad
 # driver's module parameters at boot, before InputPlumber claims the pad.
 pkgname=steamling-gamepad-calibration
 pkgver=0.1.0

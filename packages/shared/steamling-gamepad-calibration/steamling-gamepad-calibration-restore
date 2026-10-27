@@ -3,7 +3,7 @@
 set -u
 
 CONF=/etc/steamling/gamepad-calibration.conf
-# Probe-time values for Steamling Control's Reset; per board (devicetree overrides at probe).
+# Probe-time values for Governor's Reset; per board (devicetree overrides at probe).
 DEFAULTS=/run/steamling/gamepad-calibration.defaults
 
 # A gamepad driver built as a module loads on device probe, so the parameters can appear
@@ -51,7 +51,7 @@ applied=0
   fi
 done < "${CONF}"
 
-# Steamling Control's stick response: percentages of the calibrated values (or the boot-time
+# Governor's stick response: percentages of the calibrated values (or the boot-time
 # defaults), the same maths as its tuning.py. Scaled from those, never from the live value, so a
 # second run can't compound it.
 TUNING=/etc/steamling/gamepad-tuning.conf

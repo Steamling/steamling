@@ -497,17 +497,17 @@ _raw="$(grep -l -- '--appimage-extract' "${STEAMLING_ROOT}"/packages/*/*/PKGBUIL
 if [ -z "${_drift}${_raw}" ]; then note "AppImage _appimage_icon copies" "identical"
 else note "AppImage _appimage_icon copies" "differ:${_drift}${_raw:+ (runs --appimage-extract without it: ${_raw//${STEAMLING_ROOT}\//})}"; fail=1; fi
 
-# Steamling Control's backend has unit tests (stdlib unittest, nothing to install); they run
+# Governor's backend has unit tests (stdlib unittest, nothing to install); they run
 # in a second or two, so every check runs them.
 _plug="${STEAMLING_ROOT}/packages/shared/steamling-decky/steamling-control"
 if command -v python3 >/dev/null; then
   if _out="$(cd "${_plug}" && PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -t . 2>&1)"; then
-    note "Steamling Control unit tests" "ok ($(grep -o 'Ran [0-9]* tests' <<< "${_out}" | grep -o '[0-9]*'))"
+    note "Governor unit tests" "ok ($(grep -o 'Ran [0-9]* tests' <<< "${_out}" | grep -o '[0-9]*'))"
   else
-    note "Steamling Control unit tests" "FAILED"; printf '%s\n' "${_out}" | tail -20 | sed 's/^/    /'; fail=1
+    note "Governor unit tests" "FAILED"; printf '%s\n' "${_out}" | tail -20 | sed 's/^/    /'; fail=1
   fi
 else
-  note "Steamling Control unit tests" "skipped (no python3)"
+  note "Governor unit tests" "skipped (no python3)"
 fi
 
 # A device package's root/ is copied as is, so the git mode is the installed mode: a script

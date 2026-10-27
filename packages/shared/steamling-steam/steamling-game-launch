@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# steamling-game-launch — launch-option prefix Steamling Control writes into every Steam game. Steam
+# steamling-game-launch — launch-option prefix Governor writes into every Steam game. Steam
 # runs it OUTERMOST, before steam-launch-wrapper and every compat tool, so env set here reaches
 # pressure-vessel and Valve's FEX alike. Applies /etc/steamling/game-tweaks.json, then execs the
 # command; no tweak may stop the game launching.
@@ -41,7 +41,7 @@ def log(msg):
 
 def appid(args):
     # reaper's AppId= carries the same id for games and shortcuts; a shortcut's env has
-    # SteamAppId=0 and a 64-bit SteamGameId, neither of which is the key Steamling Control saves.
+    # SteamAppId=0 and a 64-bit SteamGameId, neither of which is the key Governor saves.
     for a in args:
         if a.startswith("AppId=") and a[6:].isdigit():
             return a[6:]

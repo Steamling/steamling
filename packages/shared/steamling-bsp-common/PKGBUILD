@@ -183,7 +183,7 @@ package() {
   install -Dm644 "${srcdir}/20-steamling-wifi-backend.conf" \
     "${pkgdir}/usr/lib/NetworkManager/conf.d/20-steamling-wifi-backend.conf"
 
-  # Panels with frame_len_<rate> attributes (RP6, kernel 0508): Steamling Control measures and
+  # Panels with frame_len_<rate> attributes (RP6, kernel 0508): Governor measures and
   # saves the trim, the unit writes it back at boot.
   install -Dm755 "${srcdir}/steamling-panel-calibration" "${pkgdir}/usr/lib/steamling/steamling-panel-calibration"
   install -Dm644 "${srcdir}/steamling-panel-calibration.service" \

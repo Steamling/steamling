@@ -44,7 +44,7 @@ package() {
   install -Dm644 "${srcdir}/steam-512.png"         "${pkgdir}/usr/share/icons/hicolor/512x512/apps/steam.png"
   install -Dm755 "${srcdir}/steamling-proton-prep"           "${pkgdir}/usr/bin/steamling-proton-prep"
   install -Dm644 "${srcdir}/steamling-proton-prep.service"   "${pkgdir}/usr/lib/systemd/user/steamling-proton-prep.service"
-  # Named bare in every game's launch options (Steamling Control), so it must stay on PATH under
+  # Named bare in every game's launch options (Governor), so it must stay on PATH under
   # this name: never move or rename it.
   install -Dm755 "${srcdir}/steamling-game-launch"           "${pkgdir}/usr/bin/steamling-game-launch"
   install -Dm644 "${srcdir}/steamling-steam-env"             "${pkgdir}/usr/lib/steamling/steamling-steam-env"

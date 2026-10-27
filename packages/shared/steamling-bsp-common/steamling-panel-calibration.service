@@ -1,6 +1,6 @@
 [Unit]
 Description=Restore the saved steamling panel refresh calibration
-# Only a device whose panel was calibrated (Steamling Control > Controller > Display) has the conf.
+# Only a device whose panel was calibrated (Governor > Controller > Display) has the conf.
 ConditionPathExists=/etc/steamling/panel-calibration.conf
 After=systemd-modules-load.service
 # Before game mode's first modeset, so the saved values are in place when gamescope lights the panel.

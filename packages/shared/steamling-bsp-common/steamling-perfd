@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # steamling-perfd - power profiles behind Steam's QAM, served to steamos-manager over remotes.d.
 # Event-driven only (no timers), so it adds no wakeups. Profiles are clocks only: fan curve
-# and scx_lavd mode are Steamling Control settings, so never write their mode files from here.
+# and scx_lavd mode are settings of Governor, the QAM plugin, so never write their mode files from here.
 import json
 import os
 import sys

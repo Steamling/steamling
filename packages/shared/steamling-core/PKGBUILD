@@ -18,7 +18,7 @@ depends=('mesa'                     # epoch-2 trimmed/tuned freedreno build ([st
          'steamling-lock-migrate'
          'steamling-tools'
          'steamling-branding'         # plymouthd.conf names its theme on every device
-         'steamling-gamepad-calibration'  # boot replay of Steamling Control's calibration; every family's pad driver takes one
+         'steamling-gamepad-calibration'  # boot replay of Governor's calibration; every family's pad driver takes one
          'steamling-session')
 
 package() {
