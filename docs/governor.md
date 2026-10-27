@@ -122,7 +122,8 @@ through. It's greyed out while the game is running.
 Shows live numbers on top of the game: **FPS only**, a **Compact bar** (FPS, CPU, GPU, RAM and
 battery in one line along the top), **Detailed** (adds clock speeds, temperatures and power
 draw) or **Everything**. It's the same overlay as Steam's own **Performance Overlay** setting in
-the quick access menu, so changing either one changes it.
+the quick access menu, so changing either one changes it. The level you pick here stays from
+game to game (Steam's own setting resets with every game it starts).
 
 ### System monitor
 
