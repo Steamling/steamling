@@ -1,0 +1,39 @@
+From 54fccc4a9070451d04ec5caef7c23c8370d52b5b Mon Sep 17 00:00:00 2001
+From: Rui Miguel Silva <rui.silva@linaro.org>
+Date: Mon, 8 Jun 2026 19:35:03 +0100
+Subject: [PATCH] phy: qcm-qmp-ufs: increase poll timeout
+
+Increase poll timeout, make sure we give enough time for phy to enable.
+Add also status register value to error messages if something goes bad
+for better state debugging.
+
+Signed-off-by: Rui Miguel Silva <rui.silva@linaro.org>
+---
+ drivers/phy/qualcomm/phy-qcom-qmp-ufs.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c b/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c
+index 6984c235134d..274e0d68b2a8 100644
+--- a/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c
++++ b/drivers/phy/qualcomm/phy-qcom-qmp-ufs.c
+@@ -36,7 +36,7 @@
+ /* QPHY_PCS_READY_STATUS bit */
+ #define PCS_READY				BIT(0)
+ 
+-#define PHY_INIT_COMPLETE_TIMEOUT		10000
++#define PHY_INIT_COMPLETE_TIMEOUT		100000
+ 
+ #define NUM_OVERLAY				2
+ 
+@@ -2005,7 +2005,7 @@ static int qmp_ufs_phy_calibrate(struct phy *phy)
+ 	ret = readl_poll_timeout(status, val, (val & PCS_READY), 200,
+ 				 PHY_INIT_COMPLETE_TIMEOUT);
+ 	if (ret) {
+-		dev_err(qmp->dev, "phy initialization timed-out\n");
++		dev_err(qmp->dev, "phy initialization timed-out: 0x%x\n", val);
+ 		return ret;
+ 	}
+ 
+-- 
+2.34.1
+
