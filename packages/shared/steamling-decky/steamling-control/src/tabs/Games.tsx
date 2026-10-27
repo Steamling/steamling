@@ -8,7 +8,7 @@ import { PerformanceOverlay } from "../components/PerformanceOverlay";
 import { ShaderCache } from "../components/ShaderCache";
 import { Suggestion } from "../components/Suggestion";
 import { SystemMonitor } from "../components/SystemMonitor";
-import { EnvVarsButton, PerfFields, TouchField, TweakFields, XaliaToggle, audioLatencyOptions, fanOptions, lavdOptions } from "../components/GameFields";
+import { EnvVarsButton, PerfFields, hw, TouchField, TweakFields, XaliaToggle, audioLatencyOptions, fanOptions, lavdOptions } from "../components/GameFields";
 import { SelectEdit } from "../components/widgets";
 import { availableGames, editTargetOptions } from "../lib/games";
 import { clone } from "../lib/util";
@@ -101,6 +101,8 @@ export function Games({ config, setConfig, reload }: {
   const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
 
   const showFields = editingDefault || perGameEnabled;
+  const has = hw(config);
+  const showPerf = showFields && (has.fan || has.scheduler);
   return (
     <>
       <PanelSection title={t("PERFORMANCE & GAME TWEAKS")}>
@@ -108,15 +110,15 @@ export function Games({ config, setConfig, reload }: {
         {!editingDefault ? <ToggleField label={t("Use Per-Game Settings")} checked={perGameEnabled} onChange={setPerGameEnabled} /> : null}
       </PanelSection>
       {!editingDefault ? <Suggestion config={config} appid={game!.appid} apply={applySuggestion} /> : null}
-      {showFields ? (
+      {showPerf ? (
         <PanelSection title={t("PERFORMANCE")}>
           {editingDefault ? (
             <>
-              <SelectEdit label={t("CPU Scheduler")} value={config.lavdMode} options={lavdOptions} onChange={(mode) => applyMode(setLavdMode, mode)} />
-              <SelectEdit label={t("Fan Curve")} value={config.fanMode} options={fanOptions} onChange={(mode) => applyMode(setFanMode, mode)} />
+              {has.scheduler ? <SelectEdit label={t("CPU Scheduler")} value={config.lavdMode} options={lavdOptions} onChange={(mode) => applyMode(setLavdMode, mode)} /> : null}
+              {has.fan ? <SelectEdit label={t("Fan Curve")} value={config.fanMode} options={fanOptions} onChange={(mode) => applyMode(setFanMode, mode)} /> : null}
             </>
           ) : (
-            <PerfFields values={values} patch={patchSettings} />
+            <PerfFields config={config} values={values} patch={patchSettings} />
           )}
         </PanelSection>
       ) : null}
@@ -133,7 +135,7 @@ export function Games({ config, setConfig, reload }: {
               />
               <SelectEdit label={t("Audio Buffer")} value={audioValue} options={audioLatencyOptions} onChange={(id) => patchSettings({ audioLatency: id })} />
               <XaliaToggle values={values} patch={patchSettings} />
-              <TouchField values={values} patch={patchSettings} />
+              {has.touchscreen ? <TouchField values={values} patch={patchSettings} /> : null}
               <EnvVarsButton value={String(values.envVars ?? "")} onSave={(next) => patchSettings({ envVars: next })} />
             </>
           ) : (

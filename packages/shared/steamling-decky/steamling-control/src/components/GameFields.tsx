@@ -88,19 +88,26 @@ export function TouchField({ values, patch }: { values: Record<string, any>; pat
   );
 }
 
-/** Per-game fan/scheduler overrides ("" = follow the global mode). */
-export function PerfFields({ values, patch }: {
+/** What the handheld has; an older backend that doesn't say counts as having everything. */
+export function hw(config: Config) {
+  return { fan: true, scheduler: true, touchscreen: true, ...(config.hardware || {}) };
+}
+
+/** Per-game fan/scheduler overrides ("" = follow the global mode); only the ones this handheld has. */
+export function PerfFields({ config, values, patch }: {
+  config: Config;
   values: Record<string, any>;
   patch: (patch: Record<string, any>) => void;
 }) {
+  const has = hw(config);
   const perGameFan = [globalChoice, ...fanOptions];
   const perGameLavd = [globalChoice, ...lavdOptions];
   const fanValue = perGameFan.some((option) => option.data === String(values.fanMode ?? "")) ? String(values.fanMode ?? "") : "";
   const lavdValue = perGameLavd.some((option) => option.data === String(values.lavdMode ?? "")) ? String(values.lavdMode ?? "") : "";
   return (
     <>
-      <SelectEdit label={t("CPU Scheduler")} value={lavdValue} options={perGameLavd} onChange={(id) => patch({ lavdMode: id })} />
-      <SelectEdit label={t("Fan Curve")} value={fanValue} options={perGameFan} onChange={(id) => patch({ fanMode: id })} />
+      {has.scheduler ? <SelectEdit label={t("CPU Scheduler")} value={lavdValue} options={perGameLavd} onChange={(id) => patch({ lavdMode: id })} /> : null}
+      {has.fan ? <SelectEdit label={t("Fan Curve")} value={fanValue} options={perGameFan} onChange={(id) => patch({ fanMode: id })} /> : null}
     </>
   );
 }
@@ -186,9 +193,11 @@ export function TweakFields({ config, appid, values, patch }: {
         onChange={(id) => patch({ fexProfile: id })}
       />
       <SelectEdit label={t("Audio Buffer")} value={audioValue} options={audioLatencyOptions} onChange={(id) => patch({ audioLatency: id })} />
-      <SelectEdit label={t("Mesa Version")} value={mesaValue} options={mesaOptions} onChange={(id) => patch({ mesaVersion: id })} />
+      {(config.mesaVersions || []).length > 0 ? (
+        <SelectEdit label={t("Mesa Version")} value={mesaValue} options={mesaOptions} onChange={(id) => patch({ mesaVersion: id })} />
+      ) : null}
       <XaliaToggle values={values} patch={patch} />
-      <TouchField values={values} patch={patch} />
+      {hw(config).touchscreen ? <TouchField values={values} patch={patch} /> : null}
       <GamepadTypeField values={values} patch={patch} />
       <EnvVarsButton value={String(values.envVars ?? "")} onSave={(next) => patch({ envVars: next })} />
     </>

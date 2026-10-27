@@ -15,7 +15,8 @@ tapping the icons:
 | 🕹️ Controller | Stick and trigger calibration, stick dead zone and full tilt, back paddles, rumble, stick lights, display refresh calibration, menu width |
 | 🔄 Updater | Check for and install system updates, roll back the last update, see your versions, restart game mode |
 
-Settings save automatically as you change them.
+Settings save automatically as you change them. The panel only shows what your handheld has:
+no fan, no fan curve; a gamepad driver that can't be calibrated, no calibration; and so on.
 
 ## Games
 

@@ -141,6 +141,14 @@ function CalibrationModal({ closeModal }: { closeModal?: () => void }) {
 }
 
 export function Calibration() {
+  // Hidden where the gamepad driver has no calibration parameters (an AYANEO or KONKR pad).
+  const [available, setAvailable] = useState<boolean | null>(null);
+  useEffect(() => {
+    calibrationStatus()
+      .then((status) => setAvailable(status.available))
+      .catch(() => setAvailable(false));
+  }, []);
+  if (!available) return null;
   return (
     <PanelSection title={t("CALIBRATION")}>
       <Field label={t("Sticks and triggers")} description={t("Stick centre and range, trigger travel")} />

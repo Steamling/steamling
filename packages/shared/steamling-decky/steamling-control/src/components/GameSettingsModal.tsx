@@ -47,7 +47,7 @@ export function GameSettingsModal({ appid, name, closeModal }: { appid: string; 
       />
       {enabled ? (
         <>
-          <PerfFields values={values} patch={patch} />
+          <PerfFields config={config} values={values} patch={patch} />
           <TweakFields config={config} appid={appid} values={values} patch={patch} />
           <ConfigSection game={{ appid, name }} reload={() => getConfig().then(setConfig).catch(() => {})} />
         </>

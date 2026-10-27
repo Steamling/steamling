@@ -543,6 +543,15 @@ function CalibrationModal({ closeModal }) {
     return (SP_JSX.jsxs(DFL.ModalRoot, { closeModal: phase === "capture" ? undefined : closeModal, bDisableBackgroundDismiss: phase !== "idle", children: [SP_JSX.jsx("div", { style: { fontWeight: 600, fontSize: "18px", marginBottom: "8px" }, children: t("Controller Calibration") }), !status ? (SP_JSX.jsx("div", { children: t("Loading…") })) : !status.available ? (SP_JSX.jsx("div", { children: t("This device's gamepad driver does not support calibration.") })) : phase === "capture" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { style: { fontSize: "12px", opacity: 0.7 }, children: ["Step ", status.step + 1, " of ", status.steps, " \u00B7 the controller is paused for Steam until this finishes"] }), SP_JSX.jsx("div", { style: { fontSize: "20px", margin: "16px 0" }, children: instruction(status) }), SP_JSX.jsx(DFL.ProgressBar, { nProgress: Math.round(status.progress * 100), nTransitionSec: 0 }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsx(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: SP_JSX.jsx(DFL.DialogButton, { onClick: () => run(calibrationCancel), children: t("Cancel (touch)") }) })] })) : phase === "review" ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx("div", { children: t("Calibration applied. Check the sticks and triggers below: a full push should read 100 at the edge and 0 at rest. Save keeps it across reboots.") }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationSave), children: t("Save") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationCancel), children: t("Discard") })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs("div", { children: [status.saved ? "A saved calibration is in use." : "Using the driver defaults.", " Start walks each stick and trigger to its edge and back. The controller is paused for Steam while it runs; Cancel works by touch."] }), SP_JSX.jsx(LiveBars, { live: status.live }), SP_JSX.jsxs(DFL.Focusable, { style: { display: "flex", gap: "8px", marginTop: "12px" }, children: [SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationStart), children: t("Start") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => run(calibrationReset), children: t("Reset to Defaults") }), SP_JSX.jsx(DFL.DialogButton, { disabled: busy, onClick: () => closeModal?.(), children: t("Close") })] })] })), error ? SP_JSX.jsx("div", { style: { marginTop: "8px", color: "#ff8080" }, children: error }) : null] }));
 }
 function Calibration() {
+    // Hidden where the gamepad driver has no calibration parameters (an AYANEO or KONKR pad).
+    const [available, setAvailable] = SP_REACT.useState(null);
+    SP_REACT.useEffect(() => {
+        calibrationStatus()
+            .then((status) => setAvailable(status.available))
+            .catch(() => setAvailable(false));
+    }, []);
+    if (!available)
+        return null;
     return (SP_JSX.jsxs(DFL.PanelSection, { title: t("CALIBRATION"), children: [SP_JSX.jsx(DFL.Field, { label: t("Sticks and triggers"), description: t("Stick centre and range, trigger travel") }), SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", onClick: () => DFL.showModal(SP_JSX.jsx(CalibrationModal, {})), children: t("Calibrate Controller") }) })] }));
 }
 
@@ -1273,13 +1282,18 @@ function XaliaToggle({ values, patch }) {
 function TouchField({ values, patch }) {
     return (SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ToggleField, { label: t("Disable Touchscreen"), description: t("While the game is running, to stop stray touches"), checked: values.touchDisabled === true, onChange: (on) => patch({ touchDisabled: on }) }) }));
 }
-/** Per-game fan/scheduler overrides ("" = follow the global mode). */
-function PerfFields({ values, patch }) {
+/** What the handheld has; an older backend that doesn't say counts as having everything. */
+function hw(config) {
+    return { fan: true, scheduler: true, touchscreen: true, ...(config.hardware || {}) };
+}
+/** Per-game fan/scheduler overrides ("" = follow the global mode); only the ones this handheld has. */
+function PerfFields({ config, values, patch }) {
+    const has = hw(config);
     const perGameFan = [globalChoice, ...fanOptions];
     const perGameLavd = [globalChoice, ...lavdOptions];
     const fanValue = perGameFan.some((option) => option.data === String(values.fanMode ?? "")) ? String(values.fanMode ?? "") : "";
     const lavdValue = perGameLavd.some((option) => option.data === String(values.lavdMode ?? "")) ? String(values.lavdMode ?? "") : "";
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: lavdValue, options: perGameLavd, onChange: (id) => patch({ lavdMode: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: fanValue, options: perGameFan, onChange: (id) => patch({ fanMode: id }) })] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [has.scheduler ? SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: lavdValue, options: perGameLavd, onChange: (id) => patch({ lavdMode: id }) }) : null, has.fan ? SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: fanValue, options: perGameFan, onChange: (id) => patch({ fanMode: id }) }) : null] }));
 }
 /** Applies live, like the touchscreen: the backend switches the pad when the game starts or stops. */
 function GamepadTypeField({ values, patch }) {
@@ -1335,12 +1349,26 @@ function TweakFields({ config, appid, values, patch }) {
     return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("Proton Version"), value: compatValue, options: compatOptions, onChange: (name) => {
                     setCurrentTool(String(name));
                     setCompatTool(appid, String(name));
-                } }), SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Mesa Version"), value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), SP_JSX.jsx(TouchField, { values: values, patch: patch }), SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
+                } }), SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), (config.mesaVersions || []).length > 0 ? (SP_JSX.jsx(SelectEdit, { label: t("Mesa Version"), value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) })) : null, SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), hw(config).touchscreen ? SP_JSX.jsx(TouchField, { values: values, patch: patch }) : null, SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
+// A suggestion made on another handheld can name a fan or scheduler this one doesn't have.
+function usable(config, settings) {
+    const has = hw(config);
+    const out = { ...settings };
+    if (!has.fan)
+        delete out.fanMode;
+    if (!has.scheduler)
+        delete out.lavdMode;
+    if (!has.touchscreen)
+        delete out.touchDisabled;
+    if (!(config.mesaVersions || []).some((v) => v.data === out.mesaVersion))
+        delete out.mesaVersion;
+    return out;
+}
 function describe(config, suggestion) {
     const lines = [];
-    const s = suggestion.settings;
+    const s = usable(config, suggestion.settings);
     const pick = (options, value) => options.find((o) => o.data === String(value))?.label || String(value);
     if (suggestion.proton)
         lines.push(t("Proton: {tool}", { tool: suggestion.proton }));
@@ -1371,7 +1399,7 @@ function Suggestion({ config, appid, apply }) {
         return null;
     const lines = describe(config, suggestion);
     return (SP_JSX.jsxs(DFL.PanelSection, { title: t("SUGGESTED SETTINGS"), children: [suggestion.note ? SP_JSX.jsx("div", { className: "steamling-note", children: suggestion.note }) : null, SP_JSX.jsx(DFL.Field, { label: t("Would set"), description: lines.join(" · ") }), suggestion.tested ? SP_JSX.jsx("div", { className: "steamling-note", children: t("Tested on {where}", { where: suggestion.tested }) }) : null, SP_JSX.jsx(DFL.PanelSectionRow, { children: SP_JSX.jsx(DFL.ButtonItem, { layout: "below", description: t("Turns on per-game settings for this game and fills them in. You can still change anything afterwards."), onClick: () => {
-                        apply(suggestion.settings);
+                        apply(usable(config, suggestion.settings));
                         if (suggestion.proton)
                             setCompatTool(appid, suggestion.proton);
                     }, children: t("Use Suggested Settings") }) })] }));
@@ -1540,7 +1568,9 @@ function Games({ config, setConfig, reload }) {
     const storedLatency = String(values.audioLatency ?? "");
     const audioValue = audioLatencyOptions.some((option) => option.data === storedLatency) ? storedLatency : "";
     const showFields = editingDefault || perGameEnabled;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE & GAME TWEAKS"), children: [SP_JSX.jsx(SelectEdit, { label: t("Game"), value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: t("Use Per-Game Settings"), checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), !editingDefault ? SP_JSX.jsx(Suggestion, { config: config, appid: game.appid, apply: applySuggestion }) : null, showFields ? (SP_JSX.jsx(DFL.PanelSection, { title: t("PERFORMANCE"), children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }), SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) })] })) : (SP_JSX.jsx(PerfFields, { values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: t("GAME TWEAKS"), children: [SP_JSX.jsx("div", { className: "steamling-note", children: t("Changes apply on next game launch") }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
+    const has = hw(config);
+    const showPerf = showFields && (has.fan || has.scheduler);
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE & GAME TWEAKS"), children: [SP_JSX.jsx(SelectEdit, { label: t("Game"), value: game?.appid || "", options: targetOptions, onChange: setSelectedGame }), !editingDefault ? SP_JSX.jsx(DFL.ToggleField, { label: t("Use Per-Game Settings"), checked: perGameEnabled, onChange: setPerGameEnabled }) : null] }), !editingDefault ? SP_JSX.jsx(Suggestion, { config: config, appid: game.appid, apply: applySuggestion }) : null, showPerf ? (SP_JSX.jsx(DFL.PanelSection, { title: t("PERFORMANCE"), children: editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [has.scheduler ? SP_JSX.jsx(SelectEdit, { label: t("CPU Scheduler"), value: config.lavdMode, options: lavdOptions, onChange: (mode) => applyMode(setLavdMode, mode) }) : null, has.fan ? SP_JSX.jsx(SelectEdit, { label: t("Fan Curve"), value: config.fanMode, options: fanOptions, onChange: (mode) => applyMode(setFanMode, mode) }) : null] })) : (SP_JSX.jsx(PerfFields, { config: config, values: values, patch: patchSettings })) })) : null, showFields ? (SP_JSX.jsxs(DFL.PanelSection, { title: t("GAME TWEAKS"), children: [SP_JSX.jsx("div", { className: "steamling-note", children: t("Changes apply on next game launch") }), editingDefault ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patchSettings({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patchSettings({ audioLatency: id }) }), SP_JSX.jsx(XaliaToggle, { values: values, patch: patchSettings }), has.touchscreen ? SP_JSX.jsx(TouchField, { values: values, patch: patchSettings }) : null, SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patchSettings({ envVars: next }) })] })) : (SP_JSX.jsx(TweakFields, { config: config, appid: game.appid, values: values, patch: patchSettings }))] })) : null, !editingDefault && perGameEnabled ? (SP_JSX.jsx(ConfigSection, { game: { appid: game.appid, name: game.name || "" }, reload: reload })) : null, !editingDefault ? (SP_JSX.jsx(ShaderCache, { appid: game.appid, name: game.name || "", running: runtimeGame?.appid === game.appid })) : null, SP_JSX.jsx(PerformanceOverlay, {}), SP_JSX.jsx(SystemMonitor, {})] }));
 }
 
 // Replaces the stock "Add a Non-Steam Game" flow: Steam's file browser cannot open a new
@@ -2195,7 +2225,7 @@ function GameSettingsModal({ appid, name, closeModal }) {
                     update((next) => {
                         next.tweaks.games[appid] = { ...(next.tweaks.games[appid] || {}), enabled: on, name };
                     });
-                } }), enabled ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(PerfFields, { values: values, patch: patch }), SP_JSX.jsx(TweakFields, { config: config, appid: appid, values: values, patch: patch }), SP_JSX.jsx(ConfigSection, { game: { appid, name }, reload: () => getConfig().then(setConfig).catch(() => { }) })] })) : null] }));
+                } }), enabled ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(PerfFields, { config: config, values: values, patch: patch }), SP_JSX.jsx(TweakFields, { config: config, appid: appid, values: values, patch: patch }), SP_JSX.jsx(ConfigSection, { game: { appid, name }, reload: () => getConfig().then(setConfig).catch(() => { }) })] })) : null] }));
 }
 
 // LibraryContextMenu is not a module export, so it is reached by classname marker ->

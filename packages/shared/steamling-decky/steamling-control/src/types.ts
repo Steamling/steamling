@@ -55,6 +55,8 @@ export interface Config {
   /** Known-good per-game settings, by appid (steamling_control/suggestions.py). */
   suggestions?: Record<string, GameSuggestion>;
   led: LedConfig;
+  /** What this handheld has; controls for anything missing are hidden. */
+  hardware?: { fan: boolean; scheduler: boolean; touchscreen: boolean };
   game?: GameRef | null;
   selectedGame?: GameRef | null;
 }

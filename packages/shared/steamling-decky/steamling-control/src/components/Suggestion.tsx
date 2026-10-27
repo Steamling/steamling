@@ -2,11 +2,22 @@ import { ButtonItem, Field, PanelSection, PanelSectionRow } from "@decky/ui";
 import { setCompatTool } from "../lib/compat";
 import { t } from "../i18n";
 import type { Config, GameSuggestion } from "../types";
-import { audioLatencyOptions, fanOptions, lavdOptions } from "./GameFields";
+import { audioLatencyOptions, fanOptions, hw, lavdOptions } from "./GameFields";
+
+// A suggestion made on another handheld can name a fan or scheduler this one doesn't have.
+function usable(config: Config, settings: Record<string, any>): Record<string, any> {
+  const has = hw(config);
+  const out = { ...settings };
+  if (!has.fan) delete out.fanMode;
+  if (!has.scheduler) delete out.lavdMode;
+  if (!has.touchscreen) delete out.touchDisabled;
+  if (!(config.mesaVersions || []).some((v) => v.data === out.mesaVersion)) delete out.mesaVersion;
+  return out;
+}
 
 function describe(config: Config, suggestion: GameSuggestion): string[] {
   const lines: string[] = [];
-  const s = suggestion.settings;
+  const s = usable(config, suggestion.settings);
   const pick = (options: { data: string; label: string }[], value: any) =>
     options.find((o) => o.data === String(value))?.label || String(value);
   if (suggestion.proton) lines.push(t("Proton: {tool}", { tool: suggestion.proton }));
@@ -41,7 +52,7 @@ export function Suggestion({ config, appid, apply }: {
           layout="below"
           description={t("Turns on per-game settings for this game and fills them in. You can still change anything afterwards.")}
           onClick={() => {
-            apply(suggestion.settings);
+            apply(usable(config, suggestion.settings));
             if (suggestion.proton) setCompatTool(appid, suggestion.proton);
           }}
         >
