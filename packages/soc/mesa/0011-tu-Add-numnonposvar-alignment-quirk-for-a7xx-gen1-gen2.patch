@@ -1,0 +1,82 @@
+From 2fae1d0db80f361502a89d670919c1701badd9e3 Mon Sep 17 00:00:00 2001
+From: Danylo Piliaiev <dpiliaiev@igalia.com>
+Date: Mon, 26 Oct 2026 13:23:19 +0100
+Subject: [PATCH] tu: Add QCTDD08049535_numnonposvar_alignment for a7xx
+ gen1/gen2
+
+On a7xx gen1/gen2, when the FS varyings in VPC take an odd number of
+vec4 slots (+ some conditions about number of contexts and visible
+prims that are impossible to detect), VPC_PS_CNTL::NUMNONPOSVAR has to
+be padded by one more vec4. Otherwise something goes wrong with varying
+storage alloc/dealloc: sometimes we get garbage in loaded varyings,
+unless (ei) is removed or moved much later. The padding of
+::NUMNONPOSVAR is what prop driver is doing on a7xx gen1/gen2 and
+doesn't do on gen3.
+
+Fixes rendering corruption in "Devil May Cry 5".
+
+Signed-off-by: Danylo Piliaiev <dpiliaiev@igalia.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/45615>
+
+[Backported to 26.2, which has no QCTDD quirk table yet: the quirk is a
+plain numnonposvar_alignment_quirk prop, set on a7xx_gen1 and a7xx_gen2.]
+---
+diff --git a/src/freedreno/common/freedreno_dev_info.h b/src/freedreno/common/freedreno_dev_info.h
+index 9649158..8f1cdc1 100644
+--- a/src/freedreno/common/freedreno_dev_info.h
++++ b/src/freedreno/common/freedreno_dev_info.h
+@@ -455,6 +455,17 @@ struct fd_dev_info {
+       /* Is lock/unlock sequence needed at end of compute shader? */
+       bool cs_lock_unlock_quirk;
+ 
++      /* On a7xx gen1/gen2, when the FS varyings in VPC take an odd number of
++       * vec4 slots (+ some conditions about number of contexts and visible
++       * prims that are impossible to detect), VPC_PS_CNTL::NUMNONPOSVAR has to
++       * be padded by one more vec4. Otherwise something goes wrong with varying
++       * storage alloc/dealloc: sometimes we get garbage in loaded varyings,
++       * unless (ei) is removed or moved much later. The padding of
++       * ::NUMNONPOSVAR is what prop driver is doing on a7xx gen1/gen2 and
++       * doesn't do on gen3.
++       */
++      bool numnonposvar_alignment_quirk;
++
+       /* Whether the ray_intersection instruction is present. */
+       bool has_ray_intersection;
+ 
+diff --git a/src/freedreno/common/freedreno_devices.py b/src/freedreno/common/freedreno_devices.py
+index 669c182..4ca3fc7 100644
+--- a/src/freedreno/common/freedreno_devices.py
++++ b/src/freedreno/common/freedreno_devices.py
+@@ -846,10 +846,12 @@ a7xx_gen1 = GPUProps(
+         enable_tp_ubwc_flag_hint = True,
+         reading_shading_rate_requires_smask_quirk = True,
+         cs_lock_unlock_quirk = True,
++        numnonposvar_alignment_quirk = True,
+     )
+ 
+ a7xx_gen2 = GPUProps(
+         stsc_duplication_quirk = True,
++        numnonposvar_alignment_quirk = True,
+         has_event_write_sample_count = True,
+         ubwc_unorm_snorm_int_compatible = True,
+         supports_uav_ubwc = True,
+diff --git a/src/freedreno/vulkan/tu_shader.cc b/src/freedreno/vulkan/tu_shader.cc
+index f6059bc..e1686a4 100644
+--- a/src/freedreno/vulkan/tu_shader.cc
++++ b/src/freedreno/vulkan/tu_shader.cc
+@@ -2500,9 +2500,14 @@ tu6_emit_fs_inputs(struct tu_cs *cs, const struct ir3_shader_variant *fs)
+    unsigned primid_loc = ir3_find_input_loc(fs, VARYING_SLOT_PRIMITIVE_ID);
+    unsigned viewid_loc = ir3_find_input_loc(fs, VARYING_SLOT_VIEW_INDEX);
+ 
++   unsigned num_nonpos_var = fs->total_in;
++   if (cs->device->physical_device->info->props.numnonposvar_alignment_quirk &&
++       (DIV_ROUND_UP(num_nonpos_var, 4) & 1))
++      num_nonpos_var += 4;
++
+    tu_cs_emit_regs(
+       cs,
+-      VPC_PS_CNTL(CHIP, .numnonposvar = fs->total_in, .primidloc = primid_loc,
++      VPC_PS_CNTL(CHIP, .numnonposvar = num_nonpos_var, .primidloc = primid_loc,
+                   .varying = fs && fs->total_in, .viewidloc = viewid_loc));
+ }
+ 
