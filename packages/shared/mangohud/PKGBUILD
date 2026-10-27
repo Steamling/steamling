@@ -4,7 +4,7 @@
 # dir: makepkg strips local source entries to their basename.
 pkgname=mangohud
 pkgver=0.8.4
-pkgrel=2
+pkgrel=3
 pkgdesc="Vulkan/OpenGL FPS/frametime/CPU/GPU overlay + mangoapp for the gamescope Steam session"
 arch=('aarch64')
 url="https://github.com/flightlessmango/MangoHud"
@@ -23,8 +23,9 @@ source=("git+https://github.com/flightlessmango/MangoHud.git#tag=v${pkgver}"
         '0006-mangoapp-pace-redraw-to-frame-messages.patch'
         '0007-msm-hottest-gpu-zone.patch'
         '0008-gpu_fdinfo-skip-unreadable-fdinfo.patch'
-        '0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues.patch')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        '0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues.patch'
+        '0010-battery-only-count-discharging-batteries-toward-drain.patch')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd MangoHud
@@ -33,7 +34,8 @@ prepare() {
            0004-Qualcomm-battery-power-now 0005-RAM-name \
            0006-mangoapp-pace-redraw-to-frame-messages 0007-msm-hottest-gpu-zone \
            0008-gpu_fdinfo-skip-unreadable-fdinfo \
-           0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues; do
+           0009-vulkan-use-vkGetDeviceQueue2-for-flagged-queues \
+           0010-battery-only-count-discharging-batteries-toward-drain; do
     echo "  applying ${p}.patch"
     git apply -p1 "${srcdir}/${p}.patch"
   done
