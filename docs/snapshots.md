@@ -17,7 +17,7 @@ That covers every update, whichever way you install it: the Updater tab, Steamli
 
 There are three ways to do it. They all do the same thing, so use whichever one still works:
 
-- **In game mode:** open the Quick Access Menu, go to **Steamling Control**, then the
+- **In game mode:** open the Quick Access Menu, go to **Governor**, then the
   **Updater** tab, and press **Roll Back Last Update**. It shows what will be restored. Confirm,
   then press **Reboot Now**. This button only ever undoes the most recent update.
 - **In desktop mode:** open **Steamling Tools** and pick *Roll back the last update...*. This

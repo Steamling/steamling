@@ -90,11 +90,11 @@ Finder, Windows Explorer and Linux file managers - no extra software on either e
 
 > **Got a USB-C cable handy?** That's often quicker: turn on **USB file transfer** in Steamling
 > Control's Library tab and the device shows up on your computer like a phone does. See
-> [USB file transfer](steamling-control.md#usb-file-transfer).
+> [USB file transfer](governor.md#usb-file-transfer).
 
 Turn it on in either place:
 
-- **Game Mode**: Quick Access Menu → **Steamling Control** → **Library** → *Share my home folder*
+- **Game Mode**: Quick Access Menu → **Governor** → **Library** → *Share my home folder*
 - **Desktop**: **Steamling Tools** → *File sharing (SMB) is off - turn it on...*
 
 The first time, you will be offered a small download (Samba is not shipped in the image, so

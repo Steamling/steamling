@@ -15,7 +15,7 @@ Especially welcome:
   port" in [docs/devices.md](docs/devices.md), trying it and telling me what happened is the
   single most useful thing right now, even if all you can say is "it booted".
 - **Emulator configs** that you have dialled in on a device.
-- **Steamling Control features and fixes.**
+- **Governor features and fixes.**
 - **Docs corrections** - these need no hardware and no build.
 
 ## Contents
@@ -93,7 +93,7 @@ make help       # every target
 git config core.hooksPath .githooks   # once per clone: the doc check runs before each commit
 ```
 
-**Steamling Control frontend** (any host with Node, no aarch64 needed):
+**Governor frontend** (any host with Node, no aarch64 needed):
 
 ```bash
 cd packages/shared/steamling-decky/steamling-control
@@ -156,7 +156,7 @@ Notes that will save you an hour:
   and resumes in the middle of the new contents. Copy to `/tmp` and `mv` into place.
 - **`scp`ing a script does not install its dependencies.** Install those separately, and make
   sure any new dependency is declared in the `PKGBUILD` before you submit.
-- **Steamling Control can be iterated without building a package**: copy your plugin directory
+- **Governor can be iterated without building a package**: copy your plugin directory
   over `/home/deck/homebrew/plugins/SteamlingControl` (`chown -R deck:deck` it) and reload the
   plugin. Do not restart the Decky loader mid-session. Note that
   `steamling-decky-sync.service` re-copies the OS-shipped plugin from `/usr/share/decky-plugins`
@@ -230,7 +230,7 @@ Concretely:
     scp build/localrepo/shared/steamling-decky-*.pkg.tar.* deck@steamling:/tmp/
     ssh -t deck@steamling 'sudo pacman -U /tmp/steamling-decky-*.pkg.tar.* && sudo reboot'
 
-1. Boot to game mode, open the QAM, Steamling Control -> Controller -> Stick Lights.
+1. Boot to game mode, open the QAM, Governor -> Controller -> Stick Lights.
 2. Move the Brightness slider to ~10%. Expected: the rings dim smoothly and stay the
    chosen hue. Before this change the bottom third of the slider was nearly dead and
    0% lost the colour permanently.

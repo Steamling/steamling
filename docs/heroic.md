@@ -35,7 +35,7 @@ Heroic also lists the Proton builds Steam already has, so those work too.
 ## Adding a Heroic game to Steam
 
 On a game's page in Heroic, open the **⋮** menu and pick **Add to Steam**. After you go back to
-game mode the game has its own tile in your Steam library, and Steamling Control's per-game
+game mode the game has its own tile in your Steam library, and Governor's per-game
 settings work for it like any non-Steam game.
 
 ## When a game won't start

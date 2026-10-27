@@ -113,10 +113,10 @@ came back: …**. The menu's **Log** entry has the details. Here's what each one
 
 - **Screenshots.** Hold the **Home** button and press **R1**, in a game or in Steam's menus. Steam
   keeps them under **Media** in its main menu. To copy them to a PC, turn on
-  [USB file transfer](steamling-control.md#usb-file-transfer), or over SSH:
+  [USB file transfer](governor.md#usb-file-transfer), or over SSH:
   `scp -r deck@steamling:'~/.local/share/Steam/userdata/*/760/remote/*/screenshots' .`
 - **Logging in from a PC.** Turn on **Allow SSH logins** in
-  [Steamling Control → Library](steamling-control.md#remote-access), then `ssh deck@steamling`
+  [Governor → Library](governor.md#remote-access), then `ssh deck@steamling`
   (or `deck@steamling.local`). Root can't log in over SSH; use `sudo` as `deck`.
 - **Sleep.** A short press of the power button puts it to sleep and wakes it again; **Sleep** in
   Steam's power menu works too.

@@ -31,7 +31,7 @@ open a terminal and do whatever you like.
 - **Steam gaming mode** on the ARM Steam client, the same interface as a Steam Deck.
 - **Tuned out of the box.** It ships its own kernel (based on ROCKNIX's), and the scheduler, fan
   curve and graphics drivers are set up for smooth frame times. Set a frame cap and play.
-- **Steamling Control**, a Quick Access Menu plugin for per-game settings, fan and CPU modes,
+- **Governor**, a Quick Access Menu plugin for per-game settings, fan and CPU modes,
   controller and screen calibration, stick lights, SD card formatting, file sharing over the
   network or a USB cable, and SSH.
 - **Epic, GOG and Amazon games** through the Heroic Games Launcher, right in your Steam library.
@@ -68,7 +68,7 @@ explains how to build for it and what to report.
 - [Supported devices](docs/devices.md): the full list, and how to help test one
 - [Install guide](docs/install.md): flashing, the bootloader, first boot
 - [Install to internal storage](docs/install-to-internal.md): faster loading, uninstalling, going back to stock
-- [Steamling Control](docs/steamling-control.md): the Quick Access Menu plugin
+- [Governor](docs/governor.md): the Quick Access Menu plugin
 - [Emulation](docs/emulation-setup.md): ES-DE, ROMs and BIOS files
 - [Heroic Games Launcher](docs/heroic.md): Epic, GOG and Amazon games
 - [Android apps](docs/waydroid.md): Waydroid

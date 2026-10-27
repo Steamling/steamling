@@ -1,10 +1,11 @@
-# Steamling Control
+# Governor
 
-**Steamling Control** is Steamling's built-in Decky plugin: a control panel inside the Steam
+**Governor** is Steamling's built-in Decky plugin: a control panel inside the Steam
 session for tuning the handheld and managing the system without leaving the couch (or touching
-a terminal).
+a terminal). It's named after the spinning regulator that keeps a steam engine at the right
+speed, and it used to be called Steamling Control.
 
-Open the **Quick Access menu** in the Steam session, then pick **Steamling Control** under the
+Open the **Quick Access menu** in the Steam session, then pick **Governor** under the
 plug icon. The plugin is split into four tabs - switch between them with **L1/R1** or by
 tapping the icons:
 
@@ -20,7 +21,7 @@ no fan, no fan curve; a gamepad driver that can't be calibrated, no calibration;
 
 ## Games
 
-![The Games tab: the Game picker, then Performance (CPU scheduler, fan curve) and Game Tweaks](images/steamling-control-games.jpeg)
+![The Games tab: the Game picker, then Performance (CPU scheduler, fan curve) and Game Tweaks](images/governor-games.jpeg)
 
 ### Game tweaks
 
@@ -31,7 +32,7 @@ defaults for one game, select it and flip **Use Per-Game Settings** on.
 
 Two sections follow: **Performance** (applies live) and **Game Tweaks** (applies on the
 **next game launch**, except where noted). A game's settings are also reachable from its
-library page: **Manage → Steamling Settings**.
+library page: **Manage → Governor Settings**.
 
 **Performance**
 
@@ -135,7 +136,7 @@ For numbers on top of the game itself, use the performance overlay above.
 
 ### Adding non-Steam games
 
-![Add Non-Steam Game in Steamling Control](images/steamling-control-add-game.jpeg)
+![Add Non-Steam Game in Governor](images/governor-add-game.jpeg)
 
 Steam's own **Add a Non-Steam Game** dialog does not work on Steamling, so add them here:
 
@@ -197,7 +198,7 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 
 ## Controller
 
-![The Controller tab: Calibrate Controller and the stick lights](images/steamling-control-controller.jpeg)
+![The Controller tab: Calibrate Controller and the stick lights](images/governor-controller.jpeg)
 
 - **Calibration**: **Calibrate Controller**, then **Start**, walks each stick and trigger to its edge and back, then
   shows live readings to check (a full push reads 100 at the edge, 0 at rest). **Save** keeps
@@ -226,7 +227,7 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
   **Wider** make the whole quick access menu 100 or 200 pixels wider, Steam's own pages and other
   plugins included, so text wraps less on these small screens.
 
-  ![The quick access menu widened: Steamling Control's pages get the extra room](images/steamling-control-wide-menu.jpeg)
+  ![The quick access menu widened: Governor's pages get the extra room](images/governor-wide-menu.jpeg)
 
 - **Display** (only on screens with adjustable timing, which so far means the RP6): **Calibrate Display**, then
   **Calibrate**, measures the screen's refresh rate for up to a minute and trims it onto the
@@ -235,7 +236,7 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 
 ## Updater
 
-![The Updater tab: Check for Updates, and the last snapshot under Rollback](images/steamling-control-updater.jpeg)
+![The Updater tab: Check for Updates, and the last snapshot under Rollback](images/governor-updater.jpeg)
 
 System updates, without leaving game mode:
 

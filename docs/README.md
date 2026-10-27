@@ -9,7 +9,7 @@ User guides for Steamling. New here? Start with the [project README](../README.m
 - [updating.md](updating.md) - getting a newer build onto the handheld, by reflashing or over your
   home network
 - [known-issues.md](known-issues.md) - what does not work, or not well, yet
-- [steamling-control.md](steamling-control.md) - the in-game control panel: per-game tweaks, fan/CPU
+- [governor.md](governor.md) - the in-game control panel: per-game tweaks, fan/CPU
   modes, adding non-Steam games, file sharing over the network or USB, SSH, SD card formatting,
   controller calibration, stick lights, display calibration, and system updates
 - [emulation-setup.md](emulation-setup.md) - where to put ROMs, BIOS, and firmware, how to launch

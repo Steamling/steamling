@@ -54,11 +54,11 @@ these projects some love too.
 - **[ChimeraOS](https://chimeraos.org/)**, for the gamescope session setup that the game mode
   session borrows from.
 - **[sched-ext](https://github.com/sched-ext/scx)**, for the LAVD CPU scheduler.
-- **[Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader)**, which Steamling Control
+- **[Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader)**, which Governor
   runs on, and **[InputPlumber](https://github.com/ShadowBlip/InputPlumber)** by ShadowBlip for
   controller handling.
 - **[MangoHud](https://github.com/flightlessmango/MangoHud)**, for the performance overlay.
-- **GPcal** by Kdog (Cyril Delétré), whose stick calibration math lives on in Steamling Control.
+- **GPcal** by Kdog (Cyril Delétré), whose stick calibration math lives on in Governor.
 - **[ES-DE](https://es-de.org/)**, **[RetroArch and libretro](https://www.libretro.com/)**,
   christianhaitian's ArkOS cores, and every emulator project packaged here: Dolphin, Cemu,
   Azahar, Flycast, Mupen64Plus-Next, SwanStation, ARMSX2, RPCS3, Vita3K and xemu.
