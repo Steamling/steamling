@@ -3,6 +3,7 @@ import { Field, PanelSection, Tabs } from "@decky/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { getConfig, saveTweaks } from "./backend";
+import { MenuWidthStyle } from "./components/MenuWidth";
 import { useDebouncedSave } from "./hooks/useDebouncedSave";
 import { QamVisible } from "./hooks/useQamVisible";
 import { tabIcons } from "./icons";
@@ -100,6 +101,7 @@ export function Content() {
     <QamVisible.Provider value={visible}>
       <div className="steamling-control-tabs">
         <style>{styles}</style>
+        <MenuWidthStyle />
         <Tabs activeTab={tab} onShowTab={setTab} tabs={tabs} />
       </div>
     </QamVisible.Provider>

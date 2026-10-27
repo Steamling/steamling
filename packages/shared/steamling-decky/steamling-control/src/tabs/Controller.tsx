@@ -4,6 +4,7 @@ import { setLed, setLedEnabled, setLedLinked, setLedSides } from "../backend";
 import { BackPaddles } from "../components/BackPaddles";
 import { Calibration } from "../components/Calibration";
 import { ColorControls } from "../components/ColorControls";
+import { MenuWidthSetting } from "../components/MenuWidth";
 import { PanelCalibration } from "../components/PanelCalibration";
 import { Rumble } from "../components/Rumble";
 import { StickResponse } from "../components/StickResponse";
@@ -39,6 +40,7 @@ export function Controller(props: TabProps) {
       <Rumble />
       {props.config.led.available && <StickLights {...props} />}
       <PanelCalibration />
+      <MenuWidthSetting />
     </>
   );
 }

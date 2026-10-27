@@ -12,7 +12,7 @@ tapping the icons:
 |---|---|
 | 🎮 Games | Fan curve, CPU scheduler and game tweaks, globally or per game; suggested settings, shader cache, the performance overlay and a live system monitor |
 | 📚 Library | Add non-Steam games, share your files over the network or a USB cable, turn SSH on or off, format a microSD card for Steam |
-| 🕹️ Controller | Stick and trigger calibration, stick dead zone and full tilt, back paddles, rumble, stick lights, display refresh calibration |
+| 🕹️ Controller | Stick and trigger calibration, stick dead zone and full tilt, back paddles, rumble, stick lights, display refresh calibration, menu width |
 | 🔄 Updater | Check for and install system updates, roll back the last update, see your versions, restart game mode |
 
 Settings save automatically as you change them.
@@ -221,6 +221,9 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 - **Stick Lights** (boards with stick LEDs): **Enable**, **Link Left & Right** to give both
   sticks one colour, **Side Lights** to match the side lighting to the sticks, then colour and
   brightness per stick.
+- **Quick Access Menu width**: **Standard** is Steam's own width; **Wide** (the default) and
+  **Wider** make the whole quick access menu 100 or 200 pixels wider, Steam's own pages and other
+  plugins included, so text wraps less on these small screens.
 - **Display** (only on screens with adjustable timing, which so far means the RP6): **Calibrate Display**, then
   **Calibrate**, measures the screen's refresh rate for up to a minute and trims it onto the
   nominal rate (panels ship slightly fast or slow, which drifts emulator audio against video).

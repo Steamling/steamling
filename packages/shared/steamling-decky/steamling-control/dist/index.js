@@ -75,6 +75,108 @@ const overlayStatus = () => call("overlay_status");
 const setOverlay = (level) => call("set_overlay", level);
 const systemStats = () => call("system_stats");
 
+// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
+// text in the code, so it needs no catalog.
+const catalogs = {};
+
+function language() {
+    try {
+        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
+        const raw = String(steam || navigator.language || "en").toLowerCase();
+        return raw.split(/[-_]/)[0];
+    }
+    catch (error) {
+        return "en";
+    }
+}
+let cached;
+function catalog() {
+    if (cached === undefined)
+        cached = catalogs[language()] || null;
+    return cached;
+}
+function t(text, vars) {
+    let out = catalog()?.[text] ?? text;
+    if (vars) {
+        for (const [key, value] of Object.entries(vars))
+            out = out.split(`{${key}}`).join(String(value));
+    }
+    return out;
+}
+
+// Steam draws the quick access menu 348px wide: a 48px tab strip plus a 300px page. Its
+// placeholder is 854px wide and shifted right by 506px, so making the placeholder wider (it is
+// anchored to the right edge) shows more of it without touching the slide-in transform. The
+// friends list's expanded view resizes itself and is left alone.
+const WIDTHS = { standard: 0, wide: 100, wider: 200 };
+const KEY = "steamling-control.menu-width";
+const DEFAULT = "wide";
+const listeners$1 = new Set();
+function getMenuWidth() {
+    try {
+        const saved = window.localStorage.getItem(KEY);
+        if (saved && saved in WIDTHS)
+            return saved;
+    }
+    catch (error) {
+    }
+    return DEFAULT;
+}
+function setMenuWidth(width) {
+    try {
+        window.localStorage.setItem(KEY, width);
+    }
+    catch (error) {
+    }
+    for (const listener of listeners$1)
+        listener(width);
+}
+function onMenuWidth(listener) {
+    listeners$1.add(listener);
+    return () => listeners$1.delete(listener);
+}
+function menuWidthCss(width) {
+    const extra = WIDTHS[width];
+    const c = DFL.quickAccessMenuClasses;
+    const cls = (key) => (c?.[key] ? `.${c[key].split(" ")[0]}` : "");
+    const placeholder = cls("ViewPlaceholder");
+    if (!extra || !placeholder)
+        return "";
+    const expanded = cls("Expanded");
+    const open = expanded ? `${placeholder}:not(${expanded})` : placeholder;
+    const rules = [`${open} { width: ${854 + extra}px !important; }`];
+    if (cls("TabGroupPanel"))
+        rules.push(`${open} ${cls("TabGroupPanel")}:not(.tab_Friends) { max-width: ${300 + extra}px !important; }`);
+    if (cls("HeaderContainer"))
+        rules.push(`${open} ${cls("HeaderContainer")} { max-width: ${348 + extra}px !important; }`);
+    if (cls("Footer"))
+        rules.push(`${open} ${cls("Footer")} { width: ${348 + extra}px !important; }`);
+    return rules.join("\n");
+}
+
+function SelectEdit({ label, value, options, onChange }) {
+    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
+    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
+}
+
+/** The stylesheet itself: mounted once by Content, which stays rendered for the whole session. */
+function MenuWidthStyle() {
+    const [width, setWidth] = SP_REACT.useState(getMenuWidth);
+    SP_REACT.useEffect(() => onMenuWidth(setWidth), []);
+    const css = menuWidthCss(width);
+    return css ? SP_JSX.jsx("style", { children: css }) : null;
+}
+function MenuWidthSetting() {
+    const [width, setWidth] = SP_REACT.useState(getMenuWidth);
+    SP_REACT.useEffect(() => onMenuWidth(setWidth), []);
+    const options = [
+        { data: "standard", label: t("Standard (Steam's own)") },
+        { data: "wide", label: t("Wide") },
+        { data: "wider", label: t("Wider") },
+    ];
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("QUICK ACCESS MENU"), children: [SP_JSX.jsx(SelectEdit, { label: t("Width"), value: width, options: options, onChange: (value) => setMenuWidth(value) }), SP_JSX.jsx("div", { className: "steamling-note", children: t("Widens this menu for every page in it, so text wraps less.") })] }));
+}
+
 function useDebouncedSave(options) {
     const { config, field, snapshot, save, setConfig, onError, delay = 900 } = options;
     const value = config ? config[field] : undefined;
@@ -331,40 +433,6 @@ const styles = `
         align-self: stretch;
       }
     `;
-
-// One entry per language, keyed by its two-letter code ("de", "es", ...). English is the source
-// text in the code, so it needs no catalog.
-const catalogs = {};
-
-function language() {
-    try {
-        const steam = window.LocalizationManager?.m_rgLocalesToUse?.[0];
-        const raw = String(steam || navigator.language || "en").toLowerCase();
-        return raw.split(/[-_]/)[0];
-    }
-    catch (error) {
-        return "en";
-    }
-}
-let cached;
-function catalog() {
-    if (cached === undefined)
-        cached = catalogs[language()] || null;
-    return cached;
-}
-function t(text, vars) {
-    let out = catalog()?.[text] ?? text;
-    if (vars) {
-        for (const [key, value] of Object.entries(vars))
-            out = out.split(`{${key}}`).join(String(value));
-    }
-    return out;
-}
-
-function SelectEdit({ label, value, options, onChange }) {
-    const rgOptions = options.map((option) => (typeof option === "string" ? { data: option, label: option } : option));
-    return (SP_JSX.jsx(DFL.PanelSectionRow, { children: label === undefined ? (SP_JSX.jsx(DFL.Dropdown, { selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) : (SP_JSX.jsx(DFL.DropdownItem, { label: label, selectedOption: value, rgOptions: rgOptions, onChange: (option) => onChange(option.data) })) }));
-}
 
 function options(side) {
     return [
@@ -712,7 +780,7 @@ function sideHsv(side) {
     return rgbToHsv(side.r, side.g, side.b);
 }
 function Controller(props) {
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(StickResponse, {}), SP_JSX.jsx(BackPaddles, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {})] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Calibration, {}), SP_JSX.jsx(StickResponse, {}), SP_JSX.jsx(BackPaddles, {}), SP_JSX.jsx(Rumble, {}), props.config.led.available && SP_JSX.jsx(StickLights, { ...props }), SP_JSX.jsx(PanelCalibration, {}), SP_JSX.jsx(MenuWidthSetting, {})] }));
 }
 function StickLights({ config, setConfig, reload }) {
     const led = config.led;
@@ -2096,7 +2164,7 @@ function Content() {
         { id: "Controller", title: tabIcons.Controller, content: tabContent(SP_JSX.jsx(Controller, { config: config, setConfig: setConfig, reload: load })) },
         { id: "Updater", title: tabIcons.Updater, content: tabContent(SP_JSX.jsx(Updater, {})) },
     ];
-    return (SP_JSX.jsx(QamVisible.Provider, { value: visible, children: SP_JSX.jsxs("div", { className: "steamling-control-tabs", children: [SP_JSX.jsx("style", { children: styles }), SP_JSX.jsx(DFL.Tabs, { activeTab: tab, onShowTab: setTab, tabs: tabs })] }) }));
+    return (SP_JSX.jsx(QamVisible.Provider, { value: visible, children: SP_JSX.jsxs("div", { className: "steamling-control-tabs", children: [SP_JSX.jsx("style", { children: styles }), SP_JSX.jsx(MenuWidthStyle, {}), SP_JSX.jsx(DFL.Tabs, { activeTab: tab, onShowTab: setTab, tabs: tabs })] }) }));
 }
 
 /** Standalone per-game settings, opened from the library context menu. Saves on each change
