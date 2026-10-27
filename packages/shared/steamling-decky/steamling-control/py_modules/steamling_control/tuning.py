@@ -70,7 +70,7 @@ def set_tuning(stick, deadzone, outer):
         raise ValueError("unsupported stick setting")
     current = load()
     current[stick] = {"deadzone": deadzone, "outer": outer}
-    lines = ["# Written by Steamling Control: stick response, in percent of the calibrated values."]
+    lines = ["# Written by Governor: stick response, in percent of the calibrated values."]
     for name, values in current.items():
         lines += [f"{name}_deadzone={values['deadzone']}", f"{name}_outer={values['outer']}"]
     atomically_write(TUNING, "\n".join(lines) + "\n", 0o644)

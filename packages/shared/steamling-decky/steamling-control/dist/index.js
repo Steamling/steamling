@@ -1,4 +1,4 @@
-const manifest = {"name":"Steamling Control"};
+const manifest = {"name":"Governor"};
 const API_VERSION = 2;
 const internalAPIConnection = window.__DECKY_SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED_deckyLoaderAPIInit;
 if (!internalAPIConnection) {
@@ -281,6 +281,8 @@ const tabIcons = {
     Updater: (SP_JSX.jsx(Icon, { path: SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }), SP_JSX.jsx("polyline", { points: "7 10 12 15 17 10" }), SP_JSX.jsx("line", { x1: "12", x2: "12", y1: "15", y2: "3" })] }) })),
     Controller: (SP_JSX.jsx(Icon, { path: SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx("path", { d: "M21 17a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2Z" }), SP_JSX.jsx("path", { d: "M6 15v-2" }), SP_JSX.jsx("path", { d: "M12 15V9" }), SP_JSX.jsx("circle", { cx: "12", cy: "6", r: "3" })] }) })),
 };
+/** Governor's own icon: a flyball governor, the spinning regulator that holds a steam engine's speed. */
+const pluginIcon = (SP_JSX.jsxs("svg", { width: "1em", height: "1em", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [SP_JSX.jsx("line", { x1: "12", x2: "12", y1: "2", y2: "21" }), SP_JSX.jsx("path", { d: "M12 4 7.6 9.4M12 4l4.4 5.4" }), SP_JSX.jsx("circle", { cx: "6.5", cy: "11", r: "1.9", fill: "currentColor" }), SP_JSX.jsx("circle", { cx: "17.5", cy: "11", r: "1.9", fill: "currentColor" }), SP_JSX.jsx("path", { d: "M7.6 12.6 10.5 15.5M16.4 12.6 13.5 15.5" }), SP_JSX.jsx("rect", { x: "10", y: "15", width: "4", height: "2.5", rx: "0.5" }), SP_JSX.jsx("line", { x1: "7", x2: "17", y1: "21", y2: "21" })] }));
 
 function gameDisplayName(game) {
     if (!game?.appid)
@@ -858,7 +860,7 @@ function StickLights({ config, setConfig, reload }) {
 // Bare name: Steam runs launch options through a shell with the system PATH (/usr/bin).
 const LAUNCHER = "steamling-game-launch";
 const COMMAND = "%command%";
-// Written by Steamling Control before the launcher existed; the launcher exports it itself now.
+// Written by this plugin before the launcher existed; the launcher exports it itself now.
 const FEX_TOKEN = /STEAM_COMPAT_FEX_CONFIG=("[^"]*"|\S*)\s*/g;
 function getLaunchOptions(appid) {
     return new Promise((resolve) => {
@@ -2237,7 +2239,7 @@ function Content() {
     }, [!!config, visible]);
     useDebouncedSave({ config, field: "tweaks", snapshot: savedTweaksSnapshot, save: saveTweaks, setConfig, onError: load });
     if (!config)
-        return SP_JSX.jsx(DFL.PanelSection, { title: "Steamling Control", children: SP_JSX.jsx(DFL.Field, { label: message }) });
+        return SP_JSX.jsx(DFL.PanelSection, { title: "Governor", children: SP_JSX.jsx(DFL.Field, { label: message }) });
     const tabContent = (content) => (SP_JSX.jsx("div", { className: "steamling-control-tab-content", children: content }));
     const tabs = [
         { id: "Games", title: tabIcons.Games, content: tabContent(SP_JSX.jsx(Games, { config: config, setConfig: setConfig, reload: load })) },
@@ -2324,7 +2326,7 @@ function patchLibraryContextMenu() {
                     return ret;
                 if (children.some((child) => child?.key === "steamling-settings"))
                     return ret;
-                children.push(SP_JSX.jsx(DFL.MenuItem, { onSelected: () => DFL.showModal(SP_JSX.jsx(GameSettingsModal, { appid: String(appid), name: String(overview?.display_name ?? "") })), children: "Steamling Settings" }, "steamling-settings"));
+                children.push(SP_JSX.jsx(DFL.MenuItem, { onSelected: () => DFL.showModal(SP_JSX.jsx(GameSettingsModal, { appid: String(appid), name: String(overview?.display_name ?? "") })), children: "Governor Settings" }, "steamling-settings"));
             }
             catch (error) { }
             return ret;
@@ -2347,9 +2349,9 @@ var index = definePlugin(() => {
         .then(() => wrapShortcuts(nonSteamShortcuts().map((shortcut) => shortcut.appid)))
         .catch(() => { });
     return {
-        name: "Steamling Control",
+        name: "Governor",
         content: SP_JSX.jsx(Content, {}),
-        icon: SP_JSX.jsx("div", { style: { fontWeight: 700 }, children: "P" }),
+        icon: pluginIcon,
         alwaysRender: true,
         onDismount() {
             unpatchContextMenu();

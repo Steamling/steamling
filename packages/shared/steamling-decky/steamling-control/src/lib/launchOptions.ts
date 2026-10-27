@@ -5,7 +5,7 @@
 // Bare name: Steam runs launch options through a shell with the system PATH (/usr/bin).
 const LAUNCHER = "steamling-game-launch";
 const COMMAND = "%command%";
-// Written by Steamling Control before the launcher existed; the launcher exports it itself now.
+// Written by this plugin before the launcher existed; the launcher exports it itself now.
 const FEX_TOKEN = /STEAM_COMPAT_FEX_CONFIG=("[^"]*"|\S*)\s*/g;
 
 function getLaunchOptions(appid: string): Promise<string | null> {

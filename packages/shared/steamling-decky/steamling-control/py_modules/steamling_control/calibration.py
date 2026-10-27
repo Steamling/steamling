@@ -467,7 +467,7 @@ def save():
         if _session.phase != "review":
             raise RuntimeError("Nothing to save: run a calibration first")
         result = dict(_session.result)
-    lines = ["# Written by Steamling Control: gamepad driver parameters, replayed at boot."]
+    lines = ["# Written by Governor: gamepad driver parameters, replayed at boot."]
     lines += [f"{key}={result[key]}" for key in _all_keys() if key in result]
     atomically_write(CONF, "\n".join(lines) + "\n", mode=0o644)
     _retune()

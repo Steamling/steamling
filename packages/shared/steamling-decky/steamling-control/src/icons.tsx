@@ -67,3 +67,25 @@ export const tabIcons = {
     />
   ),
 };
+
+/** Governor's own icon: a flyball governor, the spinning regulator that holds a steam engine's speed. */
+export const pluginIcon = (
+  <svg
+    width="1em"
+    height="1em"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" x2="12" y1="2" y2="21" />
+    <path d="M12 4 7.6 9.4M12 4l4.4 5.4" />
+    <circle cx="6.5" cy="11" r="1.9" fill="currentColor" />
+    <circle cx="17.5" cy="11" r="1.9" fill="currentColor" />
+    <path d="M7.6 12.6 10.5 15.5M16.4 12.6 13.5 15.5" />
+    <rect x="10" y="15" width="4" height="2.5" rx="0.5" />
+    <line x1="7" x2="17" y1="21" y2="21" />
+  </svg>
+);

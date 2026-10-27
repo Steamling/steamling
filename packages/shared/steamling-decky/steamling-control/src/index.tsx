@@ -4,6 +4,7 @@ import { getConfig } from "./backend";
 import { installedSteamGames, isGame, nonSteamShortcuts } from "./lib/games";
 import { registerDownloadWrapper, wrapAllGames, wrapShortcuts } from "./lib/launchOptions";
 import { patchLibraryContextMenu } from "./lib/contextMenu";
+import { pluginIcon } from "./icons";
 import { registerTouchLifetime } from "./lib/touch";
 import { applyToSteamWindow, getMenuWidth } from "./lib/menuWidth";
 
@@ -18,9 +19,9 @@ export default definePlugin(() => {
     .then(() => wrapShortcuts(nonSteamShortcuts().map((shortcut) => shortcut.appid)))
     .catch(() => {});
   return {
-    name: "Steamling Control",
+    name: "Governor",
     content: <Content />,
-    icon: <div style={{ fontWeight: 700 }}>P</div>,
+    icon: pluginIcon,
     alwaysRender: true,
     onDismount() {
       unpatchContextMenu();

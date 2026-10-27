@@ -86,7 +86,7 @@ export function Content() {
   }, [!!config, visible]);
   useDebouncedSave({ config, field: "tweaks", snapshot: savedTweaksSnapshot, save: saveTweaks, setConfig, onError: load });
 
-  if (!config) return <PanelSection title="Steamling Control"><Field label={message} /></PanelSection>;
+  if (!config) return <PanelSection title="Governor"><Field label={message} /></PanelSection>;
 
   const tabContent = (content: ReactNode) => (
     <div className="steamling-control-tab-content">{content}</div>

@@ -1,4 +1,4 @@
-# Translating Steamling Control
+# Translating Governor
 
 Every string the panel shows goes through `t()` (see `../i18n.ts`) with its English text, for
 example `t("Performance Overlay")`. A translation is a map from that English text to yours.
