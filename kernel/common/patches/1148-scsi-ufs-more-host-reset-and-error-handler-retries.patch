@@ -1,0 +1,33 @@
+From 8cf0e2426f557c326c52f0cc9f32243fd362308c Mon Sep 17 00:00:00 2001
+From: Rui Miguel Silva <rui.silva@linaro.org>
+Date: Sun, 7 Jun 2026 17:07:46 +0100
+Subject: [PATCH] scsi: ufs: ufs-qcom: add retry when power up
+
+We may get some failures from phy at power up sequencing, increase
+the number of retries to avoid giving up too soon.
+
+Signed-off-by: Rui Miguel Silva <rui.silva@linaro.org>
+---
+ drivers/ufs/core/ufshcd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ufs/core/ufshcd.c b/drivers/ufs/core/ufshcd.c
+index a41b56dbf3b7..ce4880768f28 100644
+--- a/drivers/ufs/core/ufshcd.c
++++ b/drivers/ufs/core/ufshcd.c
+@@ -80,10 +80,10 @@ enum {
+ #define DME_LINKSTARTUP_RETRIES 3
+ 
+ /* maximum number of reset retries before giving up */
+-#define MAX_HOST_RESET_RETRIES 5
++#define MAX_HOST_RESET_RETRIES 10
+ 
+ /* Maximum number of error handler retries before giving up */
+-#define MAX_ERR_HANDLER_RETRIES 5
++#define MAX_ERR_HANDLER_RETRIES 10
+ 
+ /* Expose the flag value from utp_upiu_query.value */
+ #define MASK_QUERY_UPIU_FLAG_LOC 0xFF
+-- 
+2.34.1
+
