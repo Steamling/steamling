@@ -36,3 +36,5 @@ holo.git                    https://github.com/evlaV/holo.git                   
 deckard.git                 https://github.com/evlaV/deckard.git                            blobless
 linux.git:valve             https://github.com/evlaV/linux-integration.git                  blobless
 linux.git:deckard           https://github.com/evlaV/deckard-linux-no-oopsies.git           blobless
+# The Frame's Mesa (Turnip + zink), its steamos-* release branches inside mesa.git under deckard/.
+mesa.git:deckard            https://github.com/evlav/deckard-mesa.git                       full      steamos-*
