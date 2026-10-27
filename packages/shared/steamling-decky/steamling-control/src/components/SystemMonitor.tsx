@@ -43,6 +43,9 @@ function batteryText(stats: SystemStats): string {
   const b = stats.battery;
   if (!b) return dash;
   const pct = b.percent === null ? dash : `${b.percent}%`;
+  // Not charging (bypass charging, a charge limit) and Full both mean the charger runs the
+  // handheld: the battery isn't the one being drawn from.
+  if (b.status === "Not charging" || b.status === "Full") return `${pct} · ${t("on external power")}`;
   if (b.watts === null) return pct;
   const flow = b.status === "Charging" ? t("charging at {w} W", { w: b.watts }) : t("drawing {w} W", { w: b.watts });
   return `${pct} · ${flow}`;
