@@ -1225,7 +1225,7 @@ function PerformanceOverlay() {
             busy.current = false;
         }
     };
-    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE OVERLAY"), children: [SP_JSX.jsx(SelectEdit, { label: t("Show on screen"), value: overlay.level, options: options, onChange: change }), SP_JSX.jsx("div", { className: "steamling-note", children: error || t("The same overlay as Steam's Performance Overlay setting; either one changes it.") })] }));
+    return (SP_JSX.jsxs(DFL.PanelSection, { title: t("PERFORMANCE OVERLAY"), children: [SP_JSX.jsx(SelectEdit, { label: t("Show on screen"), value: overlay.level, options: options, onChange: change }), SP_JSX.jsx("div", { className: "steamling-note", children: error || t("Stays from game to game. Steam's own Performance Overlay setting changes it too, until the next game starts.") })] }));
 }
 
 function clone(obj) {

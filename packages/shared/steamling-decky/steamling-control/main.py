@@ -15,7 +15,7 @@ from steamling_control.device import (
 from steamling_control.gamepad import sync_gamepad
 from steamling_control.led import restore_led, set_led, set_led_enabled, set_led_linked, set_led_sides
 from steamling_control.modes import fan_mode, lavd_mode, set_fan_mode, set_lavd_mode
-from steamling_control.overlay import overlay_status, set_overlay
+from steamling_control.overlay import overlay_status, reassert_in_background, set_overlay
 from steamling_control.paddles import paddle_status, set_paddles
 from steamling_control.rumble import restore_rumble, rumble_status, set_rumble
 from steamling_control.sdcard import detect_sdcard, format_sdcard
@@ -40,6 +40,8 @@ class Plugin:
     async def _main(self):
         await asyncio.to_thread(restore_led)
         await asyncio.to_thread(restore_rumble)
+        # The session starts the overlay off; put back the level picked here.
+        reassert_in_background()
         await asyncio.to_thread(calibration.recover)
         await asyncio.to_thread(sync_touch, self._running_appid)
 
@@ -56,6 +58,8 @@ class Plugin:
             self._running_appid = None
         await asyncio.to_thread(sync_touch, self._running_appid)
         await asyncio.to_thread(sync_gamepad, self._running_appid)
+        # Steam writes its own overlay level as a game starts or ends.
+        reassert_in_background()
 
     async def detect_sdcard(self):
         return await asyncio.to_thread(detect_sdcard)

@@ -1,10 +1,22 @@
+import json
 import os
+import threading
+import time
 from pathlib import Path
+
+from .system import atomically_write
 
 # steamling-steam points MANGOHUD_CONFIGFILE at this file for the whole session; Steam writes
 # its Performance Overlay level here and mangoapp re-reads the file whenever it changes.
 HOME = Path("/home/deck")
 FILE_NAME = "steamling-mangohud.conf"
+# The level picked here. Steam writes its own level into the file when a game starts and the
+# session starts it at no_display, so the pick is kept here and put back at those moments.
+SAVED = Path("/etc/steamling/overlay.json")
+# Steam's write lands a moment after the start notification: check a few times, then leave the
+# file alone so a change made with Steam's own slider mid-game stays.
+REASSERT_AFTER_S = (1, 3, 6)
+_lock = threading.Lock()
 
 # MangoHud's built-in presets, the same ones Steam's overlay levels pick.
 LEVELS = {
@@ -50,13 +62,50 @@ def overlay_status(path=None):
     return {"available": True, "level": level_of(text)}
 
 
-def set_overlay(level, path=None):
+def _write(path, level):
+    # Rewritten in place, never replaced: mangoapp watches this inode for changes.
+    with path.open("w", encoding="utf-8") as f:
+        f.write(LEVELS[level] + "\n")
+
+
+def saved_level(saved=SAVED):
+    try:
+        level = json.loads(saved.read_text()).get("level")
+    except (OSError, ValueError, AttributeError):
+        return None
+    return level if level in LEVELS else None
+
+
+def set_overlay(level, path=None, saved=SAVED):
     if level not in LEVELS:
         raise ValueError(f"unknown overlay level: {level!r}")
     path = path or _path()
     if path is None or not path.exists():
         raise RuntimeError("The performance overlay is only available in game mode")
-    # Rewritten in place, never replaced: mangoapp watches this inode for changes.
-    with path.open("w", encoding="utf-8") as f:
-        f.write(LEVELS[level] + "\n")
+    with _lock:
+        _write(path, level)
+        atomically_write(saved, json.dumps({"level": level}) + "\n", 0o644)
     return overlay_status(path)
+
+
+def reassert_overlay(path=None, saved=SAVED, delays=REASSERT_AFTER_S, sleep=time.sleep):
+    """Put the saved level back if Steam overwrote it; nothing if no level was ever picked here."""
+    level = saved_level(saved)
+    if level is None:
+        return
+    for delay in delays:
+        sleep(delay)
+        target = path or _path()
+        if target is None or not target.exists():
+            continue
+        with _lock:
+            try:
+                current = level_of(target.read_text(encoding="utf-8", errors="replace"))
+            except OSError:
+                continue
+            if current != level:
+                _write(target, level)
+
+
+def reassert_in_background():
+    threading.Thread(target=reassert_overlay, daemon=True).start()

@@ -54,7 +54,7 @@ export function PerformanceOverlay() {
     <PanelSection title={t("PERFORMANCE OVERLAY")}>
       <SelectEdit label={t("Show on screen")} value={overlay.level} options={options} onChange={change} />
       <div className="steamling-note">
-        {error || t("The same overlay as Steam's Performance Overlay setting; either one changes it.")}
+        {error || t("Stays from game to game. Steam's own Performance Overlay setting changes it too, until the next game starts.")}
       </div>
     </PanelSection>
   );
