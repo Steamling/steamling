@@ -7,7 +7,7 @@ epoch=2
 pkgver=26.2.5
 # differs from pkgver only for RCs: the tarball keeps the hyphen makepkg forbids in pkgver
 _srcver=${pkgver}
-pkgrel=1.3
+pkgrel=1.4
 pkgdesc="Mesa trimmed for Qualcomm handhelds: freedreno GL + turnip Vulkan, SoC-tuned (${_srcver})"
 arch=('aarch64')
 url="https://www.mesa3d.org/"
@@ -23,7 +23,8 @@ makedepends=(
 # upstream considers LTO broken until explicit notice
 options=(!lto)
 # Turnip, ir3 and freedreno fixes queued on staging/26.2 for the next point release (verbatim
-# cherry-picks; drop each once a 26.2 point release carries it).
+# cherry-picks; drop each once a 26.2 point release carries it). 0010 is still an open merge
+# request, carried until a release has it.
 source=("https://archive.mesa3d.org/mesa-${_srcver}.tar.xz"
         '0001-tu-Don-t-bail-after-the-first-instr-when-gathering-p.patch'
         '0002-tu-Fix-bindless-descriptor-invalidate-sequence.patch'
@@ -33,7 +34,8 @@ source=("https://archive.mesa3d.org/mesa-${_srcver}.tar.xz"
         '0006-tu-a6xx-Set-correct-value-for-GRAS_MODE_CNTL.patch'
         '0007-tu-a6xx-Invalidate-shared-consts-before-disabling-th.patch'
         '0008-freedreno-Fixup-incorrectly-copied-A6XX_TPL1_DBG_ECO.patch'
-        '0009-freedreno-a6xx-Fix-fbfetch-with-msrtt.patch')
+        '0009-freedreno-a6xx-Fix-fbfetch-with-msrtt.patch'
+        '0010-tu-Synchronize-access-between-no-rast-order-and-rast.patch')
 sha256sums=('794b3d1729075dae7ebd47c7283b7ca0cdb5dec668f7f11cc0a5d82f6138a0a5'
             '1a962317249202e278daae3c7c1f02c685bea8046f8dde76198f6b72006972eb'
             'c0f383eec232854027587b7a683d39549821b40013a6566fddc50549f069160f'
@@ -43,7 +45,8 @@ sha256sums=('794b3d1729075dae7ebd47c7283b7ca0cdb5dec668f7f11cc0a5d82f6138a0a5'
             '0009e6a78c91bc1138a215d922579335007746eedb8bdf9ca38927b6771d6463'
             'f2eebcd6e4b5f8c6c13f0049d17836f552932400e3a1d6439dd6bb997d4bdb0a'
             '557deed445a46c1942b6bcf4860f9b31b92cc908adae93b0cca4af03727505fc'
-            '9bbf845ede70e184dc1ffebca886408c3a5a47014a059cdc7ee26918a67c8db4')
+            '9bbf845ede70e184dc1ffebca886408c3a5a47014a059cdc7ee26918a67c8db4'
+            '9593e966d7b29efa23a547da07d1dae14a9f34a088c7df37214545b4a1bb8313')
 
 prepare() {
   cd "mesa-${_srcver}"
