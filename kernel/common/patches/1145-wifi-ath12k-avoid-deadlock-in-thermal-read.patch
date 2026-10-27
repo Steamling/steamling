@@ -1,0 +1,43 @@
+From 5fec1140bf725035b9e5c1efb7741b0e8a4264b6 Mon Sep 17 00:00:00 2001
+From: Nicolas Escande <nico.escande@gmail.com>
+Date: Mon, 13 Apr 2026 10:38:07 +0200
+Subject: [PATCH] wifi: ath12k: avoid deadlock in thermal read
+
+When removing the pci device we can have a deadlock if we try to read the
+thermal sensor at the same time.
+
+This is due to the fact that when the wiphy gets unregistered (so while
+the wiphy lock is held), we wait for all sysfs operation to complete. But
+if a read of the thermal device has been started in the mean time, we need
+to acquire the wiphy lock, which will lead to a deadlock.
+
+As we already have a flag indicating that we are currently unregistering
+the device in the hw group, lets check it first (before locking) so we can
+bail out early and avoid the dealock.
+
+Signed-off-by: Nicolas Escande <nico.escande@gmail.com>
+---
+ drivers/net/wireless/ath/ath12k/thermal.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/net/wireless/ath/ath12k/thermal.c b/drivers/net/wireless/ath/ath12k/thermal.c
+index 97fc49c40ac1..3b2cf5032719 100644
+--- a/drivers/net/wireless/ath/ath12k/thermal.c
++++ b/drivers/net/wireless/ath/ath12k/thermal.c
+@@ -148,9 +148,13 @@ static ssize_t ath12k_thermal_temp_show(struct device *dev,
+ 					char *buf)
+ {
+ 	struct ath12k *ar = dev_get_drvdata(dev);
++	struct ath12k_hw_group *ag = ath12k_ab_to_ag(ar->ab);
+ 	unsigned long time_left;
+ 	int ret, temperature;
+ 
++	if (!test_bit(ATH12K_GROUP_FLAG_REGISTERED, &ag->flags))
++		return -ESHUTDOWN;
++
+ 	guard(wiphy)(ath12k_ar_to_hw(ar)->wiphy);
+ 
+ 	if (ar->ah->state != ATH12K_HW_STATE_ON)
+-- 
+2.34.1
+
