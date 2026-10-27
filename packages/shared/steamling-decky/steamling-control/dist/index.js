@@ -1284,7 +1284,7 @@ function TouchField({ values, patch }) {
 }
 /** What the handheld has; an older backend that doesn't say counts as having everything. */
 function hw(config) {
-    return { fan: true, scheduler: true, touchscreen: true, ...(config.hardware || {}) };
+    return { fan: true, scheduler: true, touchscreen: true, padSwitch: true, ...(config.hardware || {}) };
 }
 /** Per-game fan/scheduler overrides ("" = follow the global mode); only the ones this handheld has. */
 function PerfFields({ config, values, patch }) {
@@ -1349,7 +1349,7 @@ function TweakFields({ config, appid, values, patch }) {
     return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(SelectEdit, { label: t("Proton Version"), value: compatValue, options: compatOptions, onChange: (name) => {
                     setCurrentTool(String(name));
                     setCompatTool(appid, String(name));
-                } }), SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), (config.mesaVersions || []).length > 0 ? (SP_JSX.jsx(SelectEdit, { label: t("Mesa Version"), value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) })) : null, SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), hw(config).touchscreen ? SP_JSX.jsx(TouchField, { values: values, patch: patch }) : null, SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }), SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
+                } }), SP_JSX.jsx(SelectEdit, { label: t("FEX Preset"), value: fexValue, options: fexOptions, onChange: (id) => patch({ fexProfile: id }) }), SP_JSX.jsx(SelectEdit, { label: t("Audio Buffer"), value: audioValue, options: audioLatencyOptions, onChange: (id) => patch({ audioLatency: id }) }), (config.mesaVersions || []).length > 0 ? (SP_JSX.jsx(SelectEdit, { label: t("Mesa Version"), value: mesaValue, options: mesaOptions, onChange: (id) => patch({ mesaVersion: id }) })) : null, SP_JSX.jsx(XaliaToggle, { values: values, patch: patch }), hw(config).touchscreen ? SP_JSX.jsx(TouchField, { values: values, patch: patch }) : null, hw(config).padSwitch ? SP_JSX.jsx(GamepadTypeField, { values: values, patch: patch }) : null, SP_JSX.jsx(EnvVarsButton, { value: String(values.envVars ?? ""), onSave: (next) => patch({ envVars: next }) })] }));
 }
 
 // A suggestion made on another handheld can name a fan or scheduler this one doesn't have.
@@ -1362,6 +1362,8 @@ function usable(config, settings) {
         delete out.lavdMode;
     if (!has.touchscreen)
         delete out.touchDisabled;
+    if (!has.padSwitch)
+        delete out.gamepadType;
     if (!(config.mesaVersions || []).some((v) => v.data === out.mesaVersion))
         delete out.mesaVersion;
     return out;

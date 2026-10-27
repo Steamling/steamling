@@ -90,7 +90,7 @@ export function TouchField({ values, patch }: { values: Record<string, any>; pat
 
 /** What the handheld has; an older backend that doesn't say counts as having everything. */
 export function hw(config: Config) {
-  return { fan: true, scheduler: true, touchscreen: true, ...(config.hardware || {}) };
+  return { fan: true, scheduler: true, touchscreen: true, padSwitch: true, ...(config.hardware || {}) };
 }
 
 /** Per-game fan/scheduler overrides ("" = follow the global mode); only the ones this handheld has. */
@@ -198,7 +198,7 @@ export function TweakFields({ config, appid, values, patch }: {
       ) : null}
       <XaliaToggle values={values} patch={patch} />
       {hw(config).touchscreen ? <TouchField values={values} patch={patch} /> : null}
-      <GamepadTypeField values={values} patch={patch} />
+      {hw(config).padSwitch ? <GamepadTypeField values={values} patch={patch} /> : null}
       <EnvVarsButton value={String(values.envVars ?? "")} onSave={(next) => patch({ envVars: next })} />
     </>
   );

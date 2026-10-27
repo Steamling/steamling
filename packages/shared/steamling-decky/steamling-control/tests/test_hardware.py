@@ -18,3 +18,10 @@ class HardwareTest(TempDirCase):
         self.assertFalse(hardware.has_scheduler(binary, sched_ext, helper))
         sched_ext.mkdir()
         self.assertTrue(hardware.has_scheduler(binary, sched_ext, helper))
+
+    def test_pad_switch_needs_inputplumber_and_the_helper(self):
+        daemon, tool = self.tmp / "inputplumber", self.tmp / "steamling-gamepad-target"
+        tool.write_text("")
+        self.assertFalse(hardware.has_pad_switch(daemon, tool))
+        daemon.write_text("")
+        self.assertTrue(hardware.has_pad_switch(daemon, tool))

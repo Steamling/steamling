@@ -56,7 +56,7 @@ export interface Config {
   suggestions?: Record<string, GameSuggestion>;
   led: LedConfig;
   /** What this handheld has; controls for anything missing are hidden. */
-  hardware?: { fan: boolean; scheduler: boolean; touchscreen: boolean };
+  hardware?: { fan: boolean; scheduler: boolean; touchscreen: boolean; padSwitch: boolean };
   game?: GameRef | null;
   selectedGame?: GameRef | null;
 }

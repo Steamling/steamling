@@ -11,6 +11,7 @@ function usable(config: Config, settings: Record<string, any>): Record<string, a
   if (!has.fan) delete out.fanMode;
   if (!has.scheduler) delete out.lavdMode;
   if (!has.touchscreen) delete out.touchDisabled;
+  if (!has.padSwitch) delete out.gamepadType;
   if (!(config.mesaVersions || []).some((v) => v.data === out.mesaVersion)) delete out.mesaVersion;
   return out;
 }
