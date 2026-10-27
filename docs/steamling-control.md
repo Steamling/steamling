@@ -225,6 +225,9 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 - **Quick Access Menu width**: **Standard** is Steam's own width; **Wide** (the default) and
   **Wider** make the whole quick access menu 100 or 200 pixels wider, Steam's own pages and other
   plugins included, so text wraps less on these small screens.
+
+  ![The quick access menu widened: Steamling Control's pages get the extra room](images/steamling-control-wide-menu.jpeg)
+
 - **Display** (only on screens with adjustable timing, which so far means the RP6): **Calibrate Display**, then
   **Calibrate**, measures the screen's refresh rate for up to a minute and trims it onto the
   nominal rate (panels ship slightly fast or slow, which drifts emulator audio against video).
