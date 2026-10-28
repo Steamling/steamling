@@ -27,6 +27,8 @@ Image options
 Build options
   -d, --device NAME     image target, a family under devices/ (listed below)
   -j, --jobs N          kernel compile jobs (default: every core)
+  --update              only the kernel and the packages that changed, no rootfs or SD image:
+                        what you need to update a handheld over the network (docs/updating.md)
   --no-sd-image         stop at the finished rootfs (build/rootfs), without the SD image
   --no-seed             compile every package instead of downloading the published ones
   --no-host-setup       stop when host packages are missing instead of installing them
@@ -39,7 +41,7 @@ Build options
 Every option has an environment / make variable form, e.g. `make image SSH=1 SD_IMAGE=off`,
 or `export SSH=1` to turn SSH on for every build:
   SSH=1 (or SD_SSH=on)  SD_ROOT_PASSWORD=  SD_WIFI_SSID=  SD_WIFI_PSK=  SD_WIFI_COUNTRY=
-  STEAMLING_EMULATION=1  DEVICE=  JOBS=  SD_IMAGE=off  STEAMLING_SEED=off  STEAMLING_HOST_SETUP=off
+  STEAMLING_EMULATION=1  DEVICE=  JOBS=  STEAMLING_UPDATE=1  SD_IMAGE=off  STEAMLING_SEED=off  STEAMLING_HOST_SETUP=off
   STEAMLING_STATUS_BAR=off   (switches take on/off, 1/0, yes/no or true/false)
 
 From another shell: make status shows how far it is and the time left; make watch follows it.
@@ -78,6 +80,7 @@ while [ "$#" -gt 0 ]; do
     -j|--jobs) [[ "${val}" =~ ^[1-9][0-9]*$ ]] || bad "--jobs takes a number, not '${val}'"
                export JOBS="${val}" ;;
     --no-sd-image|--rootfs-only) export SD_IMAGE=off ;;
+    --update) export STEAMLING_UPDATE=on ;;
     --no-seed) export STEAMLING_SEED=off ;;
     --no-host-setup) export STEAMLING_HOST_SETUP=off ;;
     --no-status-bar) export STEAMLING_STATUS_BAR=off ;;
@@ -106,15 +109,20 @@ SD_IMAGE="$(onoff SD_IMAGE "${SD_IMAGE:-on}")"
 STEAMLING_SEED="$(onoff STEAMLING_SEED "${STEAMLING_SEED:-on}")"
 STEAMLING_HOST_SETUP="$(onoff STEAMLING_HOST_SETUP "${STEAMLING_HOST_SETUP:-on}")"
 STEAMLING_STATUS_BAR="$(onoff STEAMLING_STATUS_BAR "${STEAMLING_STATUS_BAR:-on}")"
+STEAMLING_UPDATE="$(onoff STEAMLING_UPDATE "${STEAMLING_UPDATE:-off}")"
 emu="$(onoff STEAMLING_EMULATION "${STEAMLING_EMULATION:-0}")"
 if [ "${emu}" = on ]; then STEAMLING_EMULATION=1; else STEAMLING_EMULATION=0; fi
-export SD_SSH SD_IMAGE STEAMLING_SEED STEAMLING_HOST_SETUP STEAMLING_STATUS_BAR STEAMLING_EMULATION
+export SD_SSH SD_IMAGE STEAMLING_SEED STEAMLING_HOST_SETUP STEAMLING_STATUS_BAR STEAMLING_EMULATION STEAMLING_UPDATE
 
 # --- the plan ----------------------------------------------------------------------------------
 STEPS=(host)
 if [ "${STEAMLING_SEED}" = on ] && [ -n "${STEAMLING_REPO_URL}" ]; then STEPS+=(seed); fi
-STEPS+=(kernel packages rootfs)
-if [ "${SD_IMAGE}" = on ]; then STEPS+=(image); fi
+STEPS+=(kernel packages)
+# --update stops here: the handheld takes the packages over the network (docs/updating.md).
+if [ "${STEAMLING_UPDATE}" = off ]; then
+  STEPS+=(rootfs)
+  if [ "${SD_IMAGE}" = on ]; then STEPS+=(image); fi
+fi
 FIRST_ROOT=2   # the host check runs as you, everything from here on as root
 
 step_target() {
@@ -328,7 +336,12 @@ plan=""; for s in "${STEPS[@]}"; do plan+="${plan:+ > }$(step_label "${s}")"; do
 progress_load || true
 total=0; for e in "${EST_ARR[@]}"; do total=$((total + e)); done
 log "steamling image build for ${DEVICE} (${DEVICE_PRETTY:-${SOC}}): ${plan}"
-if [ "${SD_IMAGE}" = on ]; then
+if [ "${STEAMLING_UPDATE}" = on ]; then
+  echo "    update build: only what changed since the last build, no rootfs or SD image"
+  if [ "${SD_SSH}" = on ] || [ -n "${SD_WIFI_SSID}" ] || [ "${SD_ROOT_PASSWORD}" != root ] || [ "${STEAMLING_EMULATION}" = 1 ]; then
+    warn "SSH, Wi-Fi, the password and the emulation layer only go into an image, so --update ignores them"
+  fi
+elif [ "${SD_IMAGE}" = on ]; then
   echo "    image: SSH $([ "${SD_SSH}" = on ] && echo ON || echo off)," \
        "Wi-Fi ${SD_WIFI_SSID:-none}, emulation layer $([ "${STEAMLING_EMULATION}" = 1 ] && echo baked in || echo left out)," \
        "password $([ "${SD_ROOT_PASSWORD}" = root ] && echo "root (default)" || echo "custom")"
@@ -371,6 +384,8 @@ for ((i = 0; i < ${#STEPS[@]}; i++)); do
 done
 echo
 ok "steamling ${DEVICE} build finished in $(fmt_dur "${PR_ELAPSED}"): ${summary}"
-if [ "${SD_IMAGE}" = off ]; then
+if [ "${STEAMLING_UPDATE}" = on ]; then
+  log "packages ready in ${LOCALREPO_DIR} and ${LOCALREPO_SHARED_DIR}; docs/updating.md shows how to put them on the handheld"
+elif [ "${SD_IMAGE}" = off ]; then
   log "rootfs ready in ${ROOTFS_DIR}; 'sudo make sd-image' (or ./build.sh without --no-sd-image) turns it into an SD image"
 fi

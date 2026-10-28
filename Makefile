@@ -9,7 +9,7 @@ SCRIPTS := scripts
 
 .DEFAULT_GOAL := help
 
-.PHONY: help image rootfs status watch host-setup sync bootstrap build kernel packages seed pending sd-image snapshot base-diff extend-base stage stage-check publish stage-shared stage-check-shared publish-shared publish-image install check mirrors du trim clean distclean
+.PHONY: help image rootfs update status watch host-setup sync bootstrap build kernel packages seed pending sd-image snapshot base-diff extend-base stage stage-check publish stage-shared stage-check-shared publish-shared publish-image install check mirrors du trim clean distclean
 
 help: ## Show this help
 	@echo "steamling build targets:"
@@ -21,6 +21,9 @@ image: ## Everything from host check to flashable SD image, skipping what is cur
 
 rootfs: ## make image without the SD image: stops at the finished rootfs in build/rootfs
 	@$(SCRIPTS)/build-all.sh --no-sd-image
+
+update: ## Only the kernel and the packages that changed, for updating a handheld over the network (docs/updating.md). Same as ./build.sh --update
+	@$(SCRIPTS)/build-all.sh --update
 
 status: ## Where the running (or last) make image is, and its time left
 	@$(SCRIPTS)/build-status.sh
