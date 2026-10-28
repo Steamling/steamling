@@ -1,0 +1,13 @@
+# Stamps the handheld's name into os-release (Steam's Settings > System > OS Variant). Every
+# boot, because one image boots on every board of its family; it only writes when it changed.
+[Unit]
+Description=Steamling: name this handheld in os-release
+After=local-fs.target
+Before=graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/steamling/steamling-os-release
+
+[Install]
+WantedBy=multi-user.target
