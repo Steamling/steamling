@@ -27,6 +27,31 @@ members() {
       done
 }
 
+# Both layers install from Steamling's own repos, which on a handheld updated over the network are
+# the build PC (docs/updating.md). pacman -Syu stops with a bare "failed to retrieve" when one can't
+# be reached, so check first and say what to do.
+check_repos() {
+  local repo url bad=""
+  for repo in steamling steamling-shared; do
+    url="$(pacman-conf --repo "${repo}" Server 2>/dev/null | head -1)"
+    if [ -z "${url}" ]; then
+      echo "steamling-layer: this handheld has no [${repo}] repo, which is where these packages come from." >&2
+      echo "  Build the image with --emulation, or point the handheld at your build PC (docs/updating.md)." >&2
+      exit 1
+    fi
+    case "${url}" in
+      http://*|https://*)
+        curl -sf -o /dev/null -I --max-time 8 "${url}/${repo}.db" || bad+=" ${url}" ;;
+    esac
+  done
+  if [ -n "${bad}" ]; then
+    echo "steamling-layer: can't reach${bad}" >&2
+    echo "  These packages come from your build PC: start the package server there (docs/updating.md," >&2
+    echo "  step 2), check the handheld can reach it, and try again." >&2
+    exit 1
+  fi
+}
+
 # RemainAfterExit makes `start` a no-op once run: restart the seeder for the user who asked
 user_systemctl() {
   local u; u="$(id -nu "${PKEXEC_UID:-1001}" 2>/dev/null)" || return 1
@@ -43,7 +68,7 @@ if [ "${2:-emulation}" = desktop-plasma ]; then
   FLAVOUR=steamling-desktop-plasma
   case "${1:-status}" in
     status)  pacman -Q "${FLAVOUR}" >/dev/null 2>&1 && echo "installed=yes" || echo "installed=no" ;;
-    install) need_root; pacman -Syu --noconfirm "${FLAVOUR}"; echo "installed=yes" ;;
+    install) need_root; check_repos; pacman -Syu --noconfirm "${FLAVOUR}"; echo "installed=yes" ;;
     remove)  need_root; pacman -Rs --noconfirm "${FLAVOUR}"; echo "installed=no" ;;
     *)       echo "usage: steamling-layer {status|install|remove} [emulation|desktop-plasma]" >&2; exit 2 ;;
   esac
@@ -58,6 +83,7 @@ case "${1:-status}" in
     ;;
   install)
     need_root
+    check_repos
     # -Syu, never -Sy: a refreshed index on an un-upgraded system is the partial-upgrade trap
     pacman -Syu --noconfirm "${META}"
     for p in "${OPTIONAL[@]}"; do
