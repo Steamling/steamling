@@ -125,6 +125,8 @@ draw) or **Everything**. It's the same overlay as Steam's own **Performance Over
 the quick access menu, so changing either one changes it. The level you pick here stays from
 game to game (Steam's own setting resets with every game it starts).
 
+![The performance overlay set to the Compact bar, with the system monitor below it](images/governor-overlay.jpeg)
+
 ### System monitor
 
 Turn on **Show live readings** to see what the handheld is doing while the menu is open: how busy
@@ -137,7 +139,7 @@ For numbers on top of the game itself, use the performance overlay above.
 
 ### Adding non-Steam games
 
-![Add Non-Steam Game in Governor](images/governor-add-game.jpeg)
+![The Library tab: Add Non-Steam Game, then File Sharing](images/governor-add-game.jpeg)
 
 Steam's own **Add a Non-Steam Game** dialog does not work on Steamling, so add them here:
 
@@ -199,7 +201,7 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 
 ## Controller
 
-![The Controller tab: Calibrate Controller and the stick lights](images/governor-controller.jpeg)
+![The Controller tab: Calibrate Controller, then Stick Response](images/governor-controller.jpeg)
 
 - **Calibration**: **Calibrate Controller**, then **Start**, walks each stick and trigger to its edge and back, then
   shows live readings to check (a full push reads 100 at the edge, 0 at rest). **Save** keeps
@@ -224,6 +226,9 @@ target right away, and cards formatted here also work in a real Steam Deck (and 
 - **Stick Lights** (boards with stick LEDs): **Enable**, **Link Left & Right** to give both
   sticks one colour, **Side Lights** to match the side lighting to the sticks, then colour and
   brightness per stick.
+
+  ![Rumble on at 50% strength, and the stick lights switched off](images/governor-rumble.jpeg)
+
 - **Quick Access Menu width**: **Standard** is Steam's own width; **Wide** (the default) and
   **Wider** make the whole quick access menu 100 or 200 pixels wider, Steam's own pages and other
   plugins included, so text wraps less on these small screens.
@@ -265,6 +270,8 @@ saves and settings are untouched. To go back further, or when game mode itself i
 
 The bottom of the tab shows your Steamling OS version, the kernel, and whether the bootloader
 on internal storage is the OpenABL this build ships. Handy when you're filing a bug.
+
+![The About section: Steamling OS version, kernel, bootloader and Restart Game Mode](images/governor-about.jpeg)
 
 **Restart Game Mode** closes Steam and brings game mode back up, for the times Steam or the
 screen gets stuck. Anything unsaved in a running game is lost.
