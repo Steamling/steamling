@@ -2,11 +2,13 @@
 # Stamps Steamling identity into /usr/lib/os-release (filesystem-owned, so the hook re-runs
 # this after every filesystem upgrade, and steamling-os-release.service at every boot for the
 # device name). Steam's Settings > System reads VERSION_ID as "OS Version", BUILD_ID as
-# "OS Build" and VARIANT_ID as "OS Variant". ID/ID_LIKE stay archarm/arch for tooling.
+# "OS Build", VERSION_CODENAME as "OS Codename" and VARIANT_ID as "OS Variant". ID/ID_LIKE stay archarm/arch for tooling.
 set -euo pipefail
 
-# Bump at each image cut.
+# Bump at each image cut. Each release also gets a codename, lowercase and one word: Steam shows
+# it as is under OS Codename.
 STEAMLING_VERSION=0.1.0
+STEAMLING_CODENAME=hatchling
 
 osr=/usr/lib/os-release
 lock=/usr/share/steamling/steamling-base.lock
@@ -31,6 +33,7 @@ trap 'rm -f "${tmp}"' EXIT
   echo 'PRETTY_NAME="Steamling OS"'
   echo "VERSION=\"${STEAMLING_VERSION}${base:+ (base ${base})}\""
   echo "VERSION_ID=${STEAMLING_VERSION}"
+  echo "VERSION_CODENAME=${STEAMLING_CODENAME}"
   echo "BUILD_ID=${base:-rolling}"
   if [ -n "${model}" ]; then
     echo "VARIANT=\"${model}\""
@@ -40,7 +43,7 @@ trap 'rm -f "${tmp}"' EXIT
   fi
   echo 'HOME_URL="https://github.com/dvandenburgh/steamling"'
   echo 'BUG_REPORT_URL="https://github.com/dvandenburgh/steamling/issues"'
-  grep -vE '^(NAME|PRETTY_NAME|VERSION|VERSION_ID|BUILD_ID|VARIANT|VARIANT_ID|HOME_URL|DOCUMENTATION_URL|SUPPORT_URL|BUG_REPORT_URL)=' "${osr}" || true
+  grep -vE '^(NAME|PRETTY_NAME|VERSION|VERSION_ID|VERSION_CODENAME|BUILD_ID|VARIANT|VARIANT_ID|HOME_URL|DOCUMENTATION_URL|SUPPORT_URL|BUG_REPORT_URL)=' "${osr}" || true
 } > "${tmp}"
 # Runs every boot: leave the file alone when nothing changed.
 cmp -s "${tmp}" "${osr}" && exit 0
