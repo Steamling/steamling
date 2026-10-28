@@ -28,8 +28,13 @@ ES-DE show up in your Steam library automatically.
 ## Installing it
 
 Emulation is optional, so a fresh install does not have it. Switch to desktop mode, open
-**Steamling Tools** and pick *Install the emulation layer (ES-DE + emulators)*. It is a large
-download; everything is ready when it finishes, with no restart or logout needed.
+**Steamling Tools** and pick *Install the emulation layer (ES-DE + emulators)*. Everything is
+ready when it finishes, with no restart or logout needed.
+
+The emulators come from your own Steamling build, the same way updates do, so the handheld needs to
+reach your PC while it installs: build with `./build.sh --update`, start the package server and
+point the handheld at your PC, as in [Updating from your own build](updating.md#updating-from-your-own-build-without-reflashing)
+(steps 1 to 3). If the PC's server isn't running, the install stops and tells you so.
 
 The same entry removes the layer again. Your ROMs, BIOS files, saves and emulator settings stay
 where they are, so installing it again later picks up exactly where you left off.
