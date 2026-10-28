@@ -13,8 +13,8 @@ lock=/usr/share/steamling/steamling-base.lock
 
 # The kernel package names the SoC family; the device tree would be the build host's in
 # an image chroot.
-soc="$(ls -d /var/lib/pacman/local/linux-steamling-sm*-[0-9]* 2>/dev/null | head -1 | sed -n 's|.*/linux-steamling-\(sm[0-9]*\)-.*|\1|p')"
-base="$(sed -n 's/^#.*snapshot \([0-9][0-9.]*\).*/\1/p' "${lock}" 2>/dev/null | head -1)"
+soc="$(ls -d /var/lib/pacman/local/linux-steamling-sm*-[0-9]* 2>/dev/null | head -1 | sed -n 's|.*/linux-steamling-\(sm[0-9]*\)-.*|\1|p' || true)"
+base="$(sed -n 's/^#.*snapshot \([0-9][0-9.]*\).*/\1/p' "${lock}" 2>/dev/null | head -1 || true)"
 
 tmp="$(mktemp "${osr}.XXXXXX")"
 trap 'rm -f "${tmp}"' EXIT
