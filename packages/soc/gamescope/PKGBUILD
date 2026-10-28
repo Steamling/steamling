@@ -5,9 +5,9 @@
 # on every bump, hence commit date then sha — a bare sha is non-monotonic.
 pkgname=gamescope
 epoch=1
-pkgver=3.17.0.rocknix.20261026.d175688
+pkgver=3.17.0.rocknix.20261028.a962a4d
 pkgrel=1
-_commit=d175688ad4ec490dc7b0695c5c62f8807684a1f1
+_commit=a962a4dc136369708657605f87057ba3f9991fda
 install=gamescope.install
 pkgdesc="SteamOS session compositing WM — patched (for msm handhelds)"
 arch=('aarch64')

@@ -98,7 +98,7 @@ index d34c120..c784624 100644
  	drm->m_FbIdsInRequest.clear();
  
  	bool needs_modeset = drm->needs_modeset.exchange(false);
-@@ -3336,15 +3369,14 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
+@@ -3336,19 +3369,18 @@ int drm_prepare( struct drm_t *drm, bool async, const struct FrameInfo_t *frameI
  
  	// We do internal refcounting with these events
  
@@ -113,6 +113,10 @@ index d34c120..c784624 100644
  			needs_modeset = true;
 +		if ( bSleep )
 +			drm->pending.output_luts_applied = false;
+ 
+ 		// Make screen sleep commits synchronous so we can easily wait for them
+ 		if ( bSleep && bCurrentlyAsleep != bSleep )
+ 			flags &= ~DRM_MODE_ATOMIC_NONBLOCK;
  	}
  
  	if ( !bSleep )
