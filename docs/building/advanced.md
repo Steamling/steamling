@@ -62,6 +62,7 @@ always rebuilt.
 ./build.sh --ssh                             # SSH on in the image (make image SSH=1)
 ./build.sh --ssh --wifi MyNet --wifi-psk secret --wifi-country US
 ./build.sh --no-sd-image                     # stop at the finished rootfs (make rootfs)
+./build.sh --update                          # only the changed packages, to update a handheld (make update)
 ./build.sh --help                            # every option
 ```
 
@@ -114,6 +115,7 @@ environment (for example `make image SSH=1`, `export SSH=1` to make it the defau
 | `--jobs N` | `JOBS=N` | parallel jobs for the kernel build (default: all cores) |
 | (none) | `STEAMLING_CCACHE=off` | compile packages from scratch instead of reusing the ccache in `build/cache/ccache-pkg` (`STEAMLING_CCACHE_SIZE` sets its limit, 20G by default) |
 | `--no-sd-image` | `SD_IMAGE=off` | stop at the finished rootfs (`make rootfs`) |
+| `--update` | `STEAMLING_UPDATE=1` | build only the kernel and the packages that changed, with no rootfs or SD image (`make update`): what [updating over the network](../updating.md#updating-from-your-own-build-without-reflashing) needs |
 | `--no-host-setup` | `STEAMLING_HOST_SETUP=off` | stop when host packages are missing instead of installing them |
 | `--no-status-bar` | `STEAMLING_STATUS_BAR=off` | plain output, without the status line at the bottom |
 | (none) | `STEAMLING_BASE_SNAPSHOT=live` | build straight from Arch Linux ARM's own repos and latest tarball instead of the frozen base: nothing to host or upload, but every build gets whatever ALARM has that day (put it in `config/local.conf` to keep it) | <!-- docs-check: allow -->

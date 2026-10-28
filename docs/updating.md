@@ -30,11 +30,12 @@ on Windows) shows the PC's address.
 On the PC, in your Steamling folder:
 
 ```bash
-sudo make kernel && sudo make packages
+./build.sh --update
 ```
 
-You don't need a new image for this, so skip `make build` and `make sd-image`. Check the end of the
-output: a package that failed to build just stays at its old version on the handheld.
+That builds only what changed since your last build (the kernel too, if it changed) and stops
+there, with no new image. It asks for `sudo` once, like a full build. Check the end of the output:
+a package that failed to build just stays at its old version on the handheld.
 
 ### 2. Share them on your network
 
