@@ -11,7 +11,8 @@
 # which 01-rsinput-controller.yaml composes into this device; they map to LeftPaddle1/RightPaddle1
 # (the Deck's L4/L5 back buttons). That node also carries the volume-up rocker: InputPlumber
 # grabs the source exclusively, so KEY_VOLUMEUP is re-emitted on the keyboard target below to
-# keep the physical volume-up button working. Gyro is unavailable (no IIO/IMU on this build).
+# keep the physical volume-up button working. The gyro needs no map:
+# it comes in as its own source (see 01-rsinput-controller.yaml).
 version: 2
 kind: CapabilityMap
 name: SM8550 family RSInput Mapping
