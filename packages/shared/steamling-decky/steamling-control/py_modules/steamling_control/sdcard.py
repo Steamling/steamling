@@ -7,7 +7,6 @@ from .system import run_cmd
 # The microSD slot is mmcblk0, the internal OS disk sda. This constant is UI convenience only:
 # the formatter is the safety boundary (mmcblk-only, refuses the disk backing /).
 SD_DISK = "/dev/mmcblk0"
-SD_PART = "/dev/mmcblk0p1"
 FORMATTER = "/usr/lib/hwsupport/format-device.sh"
 
 LABEL_RE = re.compile(r"^[A-Za-z0-9_-]{1,16}$")  # ext4 volume labels cap at 16 bytes
