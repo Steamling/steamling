@@ -34,3 +34,10 @@ deckard.git                 https://github.com/evlaV/deckard.git                
 linux.git:deckard           https://github.com/evlaV/deckard-linux-no-oopsies.git           blobless
 # The Frame's Mesa (Turnip + zink), its steamos-* release branches inside mesa.git under deckard/.
 mesa.git:deckard            https://github.com/evlav/deckard-mesa.git                       full      steamos-*
+
+# Valve's Proton sources: its Wine and DXVK forks, the halves of Proton that matter when a game
+# misbehaves under FEX.
+wine.git                    https://github.com/ValveSoftware/wine.git                       blobless
+dxvk.git                    https://github.com/ValveSoftware/dxvk.git                       blobless
+# Valve's old SteamOS kernel (the 2015 Steam Machines branches). Rides in linux.git too.
+linux.git:steamos           https://github.com/ValveSoftware/steamos_kernel.git             blobless
