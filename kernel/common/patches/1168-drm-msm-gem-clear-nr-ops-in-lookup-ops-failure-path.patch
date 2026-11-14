@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rob Clark <robin.clark@oss.qualcomm.com>
+Date: Mon, 2 Nov 2026 09:20:00 -0800
+Subject: [PATCH] drm/msm/gem: Clear nr_ops in lookup_ops() failure path
+
+We've already dropped the references taken in the handle lookup loop, so
+we don't want to drop them again in msm_vma_job_free().
+
+Signed-off-by: Rob Clark <robin.clark@oss.qualcomm.com>
+Fixes: 2e6a8a1fe2b2 ("drm/msm: Add VM_BIND ioctl")
+Patchwork: https://patchwork.freedesktop.org/patch/765324/
+Message-ID: <20261102172001.508440-5-robin.clark@oss.qualcomm.com>
+---
+ drivers/gpu/drm/msm/msm_gem_vma.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/msm/msm_gem_vma.c b/drivers/gpu/drm/msm/msm_gem_vma.c
+index 3177461d7ad0..8b702422030a 100644
+--- a/drivers/gpu/drm/msm/msm_gem_vma.c
++++ b/drivers/gpu/drm/msm/msm_gem_vma.c
+@@ -1088,7 +1088,6 @@ vm_bind_job_lookup_ops(struct msm_vm_bind_job *job, struct drm_msm_vm_bind *args
+ 	}
+ 
+ 	if (ret) {
+-		job->nr_ops = 0;
+ 		goto out;
+ 	}
+ 
+@@ -1143,6 +1142,9 @@ out_unlock:
+ 		}
+ 	}
+ out:
++	if (ret)
++		job->nr_ops = 0;
++
+ 	return ret;
+ }
+ 
+-- 
+2.34.1
+
