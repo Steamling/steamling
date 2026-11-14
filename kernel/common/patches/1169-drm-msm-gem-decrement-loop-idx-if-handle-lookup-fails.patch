@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rob Clark <robin.clark@oss.qualcomm.com>
+Date: Mon, 2 Nov 2026 09:19:59 -0800
+Subject: [PATCH] drm/msm/gem: Decrement loop idx if handle lookup fails
+
+In the out_unlock unlock loop, we should skip the op which still has the
+gem handle instead of gem obj ptr.
+
+Fixes: 2e6a8a1fe2b2 ("drm/msm: Add VM_BIND ioctl")
+Signed-off-by: Rob Clark <robin.clark@oss.qualcomm.com>
+Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Patchwork: https://patchwork.freedesktop.org/patch/765328/
+Message-ID: <20261102172001.508440-4-robin.clark@oss.qualcomm.com>
+---
+ drivers/gpu/drm/msm/msm_gem_vma.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/msm/msm_gem_vma.c b/drivers/gpu/drm/msm/msm_gem_vma.c
+index bd1c3ceeea51..3177461d7ad0 100644
+--- a/drivers/gpu/drm/msm/msm_gem_vma.c
++++ b/drivers/gpu/drm/msm/msm_gem_vma.c
+@@ -1110,6 +1110,7 @@ vm_bind_job_lookup_ops(struct msm_vm_bind_job *job, struct drm_msm_vm_bind *args
+ 		obj = idr_find(&file->object_idr, op->handle);
+ 		if (!obj) {
+ 			ret = UERR(EINVAL, dev, "invalid handle %u at index %u\n", op->handle, i);
++			i--;
+ 			goto out_unlock;
+ 		}
+ 
+-- 
+2.34.1
+
